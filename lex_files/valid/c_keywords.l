@@ -3,6 +3,9 @@
 %}
 
 %%
+
+"whileif"      printf("KEYWORD: WHILEIF\n");
+"while"      printf("KEYWORD: WHILE\n");
 "if"      printf("KEYWORD: IF\n");
 "else"    printf("KEYWORD: ELSE\n");
 "return"  printf("KEYWORD: RETURN\n");

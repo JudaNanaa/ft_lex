@@ -1,15 +1,18 @@
 use std::collections::LinkedList;
+mod tokenizer;
 
-#[derive(Debug)]
-pub struct Regex {
-	value: char,
+#[derive(Debug, Clone)]
+pub enum RegexAST {
+    Char(char),
+    Concat(Box<RegexAST>, Box<RegexAST>),
+    Or(Box<RegexAST>, Box<RegexAST>),
+    Star(Box<RegexAST>),
+    Empty,
 }
 
-pub fn create_regex_list(regex: String) -> LinkedList<Regex>
+pub fn create_regex_ast(regex: &str) -> Result<RegexAST, &'static str>
 {
-	let mut regex_list: LinkedList<Regex> = LinkedList::new();
-	for char in regex.chars() {
-		regex_list.push_back(Regex {value: char});
-	}
-	return regex_list;
+	let tokens = tokenizer::regex_tokenizer(regex);
+	dbg!(tokens);
+	todo!("create_regex_ast");
 }
