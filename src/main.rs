@@ -11,7 +11,14 @@ fn main() {
 		println!("tu as tapee {}", input);
 	}
 
-	let list = regex::create_regex_ast(&input);
+	// Tokenizer
+	let mut tokens = regex::tokenizer::regex_tokenizer(&input);
+	// tokens = dbg!(tokens);
+	// Parsing
+	regex::parsing::regex_parsing(tokens);
+	
 
-	println!("list = {:?}", list);
+	// AST
+
+
 }
