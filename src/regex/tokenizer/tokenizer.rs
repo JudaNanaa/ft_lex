@@ -1,4 +1,7 @@
-use std::str::Chars;
+use std::{char, fmt::DebugSet, str::Chars};
+use crate::regex::tokenizer::utils::expand_escape;
+
+use super::charset::extract_charset;
 
 #[derive(Debug)]
 pub enum RegexToken {
@@ -6,6 +9,7 @@ pub enum RegexToken {
 	Or,
     Star,
 	Optional,
+	Charset(String, bool),
 	OpenCharSet,
 	CloseCharSet,
 	OpenGroup,
@@ -44,15 +48,6 @@ fn string_to_tokens(str: String) -> Vec<RegexToken> {
 	return token_string;
 }
 
-fn expand_escape(c: char) -> char {
-	match c {
-		'n' => return '\n',
-		't' => return '\t',
-		'r' => return '\r',
-		_ => return c,
-	}
-}
-
 pub fn regex_tokenizer(regex: &String) -> Vec<RegexToken> {
     let mut token_list: Vec<RegexToken> = Vec::new();
 
@@ -71,8 +66,10 @@ pub fn regex_tokenizer(regex: &String) -> Vec<RegexToken> {
                     token_list.push(RegexToken::Char('\\'));
                 }
             }
-            '[' => token_list.push(RegexToken::OpenCharSet),
-            ']' => token_list.push(RegexToken::CloseCharSet),
+            '[' => {
+				let token_charset = extract_charset(&mut chars);
+				token_list.push(token_charset);
+			},
             '(' => token_list.push(RegexToken::OpenGroup),
             ')' => token_list.push(RegexToken::CloseGroup),
             '?' => token_list.push(RegexToken::Optional),

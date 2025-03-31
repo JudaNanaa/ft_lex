@@ -1,4 +1,5 @@
 mod regex;
+use crate::regex::tokenizer::tokenizer::{RegexToken, regex_tokenizer};
 
 fn main() {
 	let mut input: String = String::new();
@@ -12,11 +13,11 @@ fn main() {
 	}
 
 	// Tokenizer
-	let mut tokens: Vec<regex::tokenizer::RegexToken> = regex::tokenizer::regex_tokenizer(&input);
+	let mut tokens: Vec<RegexToken> = regex_tokenizer(&input);
 	tokens = dbg!(tokens);
 	
 	// Parsing
-	regex::parsing::regex_parsing(tokens);
+	// regex::parsing::regex_parsing(tokens);
 	
 
 	// AST
