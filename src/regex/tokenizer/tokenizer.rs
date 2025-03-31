@@ -12,6 +12,7 @@ pub enum RegexToken {
 	Charset(String, bool),
 	OpenGroup,
 	CloseGroup,
+	Quantifier(u32, Option<u32>),
 }
 
 // i want to paerse this -> "a|b*c"
@@ -53,8 +54,8 @@ pub fn regex_tokenizer(regex: &String) -> Vec<RegexToken> {
 
     while let Some(char) = chars.next() {
         match char {
-            '"' | '\'' => {
-                let mut token_str: Vec<RegexToken> = get_string_under_quotes(&mut chars, char);
+            '"' => {
+                let mut token_str: Vec<RegexToken> = get_string_under_quotes(&mut chars, '"');
                 token_list.append(&mut token_str);
             }
             '\\' => {
@@ -68,7 +69,10 @@ pub fn regex_tokenizer(regex: &String) -> Vec<RegexToken> {
 				let token_charset = extract_charset(&mut chars);
 				token_list.push(token_charset);
 			},
-            '(' => token_list.push(RegexToken::OpenGroup),
+			'{' => {
+				let (first, second) = extract_quantifier(&mut chars);				
+			},
+            '(' => token_list.push(RegexToken::OpenGroup), // a changer
             ')' => token_list.push(RegexToken::CloseGroup),
             '?' => token_list.push(RegexToken::Optional),
             '|' => token_list.push(RegexToken::Or),
