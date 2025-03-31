@@ -1,4 +1,4 @@
-use std::{char, fmt::DebugSet, str::Chars};
+use std::{char, str::Chars};
 use crate::regex::tokenizer::utils::expand_escape;
 
 use super::charset::extract_charset;
@@ -10,8 +10,6 @@ pub enum RegexToken {
     Star,
 	Optional,
 	Charset(String, bool),
-	OpenCharSet,
-	CloseCharSet,
 	OpenGroup,
 	CloseGroup,
 }
@@ -65,7 +63,7 @@ pub fn regex_tokenizer(regex: &String) -> Vec<RegexToken> {
                 } else {
                     token_list.push(RegexToken::Char('\\'));
                 }
-            }
+            },
             '[' => {
 				let token_charset = extract_charset(&mut chars);
 				token_list.push(token_charset);

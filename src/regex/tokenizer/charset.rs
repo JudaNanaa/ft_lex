@@ -1,4 +1,4 @@
-use std::{char, fmt::DebugSet, str::Chars};
+use std::{char, str::Chars};
 
 use crate::regex::tokenizer::{tokenizer::RegexToken, utils::expand_escape};
 
@@ -18,7 +18,7 @@ fn check_if_negative_charset(chars: &mut Chars<'_>, charset: &mut String) -> boo
 			},
 			'\\' => {
 				if let Some(c) = chars.next() {
-					charset.push(c);
+					charset.push(expand_escape(c));
 				} else {
 					panic!("No Ending bracket");
 				}
@@ -31,7 +31,7 @@ fn check_if_negative_charset(chars: &mut Chars<'_>, charset: &mut String) -> boo
 	return is_negative;
 }
 
-fn expand_minus(chars: &mut std::str::Chars<'_>, mut char_begin: char, char_end: char) -> String {
+fn expand_minus(mut char_begin: char, char_end: char) -> String {
     let mut range_chars = String::new();
 
     if char_begin > char_end {
@@ -65,7 +65,7 @@ fn minus_gesture(chars: &mut Chars<'_>, charset: &mut String) -> CharsetState {
 				}
 			}
 			_ => {
-				charset.push(expand_escape(char));
+				charset.push(char);
 			}
 		}
 		if charset.len() < 2 {
@@ -74,7 +74,7 @@ fn minus_gesture(chars: &mut Chars<'_>, charset: &mut String) -> CharsetState {
 		}
 		let char_end = charset.pop().unwrap();
 		let char_begin = charset.pop().unwrap();
-		charset.push_str(&expand_minus(chars, char_begin, char_end));
+		charset.push_str(&expand_minus(char_begin, char_end));
 
 	} else {
 		panic!("No Ending bracket");
@@ -86,7 +86,7 @@ fn minus_gesture(chars: &mut Chars<'_>, charset: &mut String) -> CharsetState {
 pub fn extract_charset(chars: &mut Chars<'_>) -> RegexToken {
 	let mut charset = String::new();
 	
-	let mut is_negative = check_if_negative_charset(chars, &mut charset);
+	let is_negative = check_if_negative_charset(chars, &mut charset);
 	
 	while let Some(char) = chars.next() {
 		match char {
