@@ -19,7 +19,7 @@
 .         printf("Invalid character: %c\n", *yytext);
 %%
 
-// int main() {
-//     yylex();
-//     return 0;
-// }
+int main() {
+    yylex();
+    return 0;
+}

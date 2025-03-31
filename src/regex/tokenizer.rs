@@ -1,19 +1,22 @@
-use std::{char, collections::LinkedList, str::Chars};
+use std::str::Chars;
 
 #[derive(Debug)]
 pub enum RegexToken {
 	Char(char),
 	Or,
     Star,
-	Escape(char),
-	String(String),
+	Optional,
+	OpenCharSet,
+	CloseCharSet,
+	OpenGroup,
+	CloseGroup,
 }
 
 // i want to paerse this -> "a|b*c"
 
-fn get_string_under_quotes(chars: &mut Chars<'_>, quote_to_match: char) -> String {
-    let mut dest = String::new();
-    let mut last_seen_backslash = false;
+fn get_string_under_quotes(chars: &mut Chars<'_>, quote_to_match: char) -> Vec<RegexToken> {
+    let mut dest: String = String::new();
+    let mut last_seen_backslash: bool = false;
 
     while let Some(c) = chars.next() {
         match c {
@@ -28,30 +31,56 @@ fn get_string_under_quotes(chars: &mut Chars<'_>, quote_to_match: char) -> Strin
             }
         }
     }
-    return dest;
+    return string_to_tokens(dest);
 }
 
-pub fn regex_tokenizer(regex: &str) -> LinkedList<RegexToken> {
-    let mut token_list: LinkedList<RegexToken> = LinkedList::new();
-    let mut chars = regex.chars();
+fn string_to_tokens(str: String) -> Vec<RegexToken> {
+    let mut token_string: Vec<RegexToken> = Vec::new();
+	let mut str_chars: Chars<'_> = str.chars(); 
+
+	while let Some(char) = str_chars.next() {
+		token_string.push(RegexToken::Char(char));
+	}
+	return token_string;
+}
+
+fn expand_escape(c: char) -> char {
+	match c {
+		'n' => return '\n',
+		't' => return '\t',
+		'r' => return '\r',
+		_ => return c,
+	}
+}
+
+pub fn regex_tokenizer(regex: &String) -> Vec<RegexToken> {
+    let mut token_list: Vec<RegexToken> = Vec::new();
+
+    let mut chars: Chars<'_> = regex.chars();
 
     while let Some(char) = chars.next() {
         match char {
             '"' | '\'' => {
-                let str = get_string_under_quotes(&mut chars, char);
-                token_list.push_back(RegexToken::String(str));
+                let mut token_str: Vec<RegexToken> = get_string_under_quotes(&mut chars, char);
+                token_list.append(&mut token_str);
             }
             '\\' => {
                 if let Some(c) = chars.next() {
-                    token_list.push_back(RegexToken::Escape(c));
+                    token_list.push(RegexToken::Char(expand_escape(c)));
                 } else {
-                    token_list.push_back(RegexToken::Escape('\\'));
+                    token_list.push(RegexToken::Char('\\'));
                 }
             }
-            '|' => token_list.push_back(RegexToken::Or),
-            '*' => token_list.push_back(RegexToken::Star),
-            _ => token_list.push_back(RegexToken::Char(char)),
+            '[' => token_list.push(RegexToken::OpenCharSet),
+            ']' => token_list.push(RegexToken::CloseCharSet),
+            '(' => token_list.push(RegexToken::OpenGroup),
+            ')' => token_list.push(RegexToken::CloseGroup),
+            '?' => token_list.push(RegexToken::Optional),
+            '|' => token_list.push(RegexToken::Or),
+            '*' => token_list.push(RegexToken::Star),
+            _ => token_list.push(RegexToken::Char(char)),
         }
     }
     return token_list;
 }
+

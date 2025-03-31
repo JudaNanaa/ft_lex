@@ -1,8 +1,8 @@
 mod regex;
 
 fn main() {
-	let mut input = String::new();
-	let result = std::io::stdin().read_line(&mut input);
+	let mut input: String = String::new();
+	let result: Result<usize, std::io::Error> = std::io::stdin().read_line(&mut input);
 
 	if result.is_err() {
 		println!("error input");
@@ -12,8 +12,9 @@ fn main() {
 	}
 
 	// Tokenizer
-	let mut tokens = regex::tokenizer::regex_tokenizer(&input);
-	// tokens = dbg!(tokens);
+	let mut tokens: Vec<regex::tokenizer::RegexToken> = regex::tokenizer::regex_tokenizer(&input);
+	tokens = dbg!(tokens);
+	
 	// Parsing
 	regex::parsing::regex_parsing(tokens);
 	

@@ -3,6 +3,7 @@
 %}
 
 %%
+"a|b*c\" ok"?     printf("NUMBER: %s\n", yytext);
 [0-9]+     printf("NUMBER: %s\n", yytext);
 "+"|"-"|"*"|"/"  printf("OPERATOR: %s\n", yytext);
 "("         printf("OPEN_PAREN\n");
