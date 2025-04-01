@@ -8,27 +8,24 @@ enum CharsetState {
 	Exit,
 }
 
-fn check_if_negative_charset(chars: &mut Chars<'_>, charset: &mut String) -> bool {
+fn check_if_negative_charset(chars: &mut Chars<'_>, charset: &mut String) -> (bool, CharsetState) {
 	let mut is_negative = false;
 
 	if let Some(char) = chars.next() {
 		match char {
-			'^' => {
-				is_negative = true;
-			},
+			'^' => is_negative = true,
+			']' => return (is_negative, CharsetState::Exit),
 			'\\' => {
-				if let Some(c) = chars.next() {
+			if let Some(c) = chars.next() {
 					charset.push(expand_escape(c));
 				} else {
 					panic!("No Ending bracket");
 				}
-			}
-			_ => {
-				charset.push(char);
 			},
+			_ => charset.push(char),
 		}
 	}
-	return is_negative;
+	return (is_negative, CharsetState::Continue);
 }
 
 fn expand_minus(mut char_begin: char, char_end: char) -> String {
@@ -86,8 +83,11 @@ fn minus_gesture(chars: &mut Chars<'_>, charset: &mut String) -> CharsetState {
 pub fn extract_charset(chars: &mut Chars<'_>) -> RegexToken {
 	let mut charset = String::new();
 	
-	let is_negative = check_if_negative_charset(chars, &mut charset);
+	let (is_negative, state) = check_if_negative_charset(chars, &mut charset);
 	
+	if state == CharsetState::Exit {
+		return RegexToken::Charset(charset, is_negative);
+	}
 	while let Some(char) = chars.next() {
 		match char {
 			']' => {
