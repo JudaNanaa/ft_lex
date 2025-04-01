@@ -1,7 +1,7 @@
 use std::{char, str::Chars};
 use crate::regex::tokenizer::utils::expand_escape;
 
-use super::charset::extract_charset;
+use super::{charset::extract_charset, quantifier::extract_repetition_range};
 
 #[derive(Debug)]
 pub enum RegexToken {
@@ -12,7 +12,7 @@ pub enum RegexToken {
 	Charset(String, bool),
 	OpenGroup,
 	CloseGroup,
-	Quantifier(u32, Option<u32>),
+	Quantifier(u32, Option<i32>),
 }
 
 // i want to paerse this -> "a|b*c"
@@ -70,13 +70,16 @@ pub fn regex_tokenizer(regex: &String) -> Vec<RegexToken> {
 				token_list.push(token_charset);
 			},
 			'{' => {
-				let (first, second) = extract_quantifier(&mut chars);				
+				let (first, second) = extract_repetition_range(&mut chars);
+				token_list.push(RegexToken::Quantifier(first, second));
 			},
-            '(' => token_list.push(RegexToken::OpenGroup), // a changer
+			'}' => panic!("unrecognized rule -> mettre ce print mais changer pas faire comme ca"),
+            '(' => token_list.push(RegexToken::OpenGroup), // TODO: a changer
             ')' => token_list.push(RegexToken::CloseGroup),
             '?' => token_list.push(RegexToken::Optional),
             '|' => token_list.push(RegexToken::Or),
             '*' => token_list.push(RegexToken::Star),
+			'.' => token_list.push(RegexToken::Charset("\r\n".to_string(), true)),
             _ => token_list.push(RegexToken::Char(char)),
         }
     }

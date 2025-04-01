@@ -1,5 +1,4 @@
-
 DIGIT [0-9]
 OK abc
-%%a
-{DIGIT}+ printf("----YES----\n");
+%%
+Re printf("----YES----\n");
