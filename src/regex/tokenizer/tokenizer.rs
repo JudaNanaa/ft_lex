@@ -1,48 +1,16 @@
+use super::{group::extract_group, quotes::get_string_under_quotes, *};
 use std::{char, str::Chars};
-use super::*;
 
-#[derive(Debug)]
+const BLANK: &str = " \n\r\t";
+
+#[derive(Debug, PartialEq)]
 pub enum RegexToken {
-	Char(char),
-	Or,
-    Star,
-	Optional,
-	Charset(String, bool),
-	OpenGroup,
-	CloseGroup,
-	Quantifier(Quantifier),
-}
-
-// i want to paerse this -> "a|b*c"
-
-fn get_string_under_quotes(chars: &mut Chars<'_>, quote_to_match: char) -> Vec<RegexToken> {
-    let mut dest: String = String::new();
-    let mut last_seen_backslash: bool = false;
-
-    while let Some(c) = chars.next() {
-        match c {
-            '\\' if !last_seen_backslash => last_seen_backslash = true,
-            q if q == quote_to_match && !last_seen_backslash => break,
-            _ => {
-                if last_seen_backslash {
-                    dest.push('\\');
-                }
-                dest.push(c);
-                last_seen_backslash = false;
-            }
-        }
-    }
-    return string_to_tokens(dest);
-}
-
-fn string_to_tokens(str: String) -> Vec<RegexToken> {
-    let mut token_string: Vec<RegexToken> = Vec::new();
-	let mut str_chars: Chars<'_> = str.chars(); 
-
-	while let Some(char) = str_chars.next() {
-		token_string.push(RegexToken::Char(char));
-	}
-	return token_string;
+    Char(char),
+    Or,
+    TrailingContent,
+    OpenGroup,
+    CloseGroup,
+    Quantifier(Quantifier),
 }
 
 pub fn regex_tokenizer(regex: &String) -> Vec<RegexToken> {
@@ -62,23 +30,31 @@ pub fn regex_tokenizer(regex: &String) -> Vec<RegexToken> {
                 } else {
                     token_list.push(RegexToken::Char('\\'));
                 }
-            },
+            }
             '[' => {
-				let token_charset = extract_charset(&mut chars);
-				token_list.push(token_charset);
-			},
-			'{' => {
-				let quantifier = extract_repetition_range(&mut chars);
-				token_list.push(RegexToken::Quantifier(quantifier));
-			},
-            '(' => token_list.push(RegexToken::OpenGroup), // a changer
-            ')' => token_list.push(RegexToken::CloseGroup),
-            '?' => token_list.push(RegexToken::Optional),
+                let mut token_charset = extract_charset(&mut chars);
+                token_list.append(&mut token_charset);
+            }
+            '{' => {
+                let quantifier = extract_repetition_range(&mut chars);
+                token_list.push(RegexToken::Quantifier(quantifier));
+            }
+            '(' => {
+                let mut group = extract_group(&mut chars);
+                token_list.append(&mut group);
+            }
             '|' => token_list.push(RegexToken::Or),
-            '*' => token_list.push(RegexToken::Star),
-            _ => token_list.push(RegexToken::Char(char)),
+            '/' => token_list.push(RegexToken::TrailingContent),
+            '?' => token_list.push(RegexToken::Quantifier(Quantifier::Range(0, 1))),
+            '*' => token_list.push(RegexToken::Quantifier(Quantifier::AtLeast(0))),
+            '+' => token_list.push(RegexToken::Quantifier(Quantifier::AtLeast(1))),
+            c => {
+                if BLANK.contains(c) {
+                    break;
+                }
+                token_list.push(RegexToken::Char(char))
+            }
         }
     }
     return token_list;
 }
-

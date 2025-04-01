@@ -1,30 +1,65 @@
-use std::{char, str::Chars};
 use super::*;
+use std::{char, str::Chars};
 
 #[derive(PartialEq)]
 enum CharsetState {
-	Continue,
-	Exit,
+    Continue,
+    Exit,
+}
+
+fn create_charset_group(charset: String, is_negative: bool) -> Vec<RegexToken> {
+	let mut tokens_charset = Vec::new();
+
+	tokens_charset.push(RegexToken::OpenGroup);
+	if is_negative == false {
+		let mut chars_it = charset.chars();
+		while let Some(char) = chars_it.next() {
+			tokens_charset.push(RegexToken::Char(char));		
+			tokens_charset.push(RegexToken::Or);		
+		}
+	}
+	else {
+		let all_chars = (0..=127u8)  // Using ASCII range for simplicity
+            .filter_map(|c| char::from_u32(c as u32))
+            .collect::<Vec<char>>();
+            
+        // Filter out characters that are in the charset
+        let charset_chars: Vec<char> = charset.chars().collect();
+        
+        for c in all_chars {
+            if !charset_chars.contains(&c) {
+                tokens_charset.push(RegexToken::Char(c));
+                tokens_charset.push(RegexToken::Or);
+            }
+        }
+    }
+	if let Some(token) = tokens_charset.last() {
+		if *token == RegexToken::Or {
+			tokens_charset.pop();
+		}
+	}
+	tokens_charset.push(RegexToken::CloseGroup);
+	return tokens_charset;
 }
 
 fn check_if_negative_charset(chars: &mut Chars<'_>, charset: &mut String) -> (bool, CharsetState) {
-	let mut is_negative = false;
+    let mut is_negative = false;
 
-	if let Some(char) = chars.next() {
-		match char {
-			'^' => is_negative = true,
-			']' => return (is_negative, CharsetState::Exit),
-			'\\' => {
-			if let Some(c) = chars.next() {
-					charset.push(expand_escape(c));
-				} else {
-					panic!("No Ending bracket");
-				}
-			},
-			_ => charset.push(char),
-		}
-	}
-	return (is_negative, CharsetState::Continue);
+    if let Some(char) = chars.next() {
+        match char {
+            '^' => is_negative = true,
+            ']' => return (is_negative, CharsetState::Exit),
+            '\\' => {
+                if let Some(c) = chars.next() {
+                    charset.push(expand_escape(c));
+                } else {
+                    panic!("No Ending bracket");
+                }
+            }
+            _ => charset.push(char),
+        }
+    }
+    return (is_negative, CharsetState::Continue);
 }
 
 fn expand_minus(mut char_begin: char, char_end: char) -> String {
@@ -47,67 +82,65 @@ fn expand_minus(mut char_begin: char, char_end: char) -> String {
 }
 
 fn minus_gesture(chars: &mut Chars<'_>, charset: &mut String) -> CharsetState {
-	if let Some(char) = chars.next() {
-		match char {
-			']' => {
-				charset.push('-');
-				return CharsetState::Exit;
-			}
-			'\\' => {
-				if let Some(c) = chars.next() {
-					charset.push(expand_escape(c));
-				} else {
-					panic!("No Ending bracket");
-				}
-			}
-			_ => {
-				charset.push(char);
-			}
-		}
-		if charset.len() < 2 {
-			charset.push('-');
-			return CharsetState::Continue;
-		}
-		let char_end = charset.pop().unwrap();
-		let char_begin = charset.pop().unwrap();
-		charset.push_str(&expand_minus(char_begin, char_end));
-
-	} else {
-		panic!("No Ending bracket");
-	}
-	return CharsetState::Continue;
+    if let Some(char) = chars.next() {
+        match char {
+            ']' => {
+                charset.push('-');
+                return CharsetState::Exit;
+            }
+            '\\' => {
+                if let Some(c) = chars.next() {
+                    charset.push(expand_escape(c));
+                } else {
+                    panic!("No Ending bracket");
+                }
+            }
+            _ => {
+                charset.push(char);
+            }
+        }
+        if charset.len() < 2 {
+            charset.push('-');
+            return CharsetState::Continue;
+        }
+        let char_end = charset.pop().unwrap();
+        let char_begin = charset.pop().unwrap();
+        charset.push_str(&expand_minus(char_begin, char_end));
+    } else {
+        panic!("No Ending bracket");
+    }
+    return CharsetState::Continue;
 }
 
+pub fn extract_charset(chars: &mut Chars<'_>) -> Vec<RegexToken> {
+    let mut charset = String::new();
 
-pub fn extract_charset(chars: &mut Chars<'_>) -> RegexToken {
-	let mut charset = String::new();
-	
-	let (is_negative, state) = check_if_negative_charset(chars, &mut charset);
-	
-	if state == CharsetState::Exit {
-		return RegexToken::Charset(charset, is_negative);
-	}
-	while let Some(char) = chars.next() {
-		match char {
-			']' => {
-				return RegexToken::Charset(charset, is_negative);
-			},
-			'\\' => {
-				if let Some(c) = chars.next() {
-					charset.push(expand_escape(c));
-				} else {
-					panic!("No Ending bracket");
-				}
-			},
-			'-' => {
-				if minus_gesture(chars, &mut charset) == CharsetState::Exit {
-					return RegexToken::Charset(charset, is_negative);
-				}
-			}
-			_ => {
-				charset.push(char);
-			},
-		}
-	}
-	panic!("No Ending bracket");
+    let (is_negative, state) = check_if_negative_charset(chars, &mut charset);
+
+    if state == CharsetState::Exit {
+		return create_charset_group(charset, is_negative);
+    }
+    while let Some(char) = chars.next() {
+        match char {
+            ']' => {
+				return create_charset_group(charset, is_negative);
+            }
+            '\\' => {
+                if let Some(c) = chars.next() {
+                    charset.push(expand_escape(c));
+                } else {
+                    panic!("No Ending bracket");
+                }
+            }
+            '-' => {
+                if minus_gesture(chars, &mut charset) == CharsetState::Exit {
+					return create_charset_group(charset, is_negative);
+                }
+            }
+            _ => {
+                charset.push(char);
+            }
+        }
+    }
+    panic!("No Ending bracket");
 }
