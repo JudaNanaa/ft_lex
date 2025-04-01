@@ -1,5 +1,6 @@
 mod regex;
-use crate::regex::tokenizer::tokenizer::{RegexToken, regex_tokenizer};
+
+use regex::*;
 
 fn main() {
 	let mut input: String = String::new();

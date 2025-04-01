@@ -1,6 +1,5 @@
 use std::{char, str::Chars};
-
-use crate::regex::tokenizer::{tokenizer::RegexToken, utils::expand_escape};
+use super::*;
 
 #[derive(PartialEq)]
 enum CharsetState {
