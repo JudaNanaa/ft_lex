@@ -1,3 +1,4 @@
+use super::Operator::CloseGroup;
 use super::*;
 use std::{char, str::Chars};
 use super::Token::Operator as Operator;
@@ -15,32 +16,33 @@ fn create_charset_group(charset: String, is_negative: bool) -> Vec<Token> {
 
     tokens_charset.push(Operator(OpenGroup));
     if is_negative == false {
-        let mut chars_it = charset.chars();
+        let mut chars_it = charset.chars().peekable();
         while let Some(char) = chars_it.next() {
             tokens_charset.push(Token::Char(char));
-            tokens_charset.push(Operator(Or));
+			if let Some(_) = chars_it.peek() {
+				tokens_charset.push(Operator(Or));
+			}
         }
     } else {
         let all_chars = (0..=127u8) // Using ASCII range for simplicity
             .filter_map(|c| char::from_u32(c as u32))
             .collect::<Vec<char>>();
 
-        // Filter out characters that are in the charset
+		let mut iter = all_chars.iter().peekable();
+
         let charset_chars: Vec<char> = charset.chars().collect();
 
-        for c in all_chars {
-            if !charset_chars.contains(&c) {
-                tokens_charset.push(Token::Char(c));
-                tokens_charset.push(Operator(Or));
-            }
-        }
+		while let Some(c) = iter.next() {
+			if !charset_chars.contains(c) {
+				tokens_charset.push(Token::Char(*c));
+				if let Some(_) = iter.peek() {
+					tokens_charset.push(Operator(Or));
+				}
+			}
+			
+		}
     }
-    if let Some(token) = tokens_charset.last() {
-        if *token == Operator(Or) {
-            tokens_charset.pop();
-        }
-    }
-    tokens_charset.push(Operator(OpenGroup));
+    tokens_charset.push(Operator(CloseGroup));
     return tokens_charset;
 }
 
