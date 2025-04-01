@@ -1,26 +1,28 @@
-use super::RegexToken;
+use super::Token;
+use super::Token::Operator;
+use super::Operator::*;
 
-fn need_concatenate(token: &RegexToken, next: &RegexToken) -> bool {
+fn need_concatenate(token: &Token, next: &Token) -> bool {
 	match token {
-		RegexToken::Char(_) => {
+		Token::Char(_) => {
 			match next {
-				RegexToken::Char(_) | RegexToken::OpenGroup => {
+				Token::Char(_) | Operator(OpenGroup) => {
 					return true;
 				},
 				_ => return false,
 			}
 		}
-		RegexToken::CloseGroup => {
+		Operator(CloseGroup) => {
 			match next {
-				RegexToken::Char(_) | RegexToken::OpenGroup => {
+				Token::Char(_) | Operator(OpenGroup) => {
 					return true;
 				},
 				_ => return false,
 			}
 		},
-		RegexToken::Quantifier(_) => {
+		Operator(Quantifier(_)) => {
 			match next {
-				RegexToken::Char(_) | RegexToken::OpenGroup => {
+				Token::Char(_) | Operator(OpenGroup) => {
 					return true;
 				},
 				_ => return false,
@@ -29,8 +31,8 @@ fn need_concatenate(token: &RegexToken, next: &RegexToken) -> bool {
 		_ => return false,
 	}
 }
-// ab*a
-pub fn add_concatenation_token(tokens: Vec<RegexToken>) -> Vec<RegexToken> {
+
+pub fn add_concatenation_token(tokens: Vec<Token>) -> Vec<Token> {
 	let mut dest = Vec::with_capacity(tokens.len() * 2);
 	let mut token_it = tokens.iter().peekable();
 
@@ -40,7 +42,7 @@ pub fn add_concatenation_token(tokens: Vec<RegexToken>) -> Vec<RegexToken> {
 			break;
 		}
 		if need_concatenate(token, token_it.peek().unwrap()) == true {
-			dest.push(RegexToken::Concatenation);
+			dest.push(Operator(Concatenation));
 		}
 	}
 	return dest;

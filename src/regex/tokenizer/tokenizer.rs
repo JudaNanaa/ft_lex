@@ -1,21 +1,26 @@
-use super::{concatenation::add_concatenation_token, group::extract_group, quotes::get_string_under_quotes, *};
+use super::{concatenation::add_concatenation_token, postfix::postfix_notation, quotes::get_string_under_quotes, *};
 use std::{char, str::Chars};
 
 const WHITESPACE: &str = " \n\r\t";
 
 #[derive(Debug, PartialEq, Clone, Copy)]
-pub enum RegexToken {
-    Char(char),
-    Or,
-    TrailingContent,
-    OpenGroup,
-    CloseGroup,
-    Quantifier(Quantifier),
+pub enum Operator {
+	Or,
+	TrailingContent,
+	OpenGroup,
+	CloseGroup,
+	Quantifier(Quantifier),
 	Concatenation,
 }
 
-pub fn regex_tokenizer(regex: &String) -> Vec<RegexToken> {
-    let mut token_list: Vec<RegexToken> = Vec::new();
+#[derive(Debug, PartialEq, Clone, Copy)]
+pub enum Token {
+    Char(char),
+	Operator(Operator),
+}
+
+pub fn regex_tokenizer(regex: &String) -> Vec<Token> {
+    let mut token_list: Vec<Token> = Vec::new();
     let mut chars: Chars<'_> = regex.chars();
 
     while let Some(current_char) = chars.next() {
@@ -26,9 +31,9 @@ pub fn regex_tokenizer(regex: &String) -> Vec<RegexToken> {
             }
             '\\' => {
                 if let Some(escaped_char) = chars.next() {
-                    token_list.push(RegexToken::Char(expand_escape(escaped_char)));
+                    token_list.push(Token::Char(expand_escape(escaped_char)));
                 } else {
-                    token_list.push(RegexToken::Char('\\'));
+                    token_list.push(Token::Char('\\'));
                 }
             }
             '[' => {
@@ -37,25 +42,28 @@ pub fn regex_tokenizer(regex: &String) -> Vec<RegexToken> {
             }
             '{' => {
                 let quantifier = extract_repetition_range(&mut chars);
-                token_list.push(RegexToken::Quantifier(quantifier));
+                token_list.push(Token::Operator(Operator::Quantifier(quantifier)));
             }
             '(' => {
-                let mut group_tokens = extract_group(&mut chars);
-                token_list.append(&mut group_tokens);
+				token_list.push(Token::Operator(Operator::OpenGroup));
             }
-            '|' => token_list.push(RegexToken::Or),
-            '/' => token_list.push(RegexToken::TrailingContent),
-            '?' => token_list.push(RegexToken::Quantifier(Quantifier::Range(0, 1))),
-            '*' => token_list.push(RegexToken::Quantifier(Quantifier::AtLeast(0))),
-            '+' => token_list.push(RegexToken::Quantifier(Quantifier::AtLeast(1))),
+            ')' => {
+				token_list.push(Token::Operator(Operator::CloseGroup));
+            }
+            '|' => token_list.push(Token::Operator(Operator::Or)),
+            '/' => token_list.push(Token::Operator(Operator::TrailingContent)),
+            '?' => token_list.push(Token::Operator(Operator::Quantifier(Quantifier::Range(0, 1)))),
+            '*' => token_list.push(Token::Operator(Operator::Quantifier(Quantifier::AtLeast(0)))),
+            '+' => token_list.push(Token::Operator(Operator::Quantifier(Quantifier::AtLeast(1)))),
             c => {
                 if WHITESPACE.contains(c) {
                     break;
                 }
-                token_list.push(RegexToken::Char(current_char))
+                token_list.push(Token::Char(current_char))
             }
         }
     }
 	token_list = add_concatenation_token(token_list);
+	token_list = postfix_notation(token_list);
     return token_list;
 }

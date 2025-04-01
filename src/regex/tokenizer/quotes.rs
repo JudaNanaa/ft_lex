@@ -1,20 +1,22 @@
 use std::str::Chars;
+use super::Token::Operator as Operator;
+use super::Operator::CloseGroup as CloseGroup;
+use super::Operator::OpenGroup as OpenGroup;
+use super::Token;
 
-use super::RegexToken;
-
-fn string_to_tokens(str: String) -> Vec<RegexToken> {
-    let mut token_string: Vec<RegexToken> = Vec::new();
+fn string_to_tokens(str: String) -> Vec<Token> {
+    let mut token_string: Vec<Token> = Vec::new();
     let mut str_chars: Chars<'_> = str.chars();
 
-    token_string.push(RegexToken::OpenGroup);
+    token_string.push(Operator(OpenGroup));
     while let Some(char) = str_chars.next() {
-        token_string.push(RegexToken::Char(char));
+        token_string.push(Token::Char(char));
     }
-    token_string.push(RegexToken::CloseGroup);
+    token_string.push(Operator(CloseGroup));
     return token_string;
 }
 
-pub fn get_string_under_quotes(chars: &mut Chars<'_>, quote_to_match: char) -> Vec<RegexToken> {
+pub fn get_string_under_quotes(chars: &mut Chars<'_>, quote_to_match: char) -> Vec<Token> {
     let mut dest: String = String::new();
     let mut last_seen_backslash: bool = false;
 
