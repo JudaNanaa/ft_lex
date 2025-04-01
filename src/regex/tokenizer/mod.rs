@@ -1,9 +1,10 @@
 mod charset;
 mod group;
 mod quantifier;
+mod quotes;
 pub mod tokenizer;
 mod utils;
-mod quotes;
+mod concatenation;
 use charset::*;
 use quantifier::*;
 pub use tokenizer::*;

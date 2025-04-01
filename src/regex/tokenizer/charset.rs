@@ -8,24 +8,23 @@ enum CharsetState {
 }
 
 fn create_charset_group(charset: String, is_negative: bool) -> Vec<RegexToken> {
-	let mut tokens_charset = Vec::new();
+    let mut tokens_charset = Vec::new();
 
-	tokens_charset.push(RegexToken::OpenGroup);
-	if is_negative == false {
-		let mut chars_it = charset.chars();
-		while let Some(char) = chars_it.next() {
-			tokens_charset.push(RegexToken::Char(char));		
-			tokens_charset.push(RegexToken::Or);		
-		}
-	}
-	else {
-		let all_chars = (0..=127u8)  // Using ASCII range for simplicity
+    tokens_charset.push(RegexToken::OpenGroup);
+    if is_negative == false {
+        let mut chars_it = charset.chars();
+        while let Some(char) = chars_it.next() {
+            tokens_charset.push(RegexToken::Char(char));
+            tokens_charset.push(RegexToken::Or);
+        }
+    } else {
+        let all_chars = (0..=127u8) // Using ASCII range for simplicity
             .filter_map(|c| char::from_u32(c as u32))
             .collect::<Vec<char>>();
-            
+
         // Filter out characters that are in the charset
         let charset_chars: Vec<char> = charset.chars().collect();
-        
+
         for c in all_chars {
             if !charset_chars.contains(&c) {
                 tokens_charset.push(RegexToken::Char(c));
@@ -33,13 +32,13 @@ fn create_charset_group(charset: String, is_negative: bool) -> Vec<RegexToken> {
             }
         }
     }
-	if let Some(token) = tokens_charset.last() {
-		if *token == RegexToken::Or {
-			tokens_charset.pop();
-		}
-	}
-	tokens_charset.push(RegexToken::CloseGroup);
-	return tokens_charset;
+    if let Some(token) = tokens_charset.last() {
+        if *token == RegexToken::Or {
+            tokens_charset.pop();
+        }
+    }
+    tokens_charset.push(RegexToken::CloseGroup);
+    return tokens_charset;
 }
 
 fn check_if_negative_charset(chars: &mut Chars<'_>, charset: &mut String) -> (bool, CharsetState) {
@@ -118,12 +117,12 @@ pub fn extract_charset(chars: &mut Chars<'_>) -> Vec<RegexToken> {
     let (is_negative, state) = check_if_negative_charset(chars, &mut charset);
 
     if state == CharsetState::Exit {
-		return create_charset_group(charset, is_negative);
+        return create_charset_group(charset, is_negative);
     }
     while let Some(char) = chars.next() {
         match char {
             ']' => {
-				return create_charset_group(charset, is_negative);
+                return create_charset_group(charset, is_negative);
             }
             '\\' => {
                 if let Some(c) = chars.next() {
@@ -134,7 +133,7 @@ pub fn extract_charset(chars: &mut Chars<'_>) -> Vec<RegexToken> {
             }
             '-' => {
                 if minus_gesture(chars, &mut charset) == CharsetState::Exit {
-					return create_charset_group(charset, is_negative);
+                    return create_charset_group(charset, is_negative);
                 }
             }
             _ => {

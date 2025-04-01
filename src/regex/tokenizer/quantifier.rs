@@ -1,6 +1,6 @@
 use std::str::Chars;
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone, Copy)]
 pub enum Quantifier {
     Equal(usize),
     AtLeast(usize),
