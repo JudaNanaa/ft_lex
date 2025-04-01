@@ -1,8 +1,8 @@
-use std::str::Chars;
-use super::Token::Operator as Operator;
-use super::Operator::CloseGroup as CloseGroup;
-use super::Operator::OpenGroup as OpenGroup;
+use super::Operator::CloseGroup;
+use super::Operator::OpenGroup;
 use super::Token;
+use super::Token::Operator;
+use std::str::Chars;
 
 fn string_to_tokens(str: String) -> Vec<Token> {
     let mut token_string: Vec<Token> = Vec::new();

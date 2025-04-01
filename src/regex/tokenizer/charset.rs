@@ -1,9 +1,9 @@
 use super::Operator::CloseGroup;
+use super::Operator::OpenGroup;
+use super::Operator::Or;
+use super::Token::Operator;
 use super::*;
 use std::{char, str::Chars};
-use super::Token::Operator as Operator;
-use super::Operator::OpenGroup as OpenGroup;
-use super::Operator::Or as Or;
 
 #[derive(PartialEq)]
 enum CharsetState {
@@ -19,28 +19,27 @@ fn create_charset_group(charset: String, is_negative: bool) -> Vec<Token> {
         let mut chars_it = charset.chars().peekable();
         while let Some(char) = chars_it.next() {
             tokens_charset.push(Token::Char(char));
-			if let Some(_) = chars_it.peek() {
-				tokens_charset.push(Operator(Or));
-			}
+            if let Some(_) = chars_it.peek() {
+                tokens_charset.push(Operator(Or));
+            }
         }
     } else {
         let all_chars = (0..=127u8) // Using ASCII range for simplicity
             .filter_map(|c| char::from_u32(c as u32))
             .collect::<Vec<char>>();
 
-		let mut iter = all_chars.iter().peekable();
+        let mut iter = all_chars.iter().peekable();
 
         let charset_chars: Vec<char> = charset.chars().collect();
 
-		while let Some(c) = iter.next() {
-			if !charset_chars.contains(c) {
-				tokens_charset.push(Token::Char(*c));
-				if let Some(_) = iter.peek() {
-					tokens_charset.push(Operator(Or));
-				}
-			}
-			
-		}
+        while let Some(c) = iter.next() {
+            if !charset_chars.contains(c) {
+                tokens_charset.push(Token::Char(*c));
+                if let Some(_) = iter.peek() {
+                    tokens_charset.push(Operator(Or));
+                }
+            }
+        }
     }
     tokens_charset.push(Operator(CloseGroup));
     return tokens_charset;
@@ -147,4 +146,24 @@ pub fn extract_charset(chars: &mut Chars<'_>) -> Vec<Token> {
         }
     }
     panic!("No Ending bracket");
+}
+
+pub fn expand_dot() -> Vec<Token> {
+    let mut dest = Vec::new();
+    let mut all_chars = (0..=127u8)
+        .filter_map(|c| char::from_u32(c as u32))
+        .collect::<Vec<char>>();
+
+    all_chars.remove('\n' as usize);
+
+    let mut iter = all_chars.iter().peekable();
+
+    while let Some(char) = iter.next() {
+        dest.push(Token::Char(*char));
+        if let Some(_) = iter.peek() {
+            dest.push(Operator(Or));
+        }
+    }
+
+    return dest;
 }

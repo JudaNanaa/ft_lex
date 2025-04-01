@@ -1,23 +1,13 @@
-use super::{concatenation::add_concatenation_token, postfix::postfix_notation, quotes::get_string_under_quotes, *};
-use std::{char, str::Chars};
+use super::Operator::*;
+use super::Quantifier::*;
+use super::Token::Operator;
+use super::{
+    concatenation::add_concatenation_token, postfix::postfix_notation,
+    quotes::get_string_under_quotes, *,
+};
+use std::str::Chars;
 
 const WHITESPACE: &str = " \n\r\t";
-
-#[derive(Debug, PartialEq, Clone, Copy)]
-pub enum Operator {
-	Or,
-	TrailingContent,
-	OpenGroup,
-	CloseGroup,
-	Quantifier(Quantifier),
-	Concatenation,
-}
-
-#[derive(Debug, PartialEq, Clone, Copy)]
-pub enum Token {
-    Char(char),
-	Operator(Operator),
-}
 
 pub fn regex_tokenizer(regex: &String) -> Vec<Token> {
     let mut token_list: Vec<Token> = Vec::new();
@@ -42,19 +32,23 @@ pub fn regex_tokenizer(regex: &String) -> Vec<Token> {
             }
             '{' => {
                 let quantifier = extract_repetition_range(&mut chars);
-                token_list.push(Token::Operator(Operator::Quantifier(quantifier)));
+                token_list.push(Operator(Quantifier(quantifier)));
             }
             '(' => {
-				token_list.push(Token::Operator(Operator::OpenGroup));
+                token_list.push(Operator(OpenGroup));
             }
             ')' => {
-				token_list.push(Token::Operator(Operator::CloseGroup));
+                token_list.push(Operator(CloseGroup));
             }
-            '|' => token_list.push(Token::Operator(Operator::Or)),
-            '/' => token_list.push(Token::Operator(Operator::TrailingContent)),
-            '?' => token_list.push(Token::Operator(Operator::Quantifier(Quantifier::Range(0, 1)))),
-            '*' => token_list.push(Token::Operator(Operator::Quantifier(Quantifier::AtLeast(0)))),
-            '+' => token_list.push(Token::Operator(Operator::Quantifier(Quantifier::AtLeast(1)))),
+            '|' => token_list.push(Operator(Or)),
+            '/' => token_list.push(Operator(TrailingContent)),
+            '?' => token_list.push(Operator(Quantifier(Range(0, 1)))),
+            '*' => token_list.push(Operator(Quantifier(AtLeast(0)))),
+            '+' => token_list.push(Operator(Quantifier(AtLeast(1)))),
+            '.' => {
+                let mut charset_tokens = expand_dot();
+                token_list.append(&mut charset_tokens);
+            }
             c => {
                 if WHITESPACE.contains(c) {
                     break;
@@ -63,7 +57,7 @@ pub fn regex_tokenizer(regex: &String) -> Vec<Token> {
             }
         }
     }
-	token_list = add_concatenation_token(token_list);
-	token_list = postfix_notation(token_list);
+    token_list = add_concatenation_token(token_list);
+    token_list = postfix_notation(token_list);
     return token_list;
 }
