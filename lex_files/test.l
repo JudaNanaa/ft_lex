@@ -1,4 +1,4 @@
 DIGIT [0-9]
 OK abc
 %%
-() printf("----YES----\n");
+a/b printf("----YES----\n");
