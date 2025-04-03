@@ -1,86 +1,156 @@
-use std::collections::HashSet;
+// use std::collections::HashSet;
 
-use crate::regex::Token;
 use crate::regex::Operator;
+use crate::regex::Token;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct State(usize);
 
+// #[derive(Debug, Clone)]
+// pub struct Transition {
+//     from: State,
+//     to: State,
+//     input: Option<char>,
+// }
+
+// #[derive(Debug)]
+// pub struct Automaton {
+//     transitions: Vec<Transition>,
+//     initial_state: State,
+//     final_states: HashSet<State>,
+// }
+
+// fn create_automata_char(char: char) -> Automaton {
+//     let q0 = State(0);
+//     let q1 = State(1);
+
+//     let transition = Transition {
+//         from: q0,
+//         to: q1,
+//         input: Some(char),
+//     };
+
+//     let mut final_s = HashSet::new();
+//     final_s.insert(q1);
+
+//     return Automaton {
+//         transitions: vec![transition],
+//         initial_state: q0,
+//         final_states: final_s,
+//     };
+// }
+
+// fn concatenation_two_automata(left: Automaton, right: Automaton) -> Automaton {
+
+//     todo!();
+// }
+
+// fn pop_two_last_element_stack(stack: &mut Vec<Automaton>) -> (Automaton, Automaton) {
+//     let right = match stack.pop() {
+//         Some(elem) => elem,
+//         None => panic!("Internal error"),
+//     };
+//     let left = match stack.pop() {
+//         Some(elem) => elem,
+//         None => panic!("Internal error"),
+//     };
+//     return (left, right);
+// }
+
+// // a
+// pub fn create_nfa(tokens: &Vec<Token>) -> Automaton {
+//     let mut stack: Vec<Automaton> = Vec::new();
+
+//     for token in tokens {
+//         let automaton = match *token {
+//             Token::Char(c) => create_automata_char(c),
+//             Token::Operator(op) => match op {
+//                 Operator::Concatenation => {
+//                     let (left, right) = pop_two_last_element_stack(&mut stack);
+//                     concatenation_two_automata(left, right)
+//                 }
+//                 _ => todo!(),
+//             },
+//         };
+//         println!("automaton = {:#?}", automaton);
+//         stack.push(automaton);
+//     }
+//     dbg!(stack);
+//     // if | -> link les deux last de la stack en mode or
+//     // if concat -> concatener les deux last de la stack
+//     // if quantifier -> faire le quantifier sur le dernier de la stack
+
+//     // return stack.pop().unwrap();
+// }
+
+use std::collections::HashMap;
+
+#[derive(Debug, Clone, Copy)]
+struct Transition {
+    input: char,
+    to: usize,
+}
+
 #[derive(Debug, Clone)]
-pub struct Transition {
-    from: State,
-    to: State,
-    input: Option<char>,
-}
-
-#[derive(Debug)]
 pub struct Automaton {
-    transitions: Vec<Transition>,
-    initial_state: State,
-    final_states: HashSet<State>,
+    transition_table: HashMap<usize, Vec<Transition>>,
+	final_states: Vec<usize>,
 }
 
-fn create_automata_char(char: char) -> Automaton {
-    let q0 = State(0);
-    let q1 = State(1);
+fn create_automata_char(char: char, state_number: &mut usize) -> Automaton {
+    let mut table_of_transitions: HashMap<usize, Vec<Transition>> = HashMap::new();
 
+	let state = *state_number;
     let transition = Transition {
-        from: q0,
-        to: q1,
-        input: Some(char),
+        input: char,
+        to: *state_number,
     };
-
-    let mut final_s = HashSet::new();
-    final_s.insert(q1);
+	
+	*state_number += 1;
+	
+    table_of_transitions.insert(0, vec![transition]);
 
     return Automaton {
-        transitions: vec![transition],
-        initial_state: q0,
-        final_states: final_s,
+        transition_table: table_of_transitions,
+		final_states: vec![state],
     };
 }
 
-fn concatenation_two_automata(left: Automaton, right: Automaton) -> Automaton {
-	
+fn kleene_star(automaton: Automaton) -> Automaton {
+	let final_states = automaton.final_states;
+	let mut transition_table = automaton.transition_table;
+
+	let first_transition = match transition_table.get(&0) {
+		Some(tab) => tab,
+		None => panic!("No initial state, internal error"),
+	};
+
+	for state in final_states {
+
+		match transition_table.get_mut(&state) {
+			Some(tab) => {
+				*tab = first_transition.clone();
+			}
+			None => panic!("error in final state vec, internal error"),	
+		}
+	}
 	todo!();
 }
 
-fn pop_two_last_element_stack(stack: &mut Vec<Automaton>) -> (Automaton, Automaton) {
-	let right = match stack.pop() {
-		Some(elem) => elem,
-		None => panic!("Internal error"),
-	};
-	let left = match stack.pop() {
-		Some(elem) => elem,
-		None => panic!("Internal error"),
-	};
-	return (left, right);
-}
-
-// a
 pub fn create_nfa(tokens: &Vec<Token>) -> Automaton {
-    let mut stack: Vec<Automaton> = Vec::new();
-    // need stack
+    let mut automaton_stack: Vec<Automaton> = Vec::new();
+    let mut state_number = 1;
+
     for token in tokens {
         let automaton = match *token {
-            Token::Char(c) => create_automata_char(c),
-            Token::Operator(op) => match op {
-				Operator::Concatenation => {
-					let (left, right) = pop_two_last_element_stack(&mut stack);
-					concatenation_two_automata(left, right)
-				},
+            Token::Char(char) => create_automata_char(char, &mut state_number),
+            Token::Operator(operator) => match operator {
                 _ => todo!(),
             },
         };
-		println!("automaton = {:#?}", automaton);
-		stack.push(automaton);
+        dbg!(&automaton);
+        automaton_stack.push(automaton);
     }
-    dbg!(stack);
-    // if char -> automata du char
-    // if | -> link les deux last de la stack en mode or
-    // if concat -> concatener les deux last de la stack
-    // if quantifier -> faire le quantifier sur le dernier de la stack
 
     todo!();
-    // return stack.pop().unwrap();
 }
