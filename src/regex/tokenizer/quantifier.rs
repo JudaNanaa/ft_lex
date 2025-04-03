@@ -1,11 +1,6 @@
 use std::str::Chars;
 
-#[derive(Debug, PartialEq, Clone, Copy)]
-pub enum Quantifier {
-    Equal(usize),
-    AtLeast(usize),
-    Range(usize, usize),
-}
+use super::Quantifier;
 
 fn is_numeric_string(input: &String) -> bool {
     input.chars().all(|c| c.is_numeric())

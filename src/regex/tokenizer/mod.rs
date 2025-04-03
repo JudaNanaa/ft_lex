@@ -25,3 +25,10 @@ pub enum Token {
     Char(char),
     Operator(Operator),
 }
+
+#[derive(Debug, PartialEq, Clone, Copy)]
+pub enum Quantifier {
+    Equal(usize),
+    AtLeast(usize),
+    Range(usize, usize),
+}

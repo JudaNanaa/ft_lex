@@ -1,6 +1,7 @@
 // use std::collections::HashSet;
 
 use crate::regex::Operator;
+use crate::regex::Quantifier;
 use crate::regex::Token;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -116,25 +117,28 @@ fn create_automata_char(char: char, state_number: &mut usize) -> Automaton {
     };
 }
 
-fn kleene_star(automaton: Automaton) -> Automaton {
-	let final_states = automaton.final_states;
-	let mut transition_table = automaton.transition_table;
+fn kleene_star(automaton: &mut Automaton) {
+	let final_states = &automaton.final_states;
+	let transition_table = &mut automaton.transition_table;
 
+	dbg!(&transition_table);
 	let first_transition = match transition_table.get(&0) {
-		Some(tab) => tab,
+		Some(tab) => tab.clone(),
 		None => panic!("No initial state, internal error"),
 	};
 
 	for state in final_states {
 
-		match transition_table.get_mut(&state) {
+		match transition_table.get_mut(state) {
 			Some(tab) => {
 				*tab = first_transition.clone();
 			}
-			None => panic!("error in final state vec, internal error"),	
+			None => {
+				transition_table.insert(*state, first_transition.clone());
+			},	
 		}
 	}
-	todo!();
+	automaton.final_states.push(0);
 }
 
 pub fn create_nfa(tokens: &Vec<Token>) -> Automaton {
@@ -145,6 +149,17 @@ pub fn create_nfa(tokens: &Vec<Token>) -> Automaton {
         let automaton = match *token {
             Token::Char(char) => create_automata_char(char, &mut state_number),
             Token::Operator(operator) => match operator {
+				Operator::Quantifier(quantifier) => match quantifier {
+					Quantifier::AtLeast(nb) if nb == 0 => {
+						let mut automaton = match automaton_stack.pop() {
+							Some(elem) => elem,
+							None => panic!("ERRor kleene star"),
+						};
+						kleene_star(&mut automaton);
+						automaton
+					},
+					_ => todo!(),
+				}
                 _ => todo!(),
             },
         };
