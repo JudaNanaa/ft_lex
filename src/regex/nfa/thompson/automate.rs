@@ -98,6 +98,18 @@ pub struct Automaton {
 	final_states: Vec<usize>,
 }
 
+fn pop_two_last_element_stack(stack: &mut Vec<Automaton>) -> (Automaton, Automaton) {
+    let right = match stack.pop() {
+        Some(elem) => elem,
+        None => panic!("Internal error"),
+    };
+    let left = match stack.pop() {
+        Some(elem) => elem,
+        None => panic!("Internal error"),
+    };
+    return (left, right);
+}
+
 fn create_automata_char(char: char, state_number: &mut usize) -> Automaton {
     let mut table_of_transitions: HashMap<usize, Vec<Transition>> = HashMap::new();
 
@@ -121,7 +133,6 @@ fn kleene_star(automaton: &mut Automaton) {
 	let final_states = &automaton.final_states;
 	let transition_table = &mut automaton.transition_table;
 
-	dbg!(&transition_table);
 	let first_transition = match transition_table.get(&0) {
 		Some(tab) => tab.clone(),
 		None => panic!("No initial state, internal error"),
@@ -138,7 +149,33 @@ fn kleene_star(automaton: &mut Automaton) {
 			},	
 		}
 	}
-	automaton.final_states.push(0);
+	// automaton.final_states.push(0);
+}
+
+fn concatenation(mut left: Automaton, mut right: Automaton) -> Automaton {
+	let mut new = left.clone();
+	let left_final_states = &left.final_states;
+	let left_transition_table = &mut left.transition_table;
+
+	let right_initial_state = right.transition_table.get(&0).unwrap();
+	
+	for state in left_final_states {
+		match left_transition_table.get_mut(state) {
+			Some(tab) => {
+				*tab = right_initial_state.clone();
+			}
+			None => {
+				left_transition_table.insert(*state, right_initial_state.clone());
+			},
+		}	
+	}
+	right.transition_table.remove(&0);
+	left_transition_table.extend(right.transition_table);
+
+	return Automaton {
+		transition_table: left.transition_table,
+		final_states: right.final_states,
+	};
 }
 
 pub fn create_nfa(tokens: &Vec<Token>) -> Automaton {
@@ -160,6 +197,10 @@ pub fn create_nfa(tokens: &Vec<Token>) -> Automaton {
 					},
 					_ => todo!(),
 				}
+				Operator::Concatenation => {
+					let (left, right) = pop_two_last_element_stack(&mut automaton_stack);
+					concatenation(left, right)
+				},
                 _ => todo!(),
             },
         };
