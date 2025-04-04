@@ -53,14 +53,9 @@ fn apply_kleene_star(automaton: &mut Automaton) {
     let initial_transitions = transitions.get(&0).cloned().expect("No initial state, internal error");
 
     for state in final_states {
-        match transitions.get_mut(state) {
-            Some(state_transitions) => {
-                state_transitions.extend(initial_transitions.clone());
-            }
-            None => {
-                transitions.insert(*state, initial_transitions.clone());
-            },    
-        }
+		transitions.entry(*state)
+			.or_insert_with(Vec::new)
+			.extend(initial_transitions.clone());
     }
     automaton.final_states.push(0);
 }
