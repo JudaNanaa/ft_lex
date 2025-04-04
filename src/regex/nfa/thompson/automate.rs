@@ -90,6 +90,32 @@ fn concatenate_automata(mut left: Automaton, mut right: Automaton) -> Automaton 
     };
 }
 
+fn or_automata(left: Automaton, right: Automaton) -> Automaton {
+	let mut final_states = left.final_states;
+	let mut transitions = left.transitions;
+
+	for mut trans in right.transitions {
+		match transitions.contains_key(&trans.0) {
+			false => {
+				transitions.insert(trans.0, trans.1);
+			},
+			true => {
+				let array = transitions.get_mut(&trans.0).unwrap();
+				array.append(&mut trans.1);
+			}
+		}
+	}
+	for state in right.final_states {
+		if final_states.contains(&state) == false {
+			final_states.push(state);
+		}
+	}
+	
+	return Automaton {
+		transitions,
+		final_states,
+	};
+}
 
 pub fn construct_nfa(tokens: &Vec<Token>) -> Automaton {
     let mut automaton_stack: Vec<Automaton> = Vec::new();
@@ -111,6 +137,10 @@ pub fn construct_nfa(tokens: &Vec<Token>) -> Automaton {
                     let (first, second) = pop_last_two_automata(&mut automaton_stack);
                     concatenate_automata(first, second)
                 },
+				Operator::Or => {
+					let (first, second) = pop_last_two_automata(&mut automaton_stack);
+					or_automata(first, second)
+				}
                 _ => todo!(),
             },
         };
