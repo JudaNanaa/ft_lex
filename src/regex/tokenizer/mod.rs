@@ -4,11 +4,9 @@ mod postfix;
 mod quantifier;
 mod quotes;
 pub mod tokenizer;
-mod utils;
 use charset::*;
 use quantifier::*;
 pub use tokenizer::*;
-use utils::*;
 
 #[derive(Debug, PartialEq, Clone, Copy)]
 pub enum Operator {

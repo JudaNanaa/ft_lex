@@ -1,3 +1,5 @@
+use crate::regex::utils::expand_escape;
+
 use super::Operator::CloseGroup;
 use super::Operator::OpenGroup;
 use super::Operator::Or;

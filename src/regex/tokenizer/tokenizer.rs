@@ -1,3 +1,5 @@
+use crate::regex::utils::expand_escape;
+
 use super::Operator::*;
 use super::Quantifier::*;
 use super::Token::Operator;
