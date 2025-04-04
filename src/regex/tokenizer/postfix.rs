@@ -14,7 +14,7 @@ fn precedence_check(first: &Operators, second: &Operators) -> bool {
         _ => panic!("Error dans le code"),
     };
 
-    let second_precedence = match *second {
+    let second_precedence = match second {
         Quantifier(_) => 4,
         Concatenation => 3,
         Or => 2,
@@ -32,6 +32,7 @@ pub fn postfix_notation(tokens: Vec<Token>) -> Vec<Token> {
     let mut token_it = tokens.iter();
 
     while let Some(token) = token_it.next() {
+		dbg!(&token);
         match *token {
             Token::Char(c) => dest.push(Token::Char(c)),
             Operator(OpenGroup) => {

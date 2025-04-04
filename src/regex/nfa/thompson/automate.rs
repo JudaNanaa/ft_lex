@@ -8,7 +8,7 @@ pub struct State(usize);
 
 use std::collections::HashMap;
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 struct Transition {
     input: char,
     target_state: usize,
@@ -46,18 +46,31 @@ fn create_automaton_from_char(input: char, state_counter: &mut usize) -> Automat
     };
 }
 
+use std::collections::HashSet;
+
 fn apply_kleene_star(automaton: &mut Automaton) {
     let final_states = &automaton.final_states;
     let transitions = &mut automaton.transitions;
 
-    let initial_transitions = transitions.get(&0).cloned().expect("No initial state, internal error");
+    let initial_transitions = transitions
+        .get(&0)
+        .cloned()
+        .expect("No initial state, internal error");
 
     for state in final_states {
-		transitions.entry(*state)
-			.or_insert_with(Vec::new)
-			.extend(initial_transitions.clone());
+        let entry = transitions.entry(*state).or_insert_with(Vec::new);
+
+        // Convert existing transitions + new ones en HashSet pour éviter les doublons
+        let mut unique_transitions: HashSet<_> = entry.iter().cloned().collect();
+        unique_transitions.extend(initial_transitions.clone());
+
+        // Remplacer les transitions par une version sans doublons
+        *entry = unique_transitions.into_iter().collect();
     }
-    automaton.final_states.push(0);
+
+    if !automaton.final_states.contains(&0) {
+        automaton.final_states.push(0);
+    }
 }
 
 fn concatenate_automata(mut left: Automaton, mut right: Automaton) -> Automaton {
@@ -139,7 +152,7 @@ pub fn construct_nfa(tokens: &Vec<Token>) -> Automaton {
                 _ => todo!(),
             },
         };
-        dbg!(&automaton);
+		dbg!(&automaton);
         automaton_stack.push(automaton);
     }
 
