@@ -5,19 +5,19 @@ use super::Token::Operator;
 fn need_concatenate(token: &Token, next: &Token) -> bool {
     match token {
         Token::Char(_) => match next {
-            Token::Char(_) | Operator(OpenGroup) => {
+            Token::Char(_) | Operator(OpenParen) => {
                 return true;
             }
             _ => return false,
         },
-        Operator(CloseGroup) => match next {
-            Token::Char(_) | Operator(OpenGroup) => {
+        Operator(CloseParen) => match next {
+            Token::Char(_) | Operator(OpenParen) => {
                 return true;
             }
             _ => return false,
         },
         Operator(Quantifier(_)) => match next {
-            Token::Char(_) | Operator(OpenGroup) => {
+            Token::Char(_) | Operator(OpenParen) => {
                 return true;
             }
             _ => return false,

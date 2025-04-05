@@ -1,5 +1,5 @@
-use super::Operator::CloseGroup;
-use super::Operator::OpenGroup;
+use super::Operator::CloseParen;
+use super::Operator::OpenParen;
 use super::Token;
 use super::Token::Operator;
 use std::str::Chars;
@@ -8,11 +8,11 @@ fn string_to_tokens(str: String) -> Vec<Token> {
     let mut token_string: Vec<Token> = Vec::new();
     let mut str_chars: Chars<'_> = str.chars();
 
-    token_string.push(Operator(OpenGroup));
+    token_string.push(Operator(OpenParen));
     while let Some(char) = str_chars.next() {
         token_string.push(Token::Char(char));
     }
-    token_string.push(Operator(CloseGroup));
+    token_string.push(Operator(CloseParen));
     return token_string;
 }
 

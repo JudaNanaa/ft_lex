@@ -37,10 +37,10 @@ pub fn regex_tokenizer(regex: &String) -> Vec<Token> {
                 token_list.push(Operator(Quantifier(quantifier)));
             }
             '(' => {
-                token_list.push(Operator(OpenGroup));
+                token_list.push(Operator(OpenParen));
             }
             ')' => {
-                token_list.push(Operator(CloseGroup));
+                token_list.push(Operator(CloseParen));
             }
             '|' => token_list.push(Operator(Or)),
             '/' => token_list.push(Operator(TrailingContent)),

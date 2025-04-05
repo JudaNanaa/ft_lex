@@ -12,8 +12,8 @@ pub use tokenizer::*;
 pub enum Operator {
     Or,
     TrailingContent,
-    OpenGroup,
-    CloseGroup,
+    OpenParen,
+    CloseParen,
     Quantifier(Quantifier),
     Concatenation,
 }

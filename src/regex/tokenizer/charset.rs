@@ -1,7 +1,7 @@
 use crate::regex::utils::expand_escape;
 
-use super::Operator::CloseGroup;
-use super::Operator::OpenGroup;
+use super::Operator::CloseParen;
+use super::Operator::OpenParen;
 use super::Operator::Or;
 use super::Token::Operator;
 use super::*;
@@ -16,7 +16,7 @@ enum CharsetState {
 fn create_charset_group(charset: String, is_negative: bool) -> Vec<Token> {
     let mut tokens_charset = Vec::new();
 
-    tokens_charset.push(Operator(OpenGroup));
+    tokens_charset.push(Operator(OpenParen));
     if is_negative == false {
         let mut chars_it = charset.chars().peekable();
         while let Some(char) = chars_it.next() {
@@ -43,7 +43,7 @@ fn create_charset_group(charset: String, is_negative: bool) -> Vec<Token> {
             }
         }
     }
-    tokens_charset.push(Operator(CloseGroup));
+    tokens_charset.push(Operator(CloseParen));
     return tokens_charset;
 }
 
