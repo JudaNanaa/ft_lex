@@ -59,15 +59,13 @@ fn apply_kleene_star(automaton: &mut Automaton) {
     for state in final_states {
         let entry = transitions.entry(*state).or_insert_with(Vec::new);
 
-        // Convert existing transitions + new ones en HashSet pour éviter les doublons
         let mut unique_transitions: HashSet<_> = entry.iter().cloned().collect();
         unique_transitions.extend(initial_transitions.clone());
 
-        // Remplacer les transitions par une version sans doublons
         *entry = unique_transitions.into_iter().collect();
     }
 
-    if !automaton.final_states.contains(&0) {
+    if automaton.final_states.contains(&0) == false {
         automaton.final_states.push(0);
     }
 }
@@ -124,6 +122,21 @@ fn or_automata(left: Automaton, right: Automaton) -> Automaton {
 	};
 }
 
+// TODO: probleme car ca chnange pas le numero des states
+fn equal_quantifier(automaton: Automaton, nb: usize) -> Automaton {
+	let mut new = Vec::new();
+
+	for _ in 0..nb {
+		new.push(automaton.clone());
+		if new.len() == 2 {
+			let (left, right) = pop_last_two_automata(&mut new);
+			let fusion = concatenate_automata(left, right);
+			new.push(fusion);
+		}
+	}
+	return new.pop().unwrap();
+}
+
 pub fn construct_nfa(tokens: &Vec<Token>) -> Automaton {
     let mut automaton_stack: Vec<Automaton> = Vec::new();
     let mut state_counter = 1;
@@ -138,6 +151,10 @@ pub fn construct_nfa(tokens: &Vec<Token>) -> Automaton {
                         apply_kleene_star(&mut automaton);
                         automaton
                     },
+					Quantifier::Equal(nb) => {
+						let automaton = automaton_stack.pop().expect("Error applying Equal");
+						equal_quantifier(automaton, nb)
+					}
                     _ => todo!(),
                 }
                 Operator::Concatenation => {
@@ -148,6 +165,10 @@ pub fn construct_nfa(tokens: &Vec<Token>) -> Automaton {
 					let (first, second) = pop_last_two_automata(&mut automaton_stack);
 					or_automata(first, second)
 				}
+				Operator::TrailingContent => {
+					let (first, second) = pop_last_two_automata(&mut automaton_stack);
+					concatenate_automata(first, second)
+				},
                 _ => todo!(),
             },
         };
