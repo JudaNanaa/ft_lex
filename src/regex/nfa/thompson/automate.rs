@@ -137,7 +137,7 @@ fn shift_states(nfa: NFA, offset: usize) -> NFA {
     return new_nfa;
 }
 
-fn repeat_exact(nfa: NFA, count: usize) -> (NFA, usize) {
+fn repeat_exact(nfa: &NFA, count: usize) -> (NFA, usize) {
     let mut pieces = Vec::new();
     let mut offset = 0;
 
@@ -156,6 +156,25 @@ fn repeat_exact(nfa: NFA, count: usize) -> (NFA, usize) {
     return (pieces.pop().unwrap(), next_id);
 }
 
+fn at_least(nfa: NFA, count: usize) -> (NFA, usize) {
+    if count == 0 {
+        let mut kleene = nfa.clone();
+        apply_kleene_star(&mut kleene);
+		let next_id = kleene.final_states.iter().max().unwrap() + 1;
+        return (kleene, next_id);
+    }
+
+    let (repeated, _) = repeat_exact(&nfa, count);
+    let mut kleene_part = nfa.clone();
+    apply_kleene_star(&mut kleene_part);
+
+    let shifted_kleene = shift_states(kleene_part, repeated.transitions.len());
+    let result = concatenate(repeated, shifted_kleene);
+	let next_id = result.final_states.iter().max().unwrap() + 1;
+    return (result, next_id);
+}
+
+
 pub fn construct_nfa(tokens: &Vec<Token>) -> NFA {
     let mut stack: Vec<NFA> = Vec::new();
     let mut state_id = 1;
@@ -165,17 +184,18 @@ pub fn construct_nfa(tokens: &Vec<Token>) -> NFA {
             Token::Char(c) => from_char(c, &mut state_id),
             Token::Operator(op) => match op {
                 Operator::Quantifier(q) => match q {
-                    Quantifier::AtLeast(n) if n == 0 => {
-                        let mut base = stack.pop().expect("Error applying Kleene star");
-                        apply_kleene_star(&mut base);
-                        base
+                    Quantifier::AtLeast(n) => {
+                        let base = stack.pop().expect("Error applying Kleene star");
+						let (new_nfa, new_id) = at_least(base, n);
+						state_id = new_id;
+						new_nfa
                     }
                     Quantifier::Equal(n) => {
                         let base = stack.pop().expect("Error applying Equal");
-                        let (new_nfa, new_id) = repeat_exact(base, n);
+                        let (new_nfa, new_id) = repeat_exact(&base, n);
                         state_id = new_id;
                         new_nfa
-                    }
+                    },
                     _ => todo!(),
                 },
                 Operator::Concatenation | Operator::TrailingContent => {
