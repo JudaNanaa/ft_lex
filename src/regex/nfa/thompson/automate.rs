@@ -7,6 +7,7 @@ use crate::regex::Token;
 pub struct State(usize);
 
 use std::collections::HashMap;
+use std::collections::HashSet;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 struct Transition {
@@ -45,8 +46,6 @@ fn create_automaton_from_char(input: char, state_counter: &mut usize) -> Automat
         final_states: vec![current_state],
     };
 }
-
-use std::collections::HashSet;
 
 fn apply_kleene_star(automaton: &mut Automaton) {
     let final_states = &automaton.final_states;

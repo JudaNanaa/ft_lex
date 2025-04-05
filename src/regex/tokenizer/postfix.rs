@@ -4,69 +4,71 @@ use super::Token;
 use super::Token::Operator;
 use std::collections::VecDeque;
 
-fn precedence_check(first: &Operators, second: &Operators) -> bool {
-    let first_precedence = match first {
+fn has_higher_precedence(current: &Operators, stack_top: &Operators) -> bool {
+    let current_precedence = match current {
         Quantifier(_) => 4,
         Concatenation => 3,
         Or => 2,
         TrailingContent => 1,
         OpenGroup => 0,
-        _ => panic!("Error dans le code"),
+        _ => panic!("Erreur dans le code"),
     };
 
-    let second_precedence = match second {
+    let stack_top_precedence = match stack_top {
         Quantifier(_) => 4,
         Concatenation => 3,
         Or => 2,
         TrailingContent => 1,
         OpenGroup => 0,
-        _ => panic!("Error dans le code"),
+        _ => panic!("Erreur dans le code"),
     };
 
-    return first_precedence - second_precedence > 0;
+    return current_precedence - stack_top_precedence > 0;
 }
 
-pub fn postfix_notation(tokens: Vec<Token>) -> Vec<Token> {
-    let mut dest: Vec<Token> = Vec::with_capacity(tokens.len());
+pub fn to_postfix(tokens: Vec<Token>) -> Vec<Token> {
+    let mut output: Vec<Token> = Vec::with_capacity(tokens.len());
     let mut operator_stack: VecDeque<Operators> = VecDeque::new();
-    let mut token_it = tokens.iter();
+    let mut token_iter = tokens.iter();
 
-    while let Some(token) = token_it.next() {
-		dbg!(&token);
+    while let Some(token) = token_iter.next() {
         match *token {
-            Token::Char(c) => dest.push(Token::Char(c)),
+            Token::Char(c) => output.push(Token::Char(c)),
+
             Operator(OpenGroup) => {
                 operator_stack.push_front(OpenGroup);
             }
+
             Operator(CloseGroup) => loop {
-                if let Some(front) = operator_stack.pop_front() {
-                    if front == OpenGroup {
+                if let Some(top_operator) = operator_stack.pop_front() {
+                    if top_operator == OpenGroup {
                         break;
                     }
-                    dest.push(Operator(front));
+                    output.push(Operator(top_operator));
                 } else {
-                    panic!("Unopen Group");
+                    panic!("Parenthèse ouvrante manquante");
                 }
             },
-            Operator(op) => {
-                if let Some(front) = operator_stack.front() {
-                    if precedence_check(&op, front) == false {
-                        dest.push(Operator(*front));
-                        operator_stack.pop_front();
+
+            Operator(current_op) => {
+                while let Some(top_op) = operator_stack.front() {
+                    if has_higher_precedence(&current_op, top_op) {
+                        break;
                     }
-                    operator_stack.push_front(op);
-                } else {
-                    operator_stack.push_front(op);
+                    output.push(Operator(*top_op));
+                    operator_stack.pop_front();
                 }
+                operator_stack.push_front(current_op);
             }
         }
     }
 
-    while let Some(operator) = operator_stack.pop_front() {
-        if operator == OpenGroup {
-            panic!("Unclosed quotes");
+    while let Some(remaining_op) = operator_stack.pop_front() {
+        if remaining_op == OpenGroup {
+            panic!("Parenthèse fermante manquante");
         }
-        dest.push(Operator(operator));
+        output.push(Operator(remaining_op));
     }
-    return dest;
+
+    return output;
 }

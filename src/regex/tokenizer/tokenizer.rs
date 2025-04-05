@@ -4,7 +4,7 @@ use super::Operator::*;
 use super::Quantifier::*;
 use super::Token::Operator;
 use super::{
-    concatenation::add_concatenation_token, postfix::postfix_notation,
+    concatenation::add_concatenation_token, postfix::to_postfix,
     quotes::get_string_under_quotes, *,
 };
 use std::str::Chars;
@@ -60,7 +60,7 @@ pub fn regex_tokenizer(regex: &String) -> Vec<Token> {
         }
     }
     token_list = add_concatenation_token(token_list);
-    token_list = postfix_notation(token_list);
+    token_list = to_postfix(token_list);
 	dbg!(&token_list);
     return token_list;
 }
