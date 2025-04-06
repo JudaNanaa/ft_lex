@@ -48,7 +48,6 @@ pub fn construct_nfa(tokens: &Vec<Token>) -> NFA {
         stack.push(nfa);
     }
     let mut output = stack.pop().unwrap();
-
     output.final_states.sort();
     return output;
 }

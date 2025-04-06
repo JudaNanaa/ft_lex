@@ -1,11 +1,12 @@
 use super::{Transition, NFA};
 
-pub fn shift_states(nfa: NFA, offset: usize) -> NFA {
+pub fn shift_states(nfa: &NFA, offset: usize) -> NFA {
     let mut new_nfa = NFA::new();
 
-    for (state, transitions) in nfa.transitions {
-        let new_key = if state == 0 { 0 } else { state + offset };
+    for (state, transitions) in &nfa.transitions {
+        let new_key = if *state == 0 { 0 } else { state + offset };
         let updated_transitions: Vec<Transition> = transitions
+            .clone()
             .into_iter()
             .map(|mut t| {
                 t.target_state += offset;
@@ -15,7 +16,7 @@ pub fn shift_states(nfa: NFA, offset: usize) -> NFA {
         new_nfa.transitions.insert(new_key, updated_transitions);
     }
 
-    for final_state in nfa.final_states {
+    for &final_state in &nfa.final_states {
         let new_final = if final_state == 0 {
             0
         } else {
@@ -71,7 +72,7 @@ mod tests {
         let nfa = create_test_nfa();
         let offset = 2;
 
-        let shifted_nfa = shift_states(nfa, offset);
+        let shifted_nfa = shift_states(&nfa, offset);
 
         // Vérifie les transitions après décalage
         assert_eq!(shifted_nfa.transitions.len(), 2);
@@ -90,7 +91,7 @@ mod tests {
         let nfa = create_test_nfa();
         let offset = 0;
 
-        let shifted_nfa = shift_states(nfa, offset);
+        let shifted_nfa = shift_states(&nfa, offset);
 
         // Vérifie que l'automate n'a pas été modifié
         assert_eq!(shifted_nfa.transitions.len(), 2);

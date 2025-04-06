@@ -13,13 +13,12 @@ pub fn repeat_exact(nfa: &NFA, count: usize) -> (NFA, usize) {
         panic!("iteration value must be positive");
     }
     for _ in 0..count {
-        let shifted = shift_states(nfa.clone(), offset);
-		if shifted.transitions.len() > *shifted.final_states.iter().max().unwrap() {
-			offset += shifted.transitions.len() - 1;
-		}
-		else {
-			offset += shifted.transitions.len();
-		}
+        let shifted = shift_states(nfa, offset);
+        if shifted.transitions.len() > *shifted.final_states.iter().max().unwrap() {
+            offset += shifted.transitions.len() - 1;
+        } else {
+            offset += shifted.transitions.len();
+        }
         pieces.push(shifted);
 
         if pieces.len() == 2 {

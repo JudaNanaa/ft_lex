@@ -33,7 +33,7 @@ pub fn at_least(nfa: NFA, count: usize) -> (NFA, usize) {
     let mut kleene_part = nfa.clone();
     apply_kleene_star(&mut kleene_part);
 
-    let shifted_kleene = shift_states(kleene_part, repeated.transitions.len());
+    let shifted_kleene = shift_states(&kleene_part, repeated.transitions.len());
     let result = concatenate(repeated, shifted_kleene);
     let next_id = result.final_states.iter().max().unwrap() + 1;
     return (result, next_id);

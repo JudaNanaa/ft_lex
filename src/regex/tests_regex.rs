@@ -2,62 +2,63 @@ use crate::regex::{nfa::nfa::construct_nfa, Operator, Quantifier, Token, NFA};
 
 use super::regex_tokenizer;
 
-
-
 #[test]
 fn test_regex_1() {
-	let tokens = regex_tokenizer(&"chef".to_string());
+    let tokens = regex_tokenizer(&"chef".to_string());
 
-	assert_eq!(tokens[0], Token::Char('c'));
-	assert_eq!(tokens[1], Token::Char('h'));
-	assert_eq!(tokens[2], Token::Operator(Operator::Concatenation));
-	assert_eq!(tokens[3], Token::Char('e'));
-	assert_eq!(tokens[4], Token::Operator(Operator::Concatenation));
-	assert_eq!(tokens[5], Token::Char('f'));
-	assert_eq!(tokens[6], Token::Operator(Operator::Concatenation));
+    assert_eq!(tokens[0], Token::Char('c'));
+    assert_eq!(tokens[1], Token::Char('h'));
+    assert_eq!(tokens[2], Token::Operator(Operator::Concatenation));
+    assert_eq!(tokens[3], Token::Char('e'));
+    assert_eq!(tokens[4], Token::Operator(Operator::Concatenation));
+    assert_eq!(tokens[5], Token::Char('f'));
+    assert_eq!(tokens[6], Token::Operator(Operator::Concatenation));
 
-	let nfa: NFA = construct_nfa(&tokens);
+    let nfa: NFA = construct_nfa(&tokens);
 
-	assert_eq!(nfa.transitions.len(), 4);
-	assert_eq!(nfa.final_states.len(), 1);
+    assert_eq!(nfa.transitions.len(), 4);
+    assert_eq!(nfa.final_states.len(), 1);
 }
 
 #[test]
 fn test_regex_2() {
-	let tokens = regex_tokenizer(&"a|b".to_string());
+    let tokens = regex_tokenizer(&"a|b".to_string());
 
-	assert_eq!(tokens[0], Token::Char('a'));
-	assert_eq!(tokens[1], Token::Char('b'));
-	assert_eq!(tokens[2], Token::Operator(Operator::Or));
+    assert_eq!(tokens[0], Token::Char('a'));
+    assert_eq!(tokens[1], Token::Char('b'));
+    assert_eq!(tokens[2], Token::Operator(Operator::Or));
 
-	let nfa: NFA = construct_nfa(&tokens);
+    let nfa: NFA = construct_nfa(&tokens);
 
-	assert_eq!(nfa.transitions.len(), 1);
-	assert_eq!(nfa.final_states.len(), 2);
+    assert_eq!(nfa.transitions.len(), 1);
+    assert_eq!(nfa.final_states.len(), 2);
 }
 
 #[test]
 fn test_regex_3() {
-	let tokens = regex_tokenizer(&"a*".to_string());
+    let tokens = regex_tokenizer(&"a*".to_string());
 
-	assert_eq!(tokens[0], Token::Char('a'));
-	assert_eq!(tokens[1], Token::Operator(Operator::Quantifier(Quantifier::AtLeast(0))));
+    assert_eq!(tokens[0], Token::Char('a'));
+    assert_eq!(
+        tokens[1],
+        Token::Operator(Operator::Quantifier(Quantifier::AtLeast(0)))
+    );
 
-	let nfa: NFA = construct_nfa(&tokens);
+    let nfa: NFA = construct_nfa(&tokens);
 
-	assert_eq!(nfa.transitions.len(), 2);
-	assert_eq!(nfa.final_states.len(), 2);
+    assert_eq!(nfa.transitions.len(), 2);
+    assert_eq!(nfa.final_states.len(), 2);
 }
 
 #[test]
 fn test_regex_group_concatenation() {
     let tokens = regex_tokenizer(&"(ab)c".to_string());
 
-	assert_eq!(tokens[0], Token::Char('a'));
-	assert_eq!(tokens[1], Token::Char('b'));
-	assert_eq!(tokens[2], Token::Operator(Operator::Concatenation));
-	assert_eq!(tokens[3], Token::Char('c'));
-	assert_eq!(tokens[4], Token::Operator(Operator::Concatenation));
+    assert_eq!(tokens[0], Token::Char('a'));
+    assert_eq!(tokens[1], Token::Char('b'));
+    assert_eq!(tokens[2], Token::Operator(Operator::Concatenation));
+    assert_eq!(tokens[3], Token::Char('c'));
+    assert_eq!(tokens[4], Token::Operator(Operator::Concatenation));
     let nfa: NFA = construct_nfa(&tokens);
 
     assert_eq!(nfa.final_states.len(), 1);
@@ -81,11 +82,11 @@ fn test_regex_nested_or() {
 
     let nfa: NFA = construct_nfa(&tokens);
 
-	assert_eq!(tokens[0], Token::Char('a'));
-	assert_eq!(tokens[1], Token::Char('b'));
-	assert_eq!(tokens[2], Token::Char('c'));
-	assert_eq!(tokens[3], Token::Operator(Operator::Or));
-	assert_eq!(tokens[4], Token::Operator(Operator::Or));
+    assert_eq!(tokens[0], Token::Char('a'));
+    assert_eq!(tokens[1], Token::Char('b'));
+    assert_eq!(tokens[2], Token::Char('c'));
+    assert_eq!(tokens[3], Token::Operator(Operator::Or));
+    assert_eq!(tokens[4], Token::Operator(Operator::Or));
     assert!(nfa.final_states.len() >= 1);
 }
 

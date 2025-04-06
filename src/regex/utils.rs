@@ -1,4 +1,4 @@
-pub trait RemoveVecElement<T>
+pub trait VecUtils<T>
 where
     T: PartialEq,
 {
@@ -6,7 +6,7 @@ where
     fn push_unique(&mut self, element: T);
 }
 
-impl<T> RemoveVecElement<T> for Vec<T>
+impl<T> VecUtils<T> for Vec<T>
 where
     T: PartialEq,
 {

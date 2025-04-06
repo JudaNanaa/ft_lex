@@ -4,7 +4,7 @@ use crate::regex::{
         repeat_exact::repeat_exact,
         utils::{pop_last_two, shift_states},
     },
-    utils::RemoveVecElement,
+    utils::VecUtils,
     NFA,
 };
 
@@ -32,7 +32,7 @@ pub fn range(nfa: NFA, min: usize, max: usize) -> (NFA, usize) {
 
     // Parties optionnelles : (max - min) répétitions
     for _ in min..max {
-        let optional_nfa = shift_states(nfa.clone(), total_offset);
+        let optional_nfa = shift_states(&nfa, total_offset);
 
         for state in &optional_nfa.final_states {
             accumulated_final_states.push_unique(*state);

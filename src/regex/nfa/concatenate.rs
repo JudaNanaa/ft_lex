@@ -1,4 +1,4 @@
-use crate::regex::utils::RemoveVecElement;
+use crate::regex::utils::VecUtils;
 
 use super::NFA;
 
