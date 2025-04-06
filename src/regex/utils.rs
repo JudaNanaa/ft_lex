@@ -1,19 +1,28 @@
-pub trait RemoveVecElement<T> 
-    where T: PartialEq
+pub trait RemoveVecElement<T>
+where
+    T: PartialEq,
 {
     fn remove_element(&mut self, element: &T) -> Option<T>;
+    fn push_unique(&mut self, element: T);
 }
 
-impl<T> RemoveVecElement<T> for Vec<T> 
-    where T: PartialEq
+impl<T> RemoveVecElement<T> for Vec<T>
+where
+    T: PartialEq,
 {
-    fn remove_element(&mut self, element: &T) -> Option<T>{
-
+    fn remove_element(&mut self, element: &T) -> Option<T> {
         self.iter()
-            .position(|_element| _element == element)
+            .position(|e| e == element)
             .map(|index| self.remove(index))
     }
+
+    fn push_unique(&mut self, element: T) {
+        if !self.contains(&element) {
+            self.push(element);
+        }
+    }
 }
+
 
 
 pub fn expand_escape(c: char) -> char {

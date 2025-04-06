@@ -33,6 +33,15 @@ fn pop_last_two(stack: &mut Vec<NFA>) -> (NFA, NFA) {
     return (first, second);
 }
 
+fn deduplicate_transitions(transitions: &mut HashMap<usize, Vec<Transition>>) {
+    for (_state, list) in transitions.iter_mut() {
+        let mut set: HashSet<Transition> = HashSet::new();
+        set.extend(list.drain(..)); // vide la liste dans le set
+        list.extend(set.into_iter()); // remet les éléments uniques
+    }
+}
+
+
 fn from_char(c: char, state_id: &mut usize) -> NFA {
     let mut transitions: HashMap<usize, Vec<Transition>> = HashMap::new();
     let final_state = *state_id;
@@ -141,6 +150,9 @@ fn repeat_exact(nfa: &NFA, count: usize) -> (NFA, usize) {
     let mut pieces = Vec::new();
     let mut offset = 0;
 
+	if count == 0 {
+		panic!("iteration value must be positive");
+	}
     for _ in 0..count {
         let shifted = shift_states(nfa.clone(), offset);
         offset += shifted.transitions.len();
@@ -174,6 +186,54 @@ fn at_least(nfa: NFA, count: usize) -> (NFA, usize) {
     return (result, next_id);
 }
 
+fn range(nfa: NFA, min: usize, max: usize) -> (NFA, usize) {
+    assert!(min <= max, "Invalid range");
+
+    if min == max {
+        return repeat_exact(&nfa, min);
+    }
+
+    let mut nfa_parts: Vec<NFA> = Vec::new();
+    let mut total_offset = 0;
+    let mut accumulated_final_states = Vec::new();
+
+    // Partie obligatoire : min répétitions
+    if min > 0 {
+        let (mandatory_nfa, _) = repeat_exact(&nfa, min);
+        accumulated_final_states = mandatory_nfa.final_states.clone();
+        total_offset += mandatory_nfa.transitions.len();
+        nfa_parts.push(mandatory_nfa);
+    } else {
+        accumulated_final_states.push(0); // L’état initial est final si min == 0
+    }
+
+    // Parties optionnelles : (max - min) répétitions
+    for _ in min..max {
+        let optional_nfa = shift_states(nfa.clone(), total_offset);
+
+        if let Some(transitions_from_initial) = optional_nfa.transitions.get(&0) {
+            for transition in transitions_from_initial {
+                accumulated_final_states.push_unique(transition.target_state);
+            }
+        }
+
+        total_offset += optional_nfa.transitions.len();
+        nfa_parts.push(optional_nfa);
+
+        if nfa_parts.len() == 2 {
+            let (left, right) = pop_last_two(&mut nfa_parts);
+            nfa_parts.push(concatenate(left, right));
+        }
+    }
+
+    let mut final_nfa = nfa_parts.pop().unwrap();
+    for state in accumulated_final_states {
+        final_nfa.final_states.push_unique(state);
+    }
+
+    return (final_nfa, total_offset + 1);
+}
+
 
 pub fn construct_nfa(tokens: &Vec<Token>) -> NFA {
     let mut stack: Vec<NFA> = Vec::new();
@@ -196,7 +256,12 @@ pub fn construct_nfa(tokens: &Vec<Token>) -> NFA {
                         state_id = new_id;
                         new_nfa
                     },
-                    _ => todo!(),
+					Quantifier::Range(min, max) => {
+						let base = stack.pop().expect("Error applying Range");
+                        let (new_nfa, new_id) = range(base, min, max);
+                        state_id = new_id;
+                        new_nfa
+					}
                 },
                 Operator::Concatenation | Operator::TrailingContent => {
                     let (left, right) = pop_last_two(&mut stack);
