@@ -13,12 +13,12 @@ pub struct State(usize);
 use std::collections::HashMap;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
-struct Transition {
+pub struct Transition {
     input: char,
     target_state: usize,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct NFA {
     transitions: HashMap<usize, Vec<Transition>>,
     final_states: Vec<usize>,

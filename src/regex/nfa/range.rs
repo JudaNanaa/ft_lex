@@ -6,10 +6,12 @@ use crate::regex::{
     },
     utils::RemoveVecElement,
     NFA,
+	
 };
 
 pub fn range(nfa: NFA, min: usize, max: usize) -> (NFA, usize) {
     assert!(min <= max, "Invalid range");
+    assert!(max > 0, "bad iteration values");
 
     if min == max {
         return repeat_exact(&nfa, min);
@@ -33,11 +35,9 @@ pub fn range(nfa: NFA, min: usize, max: usize) -> (NFA, usize) {
     for _ in min..max {
         let optional_nfa = shift_states(nfa.clone(), total_offset);
 
-        if let Some(transitions_from_initial) = optional_nfa.transitions.get(&0) {
-            for transition in transitions_from_initial {
-                accumulated_final_states.push_unique(transition.target_state);
+            for state in &optional_nfa.final_states {
+                accumulated_final_states.push_unique(*state);
             }
-        }
 
         total_offset += optional_nfa.transitions.len();
         nfa_parts.push(optional_nfa);
@@ -54,4 +54,133 @@ pub fn range(nfa: NFA, min: usize, max: usize) -> (NFA, usize) {
     }
 
     return (final_nfa, total_offset + 1);
+}
+
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::collections::HashMap;
+    use crate::regex::{NFA, Transition};
+
+    // Fonction pour créer un NFA simple
+    fn create_test_nfa() -> NFA {
+        let mut nfa = NFA {
+            transitions: HashMap::new(),
+            final_states: vec![2],
+        };
+
+        nfa.transitions.insert(
+            0,
+            vec![Transition {
+                input: 'a',
+                target_state: 1,
+            }],
+        );
+        nfa.transitions.insert(
+            1,
+            vec![Transition {
+                input: 'b',
+                target_state: 2,
+            }],
+        );
+
+        nfa
+    }
+
+    // Test de base de la fonction range avec min == max
+    #[test]
+    fn test_range_min_equals_max() {
+        let nfa = create_test_nfa();
+        let min = 2;
+        let max = 2;
+
+        let (result_nfa, _) = range(nfa, min, max);
+
+        // Vérifie que l'automate a bien 2 répétitions
+        assert_eq!(result_nfa.final_states, vec![4]);
+        assert_eq!(result_nfa.transitions[&0].len(), 1);
+        assert_eq!(result_nfa.transitions[&1].len(), 1);
+        assert_eq!(result_nfa.transitions[&2].len(), 1);
+        assert_eq!(result_nfa.transitions[&3].len(), 1);
+    }
+
+    // Test avec min > 0 et max > min
+    #[test]
+
+    fn test_range_min_less_than_max() {
+        let nfa = create_test_nfa();
+        let min = 2;
+        let max = 3;
+
+        let (mut result_nfa, _) = range(nfa, min, max);
+
+		let expected_final_state = vec![4, 6];
+
+		result_nfa.final_states.sort();
+        // Vérifie que les états finaux et les transitions sont bien ajoutés
+        assert_eq!(result_nfa.final_states.len(), 2); // 4 états finaux au total
+        assert_eq!(result_nfa.final_states, expected_final_state);
+        assert_eq!(result_nfa.transitions.len(), 6); // 10 états en tout		
+    }
+
+    // Test avec min = 0 et max > 0
+    #[test]
+    fn test_range_min_is_zero() {
+        let nfa = create_test_nfa();
+        let min = 0;
+        let max = 3;
+
+        let (result_nfa, _) = range(nfa, min, max);
+
+        // Vérifie que l'état initial est final lorsque min == 0
+        assert!(result_nfa.final_states.contains(&0));
+        assert_eq!(result_nfa.transitions[&0].len(), 1);
+        assert_eq!(result_nfa.transitions[&1].len(), 1);
+        assert_eq!(result_nfa.transitions[&2].len(), 1);
+    }
+
+    // Test avec min == 0 et max == 0
+    #[test]
+    #[should_panic(expected = "bad iteration values")]
+    fn test_range_min_and_max_are_zero() {
+        let nfa = create_test_nfa();
+        let min = 0;
+        let max = 0;
+
+        let (result_nfa, _) = range(nfa, min, max);
+
+        // Vérifie que l'automate résultant a seulement l'état initial comme final
+        assert_eq!(result_nfa.final_states, vec![0]);
+        assert_eq!(result_nfa.transitions[&0].len(), 1); // Une seule transition
+    }
+
+    // Test avec min > max (devrait échouer)
+    #[test]
+    #[should_panic(expected = "Invalid range")]
+    fn test_range_invalid_range() {
+        let nfa = create_test_nfa();
+        let min = 3;
+        let max = 2;
+
+        range(nfa, min, max); // Doit panic
+    }
+
+    // Test avec une petite automaton répétée un nombre important de fois
+    #[test]
+    fn test_range_large_repeat() {
+        let nfa = create_test_nfa();
+        let min = 2;
+        let max = 5;
+
+        let (mut result_nfa, _) = range(nfa, min, max);
+
+		let expected_final_state = vec![4, 6, 8, 10];
+
+		result_nfa.final_states.sort();
+        // Vérifie que les états finaux et les transitions sont bien ajoutés
+        assert_eq!(result_nfa.final_states.len(), 4); // 4 états finaux au total
+        assert_eq!(result_nfa.final_states, expected_final_state);
+        assert_eq!(result_nfa.transitions.len(), 10); // 10 états en tout
+    }
 }

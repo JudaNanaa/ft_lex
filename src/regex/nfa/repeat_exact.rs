@@ -26,3 +26,143 @@ pub fn repeat_exact(nfa: &NFA, count: usize) -> (NFA, usize) {
     let next_id = pieces.first().unwrap().final_states.iter().max().unwrap() + 1;
     return (pieces.pop().unwrap(), next_id);
 }
+
+
+// ------------- Tests
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::collections::HashMap;
+    use crate::regex::{NFA, Transition};
+
+    // Fonction pour créer un NFA simple
+    fn create_test_nfa() -> NFA {
+        let mut nfa = NFA {
+            transitions: HashMap::new(),
+            final_states: vec![2],
+        };
+
+        nfa.transitions.insert(
+            0,
+            vec![Transition {
+                input: 'a',
+                target_state: 1,
+            }],
+        );
+        nfa.transitions.insert(
+            1,
+            vec![Transition {
+                input: 'b',
+                target_state: 2,
+            }],
+        );
+
+        nfa
+    }
+
+    // Test de la fonction repeat_exact avec count == 1
+    #[test]
+    fn test_repeat_exact_count_1() {
+        let nfa = create_test_nfa();
+        let count = 1;
+
+        let (result_nfa, _) = repeat_exact(&nfa, count);
+
+        // Vérifie que l'automate résultant a bien les transitions et les états
+        assert_eq!(result_nfa.final_states, vec![2]);
+        assert_eq!(result_nfa.transitions[&0].len(), 1);
+        assert_eq!(result_nfa.transitions[&1].len(), 1);
+		assert_eq!(result_nfa, nfa);
+    }
+
+    // Test de la fonction repeat_exact avec count > 1
+    #[test]
+    fn test_repeat_exact_count_2() {
+        let nfa = create_test_nfa();
+        let count = 2;
+
+        let (result_nfa, _) = repeat_exact(&nfa, count);
+
+        // Vérifie que l'automate résultant a bien les états et transitions pour les 2 répétitions
+        assert_eq!(result_nfa.final_states.len(), 1); // Deux états finaux à cause de la répétition
+        assert_eq!(result_nfa.transitions[&0].len(), 1);
+        assert_eq!(result_nfa.transitions[&1].len(), 1);
+        assert_eq!(result_nfa.transitions[&2].len(), 1); // Transition supplémentaire
+    }
+
+    // Test de la fonction repeat_exact avec count > 2
+    #[test]
+    fn test_repeat_exact_count_3() {
+        let nfa = create_test_nfa();
+        let count = 3;
+
+        let (result_nfa, _) = repeat_exact(&nfa, count);
+
+        // Vérifie que l'automate résultant a bien les états et transitions pour les 3 répétitions
+        assert_eq!(result_nfa.final_states.len(), 1); // Trois états finaux
+        assert_eq!(result_nfa.transitions[&0].len(), 1);
+        assert_eq!(result_nfa.transitions[&1].len(), 1);
+        assert_eq!(result_nfa.transitions[&2].len(), 1);
+        assert_eq!(result_nfa.transitions[&3].len(), 1); // Transition supplémentaire
+    }
+
+    // Test de la fonction repeat_exact avec count == 0 (devrait échouer)
+    #[test]
+    #[should_panic(expected = "iteration value must be positive")]
+    fn test_repeat_exact_count_0() {
+        let nfa = create_test_nfa();
+        let count = 0;
+
+        repeat_exact(&nfa, count); // Doit panic
+    }
+
+    // Test de la fonction repeat_exact avec un NFA ayant plus de transitions
+    #[test]
+    fn test_repeat_exact_large_nfa() {
+        let mut nfa = NFA {
+            transitions: HashMap::new(),
+            final_states: vec![2],
+        };
+
+        nfa.transitions.insert(
+            0,
+            vec![
+                Transition {
+                    input: 'a',
+                    target_state: 1,
+                },
+                Transition {
+                    input: 'b',
+                    target_state: 1,
+                },
+            ],
+        );
+        nfa.transitions.insert(
+            1,
+            vec![
+                Transition {
+                    input: 'c',
+                    target_state: 2,
+                },
+                Transition {
+                    input: 'd',
+                    target_state: 2,
+                },
+            ],
+        );
+
+        let count = 2;
+
+        let (result_nfa, _) = repeat_exact(&nfa, count);
+
+        // Vérifie que les transitions et les états sont bien créés pour le NFA large
+        assert_eq!(result_nfa.transitions.len(), 4); // 4 états au total
+        assert!(result_nfa.transitions.contains_key(&0));
+        assert!(result_nfa.transitions.contains_key(&1));
+        assert!(result_nfa.transitions.contains_key(&2));
+        assert!(result_nfa.transitions.contains_key(&3));
+
+        assert_eq!(result_nfa.final_states.len(), 1); // 2 états finaux
+    }
+}
