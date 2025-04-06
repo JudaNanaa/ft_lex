@@ -6,7 +6,6 @@ use crate::regex::{
     },
     utils::RemoveVecElement,
     NFA,
-	
 };
 
 pub fn range(nfa: NFA, min: usize, max: usize) -> (NFA, usize) {
@@ -35,9 +34,9 @@ pub fn range(nfa: NFA, min: usize, max: usize) -> (NFA, usize) {
     for _ in min..max {
         let optional_nfa = shift_states(nfa.clone(), total_offset);
 
-            for state in &optional_nfa.final_states {
-                accumulated_final_states.push_unique(*state);
-            }
+        for state in &optional_nfa.final_states {
+            accumulated_final_states.push_unique(*state);
+        }
 
         total_offset += optional_nfa.transitions.len();
         nfa_parts.push(optional_nfa);
@@ -56,12 +55,11 @@ pub fn range(nfa: NFA, min: usize, max: usize) -> (NFA, usize) {
     return (final_nfa, total_offset + 1);
 }
 
-
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::regex::{Transition, NFA};
     use std::collections::HashMap;
-    use crate::regex::{NFA, Transition};
 
     // Fonction pour créer un NFA simple
     fn create_test_nfa() -> NFA {
@@ -115,13 +113,13 @@ mod tests {
 
         let (mut result_nfa, _) = range(nfa, min, max);
 
-		let expected_final_state = vec![4, 6];
+        let expected_final_state = vec![4, 6];
 
-		result_nfa.final_states.sort();
+        result_nfa.final_states.sort();
         // Vérifie que les états finaux et les transitions sont bien ajoutés
         assert_eq!(result_nfa.final_states.len(), 2); // 4 états finaux au total
         assert_eq!(result_nfa.final_states, expected_final_state);
-        assert_eq!(result_nfa.transitions.len(), 6); // 10 états en tout		
+        assert_eq!(result_nfa.transitions.len(), 6); // 10 états en tout
     }
 
     // Test avec min = 0 et max > 0
@@ -175,9 +173,9 @@ mod tests {
 
         let (mut result_nfa, _) = range(nfa, min, max);
 
-		let expected_final_state = vec![4, 6, 8, 10];
+        let expected_final_state = vec![4, 6, 8, 10];
 
-		result_nfa.final_states.sort();
+        result_nfa.final_states.sort();
         // Vérifie que les états finaux et les transitions sont bien ajoutés
         assert_eq!(result_nfa.final_states.len(), 4); // 4 états finaux au total
         assert_eq!(result_nfa.final_states, expected_final_state);

@@ -49,21 +49,17 @@ mod tests {
 
         nfa.transitions.insert(
             0,
-            vec![
-                Transition {
-                    input: 'a',
-                    target_state: 1,
-                },
-            ],
+            vec![Transition {
+                input: 'a',
+                target_state: 1,
+            }],
         );
         nfa.transitions.insert(
             1,
-            vec![
-                Transition {
-                    input: 'b',
-                    target_state: 2,
-                },
-            ],
+            vec![Transition {
+                input: 'b',
+                target_state: 2,
+            }],
         );
 
         nfa

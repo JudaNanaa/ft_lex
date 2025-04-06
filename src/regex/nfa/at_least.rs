@@ -39,7 +39,6 @@ pub fn at_least(nfa: NFA, count: usize) -> (NFA, usize) {
     return (result, next_id);
 }
 
-
 #[cfg(test)]
 mod tests {
     use crate::regex::nfa::Transition;
@@ -83,9 +82,13 @@ mod tests {
         // Après application du Kleene Star
         assert_eq!(nfa.final_states, vec![2, 0]); // L'état initial 0 est aussi final
         assert!(nfa.transitions.contains_key(&2)); // La transition depuis l'état final vers l'état initial
-        assert_eq!(nfa.transitions[&2], vec![
-            Transition { input: 'a', target_state: 1 },
-        ]);
+        assert_eq!(
+            nfa.transitions[&2],
+            vec![Transition {
+                input: 'a',
+                target_state: 1
+            },]
+        );
     }
 
     // Test de la fonction at_least avec count = 0 (Kleene Star)
@@ -97,9 +100,13 @@ mod tests {
         // Vérifie si l'automate résultant a bien l'état 0 comme état final avec une répétition de Kleene
         assert_eq!(result_nfa.final_states, vec![2, 0]);
         assert!(result_nfa.transitions.contains_key(&2));
-        assert_eq!(result_nfa.transitions[&2], vec![
-            Transition { input: 'a', target_state: 1 },
-        ]);
+        assert_eq!(
+            result_nfa.transitions[&2],
+            vec![Transition {
+                input: 'a',
+                target_state: 1
+            },]
+        );
     }
 
     // Test de la fonction at_least avec count > 0
@@ -110,7 +117,7 @@ mod tests {
 
         // L'automate résultant devrait avoir appliqué le Kleene Star sur la répétition de 3 fois
         assert_eq!(result_nfa.final_states.len(), 2);
-        assert!(result_nfa.final_states.contains(&(next_id - 1)));  // Assumer que `states` soit disponible dans `NFA`
+        assert!(result_nfa.final_states.contains(&(next_id - 1))); // Assumer que `states` soit disponible dans `NFA`
         assert!(result_nfa.transitions.contains_key(&(next_id - 1)));
     }
 
@@ -123,16 +130,33 @@ mod tests {
         };
 
         // Transitions pour le NFA
-        nfa.transitions.insert(0, vec![
-            Transition { input: 'a', target_state: 1 },
-            Transition { input: 'b', target_state: 2 },
-        ]);
-        nfa.transitions.insert(1, vec![
-            Transition { input: 'a', target_state: 3 },
-        ]);
-        nfa.transitions.insert(2, vec![
-            Transition { input: 'b', target_state: 3 },
-        ]);
+        nfa.transitions.insert(
+            0,
+            vec![
+                Transition {
+                    input: 'a',
+                    target_state: 1,
+                },
+                Transition {
+                    input: 'b',
+                    target_state: 2,
+                },
+            ],
+        );
+        nfa.transitions.insert(
+            1,
+            vec![Transition {
+                input: 'a',
+                target_state: 3,
+            }],
+        );
+        nfa.transitions.insert(
+            2,
+            vec![Transition {
+                input: 'b',
+                target_state: 3,
+            }],
+        );
 
         apply_kleene_star(&mut nfa);
 
@@ -142,7 +166,9 @@ mod tests {
 
         // Tester les transitions
         assert!(nfa.transitions.contains_key(&3));
-        assert!(nfa.transitions[&3].iter().any(|t| t.input == 'a' || t.input == 'b'));
+        assert!(nfa.transitions[&3]
+            .iter()
+            .any(|t| t.input == 'a' || t.input == 'b'));
     }
 
     // Test avec un NFA ayant plusieurs états
@@ -154,18 +180,34 @@ mod tests {
         };
 
         // Définir plusieurs transitions
-        nfa.transitions.insert(0, vec![
-            Transition { input: 'a', target_state: 1 },
-        ]);
-        nfa.transitions.insert(1, vec![
-            Transition { input: 'b', target_state: 2 },
-        ]);
-        nfa.transitions.insert(2, vec![
-            Transition { input: 'c', target_state: 3 },
-        ]);
-        nfa.transitions.insert(3, vec![
-            Transition { input: 'd', target_state: 4 },
-        ]);
+        nfa.transitions.insert(
+            0,
+            vec![Transition {
+                input: 'a',
+                target_state: 1,
+            }],
+        );
+        nfa.transitions.insert(
+            1,
+            vec![Transition {
+                input: 'b',
+                target_state: 2,
+            }],
+        );
+        nfa.transitions.insert(
+            2,
+            vec![Transition {
+                input: 'c',
+                target_state: 3,
+            }],
+        );
+        nfa.transitions.insert(
+            3,
+            vec![Transition {
+                input: 'd',
+                target_state: 4,
+            }],
+        );
 
         apply_kleene_star(&mut nfa);
 
@@ -181,7 +223,12 @@ mod tests {
         let nfa = create_test_nfa();
 
         // Vérifie qu'il n'y a pas de transition définie pour 'c' à partir de l'état 0
-        assert!(nfa.transitions.get(&0).unwrap().iter().all(|t| t.input != 'c'));
+        assert!(nfa
+            .transitions
+            .get(&0)
+            .unwrap()
+            .iter()
+            .all(|t| t.input != 'c'));
     }
 
     // Test d'un NFA avec plusieurs répétitions

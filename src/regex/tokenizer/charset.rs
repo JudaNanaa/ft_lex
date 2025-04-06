@@ -170,8 +170,6 @@ pub fn expand_dot() -> Vec<Token> {
     return dest;
 }
 
-
-
 // ------------------- tests
 
 #[cfg(test)]
@@ -179,7 +177,11 @@ mod tests {
     use super::*;
 
     fn tokens_to_string(tokens: &[Token]) -> String {
-        tokens.iter().map(|t| format!("{:?}", t)).collect::<Vec<_>>().join(" ")
+        tokens
+            .iter()
+            .map(|t| format!("{:?}", t))
+            .collect::<Vec<_>>()
+            .join(" ")
     }
 
     #[test]
@@ -238,11 +240,7 @@ mod tests {
         chars.next();
         let tokens = extract_charset(&mut chars);
 
-        let expected = vec![
-            Operator(OpenParen),
-            Token::Char('\n'),
-            Operator(CloseParen),
-        ];
+        let expected = vec![Operator(OpenParen), Token::Char('\n'), Operator(CloseParen)];
 
         assert_eq!(tokens, expected, "{}", tokens_to_string(&tokens));
     }
@@ -253,11 +251,7 @@ mod tests {
         chars.next();
         let tokens = extract_charset(&mut chars);
 
-        let expected = vec![
-            Operator(OpenParen),
-            Token::Char('-'),
-            Operator(CloseParen),
-        ];
+        let expected = vec![Operator(OpenParen), Token::Char('-'), Operator(CloseParen)];
 
         assert_eq!(tokens, expected, "{}", tokens_to_string(&tokens));
     }

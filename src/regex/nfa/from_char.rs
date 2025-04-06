@@ -23,7 +23,7 @@ pub fn from_char(c: char, state_id: &mut usize) -> NFA {
 #[cfg(test)]
 mod tests {
     use super::*;
-    
+
     // Test de base pour la création d'un NFA avec un seul caractère
     #[test]
     fn test_from_char_basic() {
@@ -56,7 +56,7 @@ mod tests {
     #[test]
     fn test_from_char_multiple_calls() {
         let mut state_id = 1;
-        
+
         // Appel de from_char deux fois
         let result1 = from_char('a', &mut state_id);
         let result2 = from_char('b', &mut state_id);

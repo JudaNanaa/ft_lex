@@ -56,7 +56,6 @@ pub fn extract_repetition_range(chars: &mut Chars<'_>) -> Quantifier {
     return parse_range(&range_str);
 }
 
-
 // -------------------- Tests
 
 #[cfg(test)]

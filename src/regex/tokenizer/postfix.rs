@@ -66,108 +66,87 @@ pub fn to_postfix(tokens: Vec<Token>) -> Vec<Token> {
     return output;
 }
 
-
 // ------------------- Tests
 
 #[cfg(test)]
 mod tests {
 
-	use super::*;
-	use crate::regex::{Token, Operator, Quantifier};
+    use super::*;
+    use crate::regex::{Operator, Quantifier, Token};
 
-	fn char(c: char) -> Token {
-		Token::Char(c)
-	}
-	
-	fn op(o: Operator) -> Token {
-		Token::Operator(o)
-	}
-	
-	#[test]
-	fn test_simple_concatenation() {
-		let infix = vec![
-			char('a'),
-			op(Operator::Concatenation),
-			char('b'),
-		];
-		let expected = vec![
-			char('a'),
-			char('b'),
-			op(Operator::Concatenation),
-		];
-		assert_eq!(to_postfix(infix), expected);
-	}
-	
-	#[test]
-	fn test_with_or_operator() {
-		let infix = vec![
-			char('a'),
-			op(Operator::Or),
-			char('b'),
-		];
-		let expected = vec![
-			char('a'),
-			char('b'),
-			op(Operator::Or),
-		];
-		assert_eq!(to_postfix(infix), expected);
-	}
-	
-	#[test]
-	fn test_with_quantifier() {
-		let infix = vec![
-			char('a'),
-			op(Operator::Quantifier(Quantifier::AtLeast(0))), // a*
-		];
-		let expected = vec![
-			char('a'),
-			op(Operator::Quantifier(Quantifier::AtLeast(0))),
-		];
-		assert_eq!(to_postfix(infix), expected);
-	}
-	
-	#[test]
-	fn test_grouped_expression() {
-		let infix = vec![
-			op(Operator::OpenParen),
-			char('a'),
-			op(Operator::Concatenation),
-			char('b'),
-			op(Operator::CloseParen),
-			op(Operator::Or),
-			char('c'),
-		];
-		let expected = vec![
-			char('a'),
-			char('b'),
-			op(Operator::Concatenation),
-			char('c'),
-			op(Operator::Or),
-		];
-		assert_eq!(to_postfix(infix), expected);
-	}
-	
-	#[test]
-	fn test_nested_parentheses() {
-		let infix = vec![
-			op(Operator::OpenParen),
-			char('a'),
-			op(Operator::Or),
-			op(Operator::OpenParen),
-			char('b'),
-			op(Operator::Or),
-			char('c'),
-			op(Operator::CloseParen),
-			op(Operator::CloseParen),
-		];
-		let expected = vec![
-			char('a'),
-			char('b'),
-			char('c'),
-			op(Operator::Or),
-			op(Operator::Or),
-		];
-		assert_eq!(to_postfix(infix), expected);
-	}
-	
+    fn char(c: char) -> Token {
+        Token::Char(c)
+    }
+
+    fn op(o: Operator) -> Token {
+        Token::Operator(o)
+    }
+
+    #[test]
+    fn test_simple_concatenation() {
+        let infix = vec![char('a'), op(Operator::Concatenation), char('b')];
+        let expected = vec![char('a'), char('b'), op(Operator::Concatenation)];
+        assert_eq!(to_postfix(infix), expected);
+    }
+
+    #[test]
+    fn test_with_or_operator() {
+        let infix = vec![char('a'), op(Operator::Or), char('b')];
+        let expected = vec![char('a'), char('b'), op(Operator::Or)];
+        assert_eq!(to_postfix(infix), expected);
+    }
+
+    #[test]
+    fn test_with_quantifier() {
+        let infix = vec![
+            char('a'),
+            op(Operator::Quantifier(Quantifier::AtLeast(0))), // a*
+        ];
+        let expected = vec![char('a'), op(Operator::Quantifier(Quantifier::AtLeast(0)))];
+        assert_eq!(to_postfix(infix), expected);
+    }
+
+    #[test]
+    fn test_grouped_expression() {
+        let infix = vec![
+            op(Operator::OpenParen),
+            char('a'),
+            op(Operator::Concatenation),
+            char('b'),
+            op(Operator::CloseParen),
+            op(Operator::Or),
+            char('c'),
+        ];
+        let expected = vec![
+            char('a'),
+            char('b'),
+            op(Operator::Concatenation),
+            char('c'),
+            op(Operator::Or),
+        ];
+        assert_eq!(to_postfix(infix), expected);
+    }
+
+    #[test]
+    fn test_nested_parentheses() {
+        let infix = vec![
+            op(Operator::OpenParen),
+            char('a'),
+            op(Operator::Or),
+            op(Operator::OpenParen),
+            char('b'),
+            op(Operator::Or),
+            char('c'),
+            op(Operator::CloseParen),
+            op(Operator::CloseParen),
+        ];
+        let expected = vec![
+            char('a'),
+            char('b'),
+            char('c'),
+            op(Operator::Or),
+            op(Operator::Or),
+        ];
+        assert_eq!(to_postfix(infix), expected);
+    }
 }

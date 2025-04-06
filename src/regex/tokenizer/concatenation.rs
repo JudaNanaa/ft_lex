@@ -42,16 +42,19 @@ pub fn add_concatenation_token(tokens: Vec<Token>) -> Vec<Token> {
     return dest;
 }
 
-
-// --------------------------- Tests 
+// --------------------------- Tests
 
 #[cfg(test)]
 mod tests {
     use super::*;
-	use crate::regex::{Operator, Quantifier};
+    use crate::regex::{Operator, Quantifier};
 
     fn str_tokens(tokens: &[Token]) -> String {
-        tokens.iter().map(|t| format!("{:?}", t)).collect::<Vec<_>>().join(" ")
+        tokens
+            .iter()
+            .map(|t| format!("{:?}", t))
+            .collect::<Vec<_>>()
+            .join(" ")
     }
 
     #[test]

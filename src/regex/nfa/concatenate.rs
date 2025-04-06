@@ -27,11 +27,10 @@ pub fn concatenate(mut left: NFA, mut right: NFA) -> NFA {
     };
 }
 
-
 #[cfg(test)]
 mod tests {
-    use crate::regex::nfa::Transition;
     use super::*;
+    use crate::regex::nfa::Transition;
     use std::collections::HashMap;
 
     // Fonction de création d'un NFA de test simple

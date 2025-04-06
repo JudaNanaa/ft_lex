@@ -64,11 +64,10 @@ pub fn regex_tokenizer(regex: &String) -> Vec<Token> {
     return token_list;
 }
 
-
 #[cfg(test)]
 mod tests {
-    use super::*;
     use super::Token::{Char, Operator};
+    use super::*;
 
     fn tok(regex: &str) -> Vec<Token> {
         regex_tokenizer(&regex.to_string())
@@ -110,33 +109,21 @@ mod tests {
     #[test]
     fn test_charset() {
         let result = tok("[abc]");
-        let expected = vec![
-            Char('a'),
-            Char('b'),
-            Operator(Or),
-            Char('c'),
-            Operator(Or),
-        ];
+        let expected = vec![Char('a'), Char('b'), Operator(Or), Char('c'), Operator(Or)];
         assert_eq!(result, expected);
     }
 
     #[test]
     fn test_quantifiers() {
         let result = tok("a{3}");
-        let expected = vec![
-            Char('a'),
-            Operator(Quantifier(Equal(3))),
-        ];
+        let expected = vec![Char('a'), Operator(Quantifier(Equal(3)))];
         assert_eq!(result, expected);
     }
 
     #[test]
     fn test_range_quantifier() {
         let result = tok("a{2,5}");
-        let expected = vec![
-            Char('a'),
-            Operator(Quantifier(Range(2, 5))),
-        ];
+        let expected = vec![Char('a'), Operator(Quantifier(Range(2, 5)))];
         assert_eq!(result, expected);
     }
 
@@ -196,36 +183,34 @@ mod tests {
         );
     }
 
-	#[test]
-	#[should_panic(expected = "Unclose quotes")]
-	fn test_unclosed_quotes() {
-		tok("\"abc");
-	}
+    #[test]
+    #[should_panic(expected = "Unclose quotes")]
+    fn test_unclosed_quotes() {
+        tok("\"abc");
+    }
 
-
-	#[test]
-fn test_complex_pattern() {
-    let result = tok("(ab|cd)*e+f{2,}");
-    let expected = vec![
-        // (ab|cd)*
-        Char('a'),
-        Char('b'),
-        Operator(Concatenation),
-        Char('c'),
-        Char('d'),
-        Operator(Concatenation),
-        Operator(Or),
-        Operator(Quantifier(AtLeast(0))),
-        // e+
-        Char('e'),
-        Operator(Quantifier(AtLeast(1))),
-        Operator(Concatenation),
-        // f{2,}
-        Char('f'),
-        Operator(Quantifier(AtLeast(2))),
-        Operator(Concatenation),
-    ];
-    assert_eq!(result, expected);
-}
-
+    #[test]
+    fn test_complex_pattern() {
+        let result = tok("(ab|cd)*e+f{2,}");
+        let expected = vec![
+            // (ab|cd)*
+            Char('a'),
+            Char('b'),
+            Operator(Concatenation),
+            Char('c'),
+            Char('d'),
+            Operator(Concatenation),
+            Operator(Or),
+            Operator(Quantifier(AtLeast(0))),
+            // e+
+            Char('e'),
+            Operator(Quantifier(AtLeast(1))),
+            Operator(Concatenation),
+            // f{2,}
+            Char('f'),
+            Operator(Quantifier(AtLeast(2))),
+            Operator(Concatenation),
+        ];
+        assert_eq!(result, expected);
+    }
 }

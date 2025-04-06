@@ -47,13 +47,12 @@ pub fn construct_nfa(tokens: &Vec<Token>) -> NFA {
         };
         stack.push(nfa);
     }
-	dbg!(stack.first().unwrap());
-	let mut output = stack.pop().unwrap();
+    dbg!(stack.first().unwrap());
+    let mut output = stack.pop().unwrap();
 
-	output.final_states.sort();
-	return output;
+    output.final_states.sort();
+    return output;
 }
-
 
 #[cfg(test)]
 mod tests {
@@ -163,8 +162,15 @@ mod tests {
     // Fonction utilitaire pour vérifier les transitions d'un NFA
     fn check_transition(nfa: &NFA, state: usize, input: char, target_state: usize) {
         if let Some(transitions) = nfa.transitions.get(&state) {
-            assert!(transitions.iter().any(|t| t.input == input && t.target_state == target_state), 
-                    "Transition de {} avec '{}' vers {} non trouvée", state, input, target_state);
+            assert!(
+                transitions
+                    .iter()
+                    .any(|t| t.input == input && t.target_state == target_state),
+                "Transition de {} avec '{}' vers {} non trouvée",
+                state,
+                input,
+                target_state
+            );
         } else {
             panic!("Aucune transition trouvée pour l'état {}", state);
         }
@@ -257,7 +263,6 @@ mod tests {
         ];
         let result = construct_nfa(&tokens);
 
-
         assert_eq!(result.transitions.len(), 5);
         assert_eq!(result.final_states.len(), 2); // 2 états finaux
     }
@@ -276,10 +281,7 @@ mod tests {
     #[test]
     #[should_panic(expected = "Internal error")]
     fn test_construct_nfa_invalid_operator_sequence() {
-        let tokens = vec![
-            Token::Operator(Operator::Concatenation),
-            Token::Char('a'),
-        ];
+        let tokens = vec![Token::Operator(Operator::Concatenation), Token::Char('a')];
         let result = construct_nfa(&tokens);
 
         // Le résultat devrait avoir un seul état avec une transition vers un état final

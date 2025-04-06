@@ -23,9 +23,7 @@ pub fn or(left: NFA, right: NFA) -> NFA {
     };
 }
 
-
 // ------------------- Tests
-
 
 #[cfg(test)]
 mod tests {
@@ -99,6 +97,4 @@ mod tests {
         // Vérification des états finaux
         assert_eq!(result.final_states, vec![1, 2]);
     }
-
 }
-

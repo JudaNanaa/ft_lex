@@ -27,14 +27,13 @@ pub fn repeat_exact(nfa: &NFA, count: usize) -> (NFA, usize) {
     return (pieces.pop().unwrap(), next_id);
 }
 
-
 // ------------- Tests
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::regex::{Transition, NFA};
     use std::collections::HashMap;
-    use crate::regex::{NFA, Transition};
 
     // Fonction pour créer un NFA simple
     fn create_test_nfa() -> NFA {
@@ -73,7 +72,7 @@ mod tests {
         assert_eq!(result_nfa.final_states, vec![2]);
         assert_eq!(result_nfa.transitions[&0].len(), 1);
         assert_eq!(result_nfa.transitions[&1].len(), 1);
-		assert_eq!(result_nfa, nfa);
+        assert_eq!(result_nfa, nfa);
     }
 
     // Test de la fonction repeat_exact avec count > 1
