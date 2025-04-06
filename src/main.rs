@@ -1,6 +1,6 @@
 mod regex;
 
-use regex::{automate::construct_nfa, *};
+use regex::{nfa::nfa::construct_nfa, *};
 
 fn main() {
     loop {
@@ -17,12 +17,5 @@ fn main() {
         let tokens: Vec<Token> = regex_tokenizer(&input);
         construct_nfa(&tokens);
         println!("tokens {:#?}", tokens);
-
-        // tokens = dbg!(tokens);
     }
-
-    // Parsing
-    // regex::parsing::regex_parsing(tokens);
-
-    // AST
 }

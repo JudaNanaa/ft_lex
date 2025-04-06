@@ -19,7 +19,6 @@ fn has_higher_precedence(current: &Operators, stack_top: &Operators) -> bool {
     return precedence(current) > precedence(stack_top);
 }
 
-
 pub fn to_postfix(tokens: Vec<Token>) -> Vec<Token> {
     let mut output: Vec<Token> = Vec::with_capacity(tokens.len());
     let mut operator_stack: VecDeque<Operators> = VecDeque::new();
