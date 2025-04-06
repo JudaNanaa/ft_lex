@@ -20,8 +20,8 @@ pub struct Transition {
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct NFA {
-    transitions: HashMap<usize, Vec<Transition>>,
-    final_states: Vec<usize>,
+    pub transitions: HashMap<usize, Vec<Transition>>,
+    pub final_states: Vec<usize>,
 }
 
 impl NFA {

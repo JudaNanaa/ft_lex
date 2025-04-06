@@ -3,3 +3,5 @@ pub use tokenizer::*;
 pub mod nfa;
 pub use nfa::*;
 mod utils;
+#[cfg(test)]
+mod tests_regex;

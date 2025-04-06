@@ -16,6 +16,5 @@ fn main() {
         // Tokenizer
         let tokens: Vec<Token> = regex_tokenizer(&input);
         construct_nfa(&tokens);
-        println!("tokens {:#?}", tokens);
     }
 }

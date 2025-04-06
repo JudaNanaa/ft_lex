@@ -14,7 +14,12 @@ pub fn repeat_exact(nfa: &NFA, count: usize) -> (NFA, usize) {
     }
     for _ in 0..count {
         let shifted = shift_states(nfa.clone(), offset);
-        offset += shifted.transitions.len();
+		if shifted.transitions.len() > *shifted.final_states.iter().max().unwrap() {
+			offset += shifted.transitions.len() - 1;
+		}
+		else {
+			offset += shifted.transitions.len();
+		}
         pieces.push(shifted);
 
         if pieces.len() == 2 {
