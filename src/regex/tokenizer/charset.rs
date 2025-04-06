@@ -169,3 +169,106 @@ pub fn expand_dot() -> Vec<Token> {
 
     return dest;
 }
+
+
+
+// ------------------- tests
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn tokens_to_string(tokens: &[Token]) -> String {
+        tokens.iter().map(|t| format!("{:?}", t)).collect::<Vec<_>>().join(" ")
+    }
+
+    #[test]
+    fn test_extract_charset_basic() {
+        let mut chars = "[abc]".chars();
+        chars.next(); // skip '['
+        let tokens = extract_charset(&mut chars);
+
+        let expected = vec![
+            Operator(OpenParen),
+            Token::Char('a'),
+            Operator(Or),
+            Token::Char('b'),
+            Operator(Or),
+            Token::Char('c'),
+            Operator(CloseParen),
+        ];
+
+        assert_eq!(tokens, expected, "{}", tokens_to_string(&tokens));
+    }
+
+    #[test]
+    fn test_extract_charset_negative() {
+        let mut chars = "[^x]".chars();
+        chars.next();
+        let tokens = extract_charset(&mut chars);
+
+        // Just check it’s negative and contains lots of tokens (not x)
+        assert!(tokens.contains(&Operator(OpenParen)));
+        assert!(tokens.contains(&Operator(CloseParen)));
+        assert!(!tokens.contains(&Token::Char('x')));
+    }
+
+    #[test]
+    fn test_extract_charset_range() {
+        let mut chars = "[a-c]".chars();
+        chars.next();
+        let tokens = extract_charset(&mut chars);
+
+        let expected = vec![
+            Operator(OpenParen),
+            Token::Char('a'),
+            Operator(Or),
+            Token::Char('b'),
+            Operator(Or),
+            Token::Char('c'),
+            Operator(CloseParen),
+        ];
+
+        assert_eq!(tokens, expected, "{}", tokens_to_string(&tokens));
+    }
+
+    #[test]
+    fn test_extract_charset_with_escape() {
+        let mut chars = "[\\n]".chars();
+        chars.next();
+        let tokens = extract_charset(&mut chars);
+
+        let expected = vec![
+            Operator(OpenParen),
+            Token::Char('\n'),
+            Operator(CloseParen),
+        ];
+
+        assert_eq!(tokens, expected, "{}", tokens_to_string(&tokens));
+    }
+
+    #[test]
+    fn test_extract_charset_with_dash_as_char() {
+        let mut chars = "[-]".chars();
+        chars.next();
+        let tokens = extract_charset(&mut chars);
+
+        let expected = vec![
+            Operator(OpenParen),
+            Token::Char('-'),
+            Operator(CloseParen),
+        ];
+
+        assert_eq!(tokens, expected, "{}", tokens_to_string(&tokens));
+    }
+
+    #[test]
+    fn test_expand_dot() {
+        let tokens = expand_dot();
+
+        assert!(tokens.contains(&Token::Char('a')));
+        assert!(!tokens.contains(&Token::Char('\n')));
+        assert!(tokens.contains(&Operator(Or)));
+        assert!(tokens.len() > 50); // should include most printable ASCII chars
+    }
+}

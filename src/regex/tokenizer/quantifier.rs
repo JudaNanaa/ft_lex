@@ -55,3 +55,72 @@ pub fn extract_repetition_range(chars: &mut Chars<'_>) -> Quantifier {
 
     return parse_range(&range_str);
 }
+
+
+// -------------------- Tests
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::str::Chars;
+
+    fn get_chars(s: &str) -> Chars<'_> {
+        s.chars()
+    }
+
+    #[test]
+    fn test_equal_quantifier() {
+        let mut chars = get_chars("3}");
+        let quant = extract_repetition_range(&mut chars);
+        assert_eq!(quant, Quantifier::Equal(3));
+    }
+
+    #[test]
+    fn test_at_least_quantifier() {
+        let mut chars = get_chars("2,}");
+        let quant = extract_repetition_range(&mut chars);
+        assert_eq!(quant, Quantifier::AtLeast(2));
+    }
+
+    #[test]
+    fn test_range_quantifier() {
+        let mut chars = get_chars("1,4}");
+        let quant = extract_repetition_range(&mut chars);
+        assert_eq!(quant, Quantifier::Range(1, 4));
+    }
+
+    #[test]
+    #[should_panic(expected = "Unrecognized rule")]
+    fn test_empty_range_should_panic() {
+        let mut chars = get_chars("}");
+        let _ = extract_repetition_range(&mut chars);
+    }
+
+    #[test]
+    #[should_panic(expected = "Invalid numeric value")]
+    fn test_invalid_min_should_panic() {
+        let mut chars = get_chars("a,3}");
+        let _ = extract_repetition_range(&mut chars);
+    }
+
+    #[test]
+    #[should_panic(expected = "Invalid numeric value")]
+    fn test_invalid_max_should_panic() {
+        let mut chars = get_chars("2,b}");
+        let _ = extract_repetition_range(&mut chars);
+    }
+
+    #[test]
+    #[should_panic(expected = "Invalid range")]
+    fn test_min_greater_than_max_should_panic() {
+        let mut chars = get_chars("5,2}");
+        let _ = extract_repetition_range(&mut chars);
+    }
+
+    #[test]
+    #[should_panic(expected = "Unrecognized rule")]
+    fn test_too_many_commas_should_panic() {
+        let mut chars = get_chars("1,2,3}");
+        let _ = extract_repetition_range(&mut chars);
+    }
+}
