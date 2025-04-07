@@ -2,7 +2,7 @@ use std::str::Chars;
 
 use super::Quantifier;
 
-fn is_numeric_string(input: &String) -> bool {
+fn is_numeric_string(input: &str) -> bool {
     input.chars().all(|c| c.is_numeric())
 }
 
@@ -33,7 +33,7 @@ fn parse_range(range_str: &str) -> Quantifier {
     }
 
     let max_value: usize = max_repeats.parse().unwrap();
-    if min_value > max_value as usize {
+    if min_value > max_value {
         panic!("Invalid range: min cannot be greater than max")
     }
     return Quantifier::Range(min_value, max_value);
@@ -42,7 +42,7 @@ fn parse_range(range_str: &str) -> Quantifier {
 pub fn extract_repetition_range(chars: &mut Chars<'_>) -> Quantifier {
     let mut range_str = String::new();
 
-    while let Some(c) = chars.next() {
+    for c in chars {
         if c == '}' {
             break;
         }

@@ -22,9 +22,9 @@ fn has_higher_precedence(current: &Operators, stack_top: &Operators) -> bool {
 pub fn to_postfix(tokens: Vec<Token>) -> Vec<Token> {
     let mut output: Vec<Token> = Vec::with_capacity(tokens.len());
     let mut operator_stack: VecDeque<Operators> = VecDeque::new();
-    let mut token_iter = tokens.iter();
+    let token_iter = tokens.iter();
 
-    while let Some(token) = token_iter.next() {
+    for token in token_iter {
         match *token {
             Token::Char(c) => output.push(Token::Char(c)),
 

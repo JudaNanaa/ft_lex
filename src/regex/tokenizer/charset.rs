@@ -21,7 +21,7 @@ fn create_charset_group(charset: String, is_negative: bool) -> Vec<Token> {
         let mut chars_it = charset.chars().peekable();
         while let Some(char) = chars_it.next() {
             tokens_charset.push(Token::Char(char));
-            if let Some(_) = chars_it.peek() {
+            if chars_it.peek().is_some() {
                 tokens_charset.push(Operator(Or));
             }
         }
@@ -37,7 +37,7 @@ fn create_charset_group(charset: String, is_negative: bool) -> Vec<Token> {
         while let Some(c) = iter.next() {
             if !charset_chars.contains(c) {
                 tokens_charset.push(Token::Char(*c));
-                if let Some(_) = iter.peek() {
+                if iter.peek().is_some() {
                     tokens_charset.push(Operator(Or));
                 }
             }
@@ -162,7 +162,7 @@ pub fn expand_dot() -> Vec<Token> {
     dest.push(Operator(OpenParen));
     while let Some(char) = iter.next() {
         dest.push(Token::Char(*char));
-        if let Some(_) = iter.peek() {
+        if iter.peek().is_some() {
             dest.push(Operator(Or));
         }
     }

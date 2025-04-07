@@ -10,7 +10,7 @@ use std::str::Chars;
 
 const WHITESPACE: &str = " \n\r\t";
 
-pub fn regex_tokenizer(regex: &String) -> Vec<Token> {
+pub fn regex_tokenizer(regex: &str) -> Vec<Token> {
     let mut token_list: Vec<Token> = Vec::new();
     let mut chars: Chars<'_> = regex.chars();
 

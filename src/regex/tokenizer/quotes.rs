@@ -6,10 +6,10 @@ use std::str::Chars;
 
 fn string_to_tokens(str: String) -> Vec<Token> {
     let mut token_string: Vec<Token> = Vec::new();
-    let mut str_chars: Chars<'_> = str.chars();
+    let str_chars: Chars<'_> = str.chars();
 
     token_string.push(Operator(OpenParen));
-    while let Some(char) = str_chars.next() {
+    for char in str_chars {
         token_string.push(Token::Char(char));
     }
     token_string.push(Operator(CloseParen));
@@ -20,7 +20,7 @@ pub fn get_string_under_quotes(chars: &mut Chars<'_>, quote_to_match: char) -> V
     let mut dest: String = String::new();
     let mut last_seen_backslash: bool = false;
 
-    while let Some(c) = chars.next() {
+    for c in chars {
         match c {
             '\\' if !last_seen_backslash => last_seen_backslash = true,
             q if q == quote_to_match && !last_seen_backslash => {
