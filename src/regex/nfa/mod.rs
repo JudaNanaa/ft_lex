@@ -7,9 +7,6 @@ mod range;
 mod repeat_exact;
 mod utils;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub struct State(usize);
-
 use std::collections::HashMap;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]

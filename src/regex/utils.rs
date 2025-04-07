@@ -4,11 +4,12 @@ where
 {
     fn remove_element(&mut self, element: &T) -> Option<T>;
     fn push_unique(&mut self, element: T);
+    fn push_sort(&mut self, element: T);
 }
 
 impl<T> VecUtils<T> for Vec<T>
 where
-    T: PartialEq,
+    T: PartialEq + std::cmp::Ord,
 {
     fn remove_element(&mut self, element: &T) -> Option<T> {
         self.iter()
@@ -20,6 +21,11 @@ where
         if !self.contains(&element) {
             self.push(element);
         }
+    }
+
+    fn push_sort(&mut self, element: T) {
+		self.push(element);
+		self.sort();
     }
 }
 
