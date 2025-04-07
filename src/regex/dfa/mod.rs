@@ -17,12 +17,14 @@ pub struct DfaTransition {
 #[derive(Clone, PartialEq, Eq)]
 pub struct DFA {
 	transitions: HashMap<State, Vec<DfaTransition>>,
+	final_states: Vec<usize>,
 }
 
 impl DFA {
     pub fn new() -> Self {
         return Self {
             transitions: HashMap::new(),
+            final_states: Vec::new(),
         };
     }
 }

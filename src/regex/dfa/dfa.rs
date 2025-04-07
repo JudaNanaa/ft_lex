@@ -44,14 +44,14 @@ fn set_state(state: &State, nfa: &NFA, dfa: &mut DFA, all_chars: &Vec<char>) {
 	}
 }
 
-pub fn construct_dfa(nfa: &NFA) -> DFA {
+pub fn construct_dfa(nfa: NFA) -> DFA {
 	let mut new_dfa = DFA::new();
 
 	let all_chars = (0..=127u8)
         .filter_map(|c| char::from_u32(c as u32))
         .collect::<Vec<char>>();
 
-	set_state(&State { state: vec![0] }, nfa, &mut new_dfa, &all_chars);
-
+	set_state(&State { state: vec![0] }, &nfa, &mut new_dfa, &all_chars);
+	new_dfa.final_states = nfa.final_states;
 	return new_dfa;
 }
