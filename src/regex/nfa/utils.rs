@@ -1,6 +1,6 @@
 use super::{Transition, NFA};
 
-pub fn shift_states(nfa: &NFA, offset: usize) -> NFA {
+pub fn shift_states(nfa: &NFA, offset: &usize) -> NFA {
     let mut new_nfa = NFA::new();
 
     for (state, transitions) in &nfa.transitions {
@@ -72,7 +72,7 @@ mod tests {
         let nfa = create_test_nfa();
         let offset = 2;
 
-        let shifted_nfa = shift_states(&nfa, offset);
+        let shifted_nfa = shift_states(&nfa, &offset);
 
         // Vérifie les transitions après décalage
         assert_eq!(shifted_nfa.transitions.len(), 2);
@@ -91,7 +91,7 @@ mod tests {
         let nfa = create_test_nfa();
         let offset = 0;
 
-        let shifted_nfa = shift_states(&nfa, offset);
+        let shifted_nfa = shift_states(&nfa, &offset);
 
         // Vérifie que l'automate n'a pas été modifié
         assert_eq!(shifted_nfa.transitions.len(), 2);

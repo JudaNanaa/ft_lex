@@ -1,9 +1,5 @@
 use crate::regex::{
-    nfa::{
-        concatenate::concatenate,
-        repeat_exact::repeat_exact,
-        utils::{pop_last_two, shift_states},
-    },
+    nfa::{concatenate::concatenate, repeat_exact::repeat_exact, utils::shift_states},
     utils::VecUtils,
     NFA,
 };
@@ -16,7 +12,7 @@ pub fn range(nfa: NFA, min: usize, max: usize) -> (NFA, usize) {
         return repeat_exact(&nfa, min);
     }
 
-    let mut nfa_parts: Vec<NFA> = Vec::new();
+    let mut big_nfa: Option<NFA> = None;
     let mut total_offset = 0;
     let mut accumulated_final_states = Vec::new();
 
@@ -25,29 +21,28 @@ pub fn range(nfa: NFA, min: usize, max: usize) -> (NFA, usize) {
         let (mandatory_nfa, _) = repeat_exact(&nfa, min);
         accumulated_final_states = mandatory_nfa.final_states.clone();
         total_offset += mandatory_nfa.transitions.len();
-        nfa_parts.push(mandatory_nfa);
+        big_nfa = Some(mandatory_nfa);
     } else {
         accumulated_final_states.push(0); // L’état initial est final si min == 0
     }
 
     // Parties optionnelles : (max - min) répétitions
     for _ in min..max {
-        let optional_nfa = shift_states(&nfa, total_offset);
+        let optional_nfa = shift_states(&nfa, &total_offset);
 
         for state in &optional_nfa.final_states {
             accumulated_final_states.push_unique(*state);
         }
 
         total_offset += optional_nfa.transitions.len();
-        nfa_parts.push(optional_nfa);
-
-        if nfa_parts.len() == 2 {
-            let (left, right) = pop_last_two(&mut nfa_parts);
-            nfa_parts.push(concatenate(left, right));
+        if let Some(left) = big_nfa {
+            big_nfa = Some(concatenate(left, optional_nfa));
+        } else {
+            big_nfa = Some(optional_nfa);
         }
     }
 
-    let mut final_nfa = nfa_parts.pop().unwrap();
+    let mut final_nfa = big_nfa.unwrap();
     for state in accumulated_final_states {
         final_nfa.final_states.push_unique(state);
     }

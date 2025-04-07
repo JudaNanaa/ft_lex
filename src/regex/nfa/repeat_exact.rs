@@ -1,34 +1,31 @@
 use crate::NFA;
 
-use super::{
-    concatenate::concatenate,
-    utils::{pop_last_two, shift_states},
-};
+use super::{concatenate::concatenate, utils::shift_states};
 
 pub fn repeat_exact(nfa: &NFA, count: usize) -> (NFA, usize) {
-    let mut pieces = Vec::new();
+    let mut big_nfa: Option<NFA> = None;
     let mut offset = 0;
 
     if count == 0 {
         panic!("iteration value must be positive");
     }
     for _ in 0..count {
-        let shifted = shift_states(nfa, offset);
+        let shifted = shift_states(nfa, &offset);
         if shifted.transitions.len() > *shifted.final_states.iter().max().unwrap() {
             offset += shifted.transitions.len() - 1;
         } else {
             offset += shifted.transitions.len();
         }
-        pieces.push(shifted);
-
-        if pieces.len() == 2 {
-            let (left, right) = pop_last_two(&mut pieces);
-            pieces.push(concatenate(left, right));
+        if let Some(left) = big_nfa {
+            big_nfa = Some(concatenate(left, shifted));
+        } else {
+            big_nfa = Some(shifted);
         }
     }
 
-    let next_id = pieces.first().unwrap().final_states.iter().max().unwrap() + 1;
-    return (pieces.pop().unwrap(), next_id);
+    let output = big_nfa.unwrap();
+    let next_id = output.final_states.iter().max().unwrap() + 1;
+    return (output, next_id);
 }
 
 // ------------- Tests
