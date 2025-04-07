@@ -10,7 +10,7 @@ fn apply_kleene_star(nfa: &mut NFA) {
         .expect("No initial state, internal error");
 
     for &final_state in &nfa.final_states {
-        let entry = nfa.transitions.entry(final_state).or_default();
+        let entry = nfa.transitions.entry(final_state).or_insert_with(Vec::new);
         let mut unique: HashSet<_> = entry.iter().cloned().collect();
         unique.extend(initial_transitions.clone());
         *entry = unique.into_iter().collect();

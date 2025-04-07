@@ -13,10 +13,10 @@ pub fn concatenate(mut left: NFA, mut right: NFA) -> NFA {
             .entry(state)
             .or_insert_with(Vec::new)
             .extend(right_initial.clone());
+    }
 
-        if right_has_initial_final {
-            right.final_states.push(state);
-        }
+    if right_has_initial_final {
+        right.final_states.append(&mut left.final_states);
     }
 
     left.transitions.extend(right.transitions);

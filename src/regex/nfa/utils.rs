@@ -16,14 +16,12 @@ pub fn shift_states(nfa: &NFA, offset: &usize) -> NFA {
         new_nfa.transitions.insert(new_key, updated_transitions);
     }
 
-    for &final_state in &nfa.final_states {
-        let new_final = if final_state == 0 {
-            0
-        } else {
-            final_state + offset
-        };
-        new_nfa.final_states.push(new_final);
-    }
+    new_nfa.final_states = nfa
+        .final_states
+        .clone()
+        .iter()
+        .map(|state| state + offset)
+        .collect();
 
     return new_nfa;
 }
