@@ -11,8 +11,8 @@ use std::collections::HashMap;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct Transition {
-    input: char,
-    target_state: usize,
+    pub input: char,
+    pub target_state: usize,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
