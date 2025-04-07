@@ -159,14 +159,14 @@ pub fn expand_dot() -> Vec<Token> {
     all_chars.remove('\n' as usize);
 
     let mut iter = all_chars.iter().peekable();
-
+	dest.push(Operator(OpenParen));
     while let Some(char) = iter.next() {
-        dest.push(Token::Char(*char));
+		dest.push(Token::Char(*char));
         if let Some(_) = iter.peek() {
-            dest.push(Operator(Or));
+			dest.push(Operator(Or));
         }
     }
-
+	dest.push(Operator(CloseParen));
     return dest;
 }
 

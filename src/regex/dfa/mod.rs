@@ -8,6 +8,16 @@ pub struct State {
 	state: Vec<usize>,
 }
 
+impl State {
+    pub fn trap() -> Self {
+        return Self { state: vec![0] };
+    }
+
+    pub fn is_trap(&self) -> bool {
+        return self.state == vec![0];
+    }
+}
+
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct DfaTransition {
 	input: char,
@@ -38,7 +48,7 @@ impl Debug for DFA {
 			.map(|(state, transitions)| {
 				let filtered_transitions: Vec<_> = transitions
 					.iter()
-					.filter(|t| t.target_state.state != vec![0])
+					.filter(|t| !t.target_state.is_trap())
 					.cloned()
 					.collect();
 				(state, filtered_transitions)

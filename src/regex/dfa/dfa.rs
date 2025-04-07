@@ -12,13 +12,13 @@ fn get_transitions_for_input(transition: &Vec<Transition>, char: &char) -> State
 	}
 	
 	if output.state.is_empty() {
-		output.state.push(0);
+		return State::trap();
 	}
 	output.state.sort();
 	return output;
 }
 
-fn set_state(state: &State, nfa: &NFA, dfa: &mut DFA, all_chars: &Vec<char>) {
+fn set_state(state: State, nfa: &NFA, dfa: &mut DFA, all_chars: &Vec<char>) {
 	let mut vec_of_transitions = Vec::new();
 
 
@@ -35,11 +35,11 @@ fn set_state(state: &State, nfa: &NFA, dfa: &mut DFA, all_chars: &Vec<char>) {
 			});
 		}
 	}
-	dfa.transitions.insert(state.clone(),  vec_of_transitions.clone());
+	dfa.transitions.insert(state,  vec_of_transitions.clone());
 
 	for transition in vec_of_transitions {
 		if !dfa.transitions.contains_key(&transition.target_state) {
-			set_state(&transition.target_state, nfa, dfa, all_chars);
+			set_state(transition.target_state, nfa, dfa, all_chars);
 		}
 	}
 }
@@ -51,7 +51,8 @@ pub fn construct_dfa(nfa: NFA) -> DFA {
         .filter_map(|c| char::from_u32(c as u32))
         .collect::<Vec<char>>();
 
-	set_state(&State { state: vec![0] }, &nfa, &mut new_dfa, &all_chars);
+	set_state(State { state: vec![0] }, &nfa, &mut new_dfa, &all_chars);
 	new_dfa.final_states = nfa.final_states;
+	println!("nb of transitions == {}", new_dfa.transitions.len());
 	return new_dfa;
 }
