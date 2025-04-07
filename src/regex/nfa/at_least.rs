@@ -1,5 +1,3 @@
-use std::collections::HashSet;
-
 use super::{concatenate::concatenate, repeat_exact::repeat_exact, utils::shift_states, NFA};
 
 fn apply_kleene_star(nfa: &mut NFA) {
@@ -10,10 +8,12 @@ fn apply_kleene_star(nfa: &mut NFA) {
         .expect("No initial state, internal error");
 
     for &final_state in &nfa.final_states {
-        let entry = nfa.transitions.entry(final_state).or_insert_with(Vec::new);
-        let mut unique: HashSet<_> = entry.iter().cloned().collect();
-        unique.extend(initial_transitions.clone());
-        *entry = unique.into_iter().collect();
+		for initial_state in &initial_transitions {
+			let tab = nfa.transitions.entry(final_state).or_default();
+			if !tab.contains(initial_state) {
+				tab.push(*initial_state);
+			}
+		}
     }
 
     if !nfa.final_states.contains(&0) {

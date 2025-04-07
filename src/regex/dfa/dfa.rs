@@ -1,3 +1,5 @@
+use std::collections::VecDeque;
+
 use super::{DfaTransition, State, DFA};
 use crate::regex::{Transition, NFA};
 
@@ -27,10 +29,10 @@ pub fn construct_dfa(nfa: NFA) -> DFA {
         .collect::<Vec<char>>();
 
     // Stack of DFA states to process
-    let mut unprocessed_states = vec![State { state: vec![0] }];
+	let mut unprocessed_states = VecDeque::from(vec![State { state: vec![0] }]);
 
-    while let Some(current_state) = unprocessed_states.pop() {
-        let mut transitions_from_current = Vec::new();
+    while let Some(current_state) = unprocessed_states.pop_front() {
+        let mut transitions_from_current = Vec::with_capacity(alphabet.len());
 
         for nfa_state_id in &current_state.state {
             let nfa_transitions = match nfa.transitions.get(nfa_state_id) {
@@ -54,7 +56,7 @@ pub fn construct_dfa(nfa: NFA) -> DFA {
             if !dfa.transitions.contains_key(&transition.target_state)
                 && !unprocessed_states.contains(&transition.target_state)
             {
-                unprocessed_states.push(transition.target_state);
+                unprocessed_states.push_back(transition.target_state);
             }
         }
     }
