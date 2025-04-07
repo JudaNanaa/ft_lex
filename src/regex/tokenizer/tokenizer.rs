@@ -148,7 +148,8 @@ mod tests {
         assert!(result.len() > 3); // car . se développe en plein de OR
         assert_eq!(result[0], Char('a'));
         assert!(matches!(result[1], Char(_))); // un caractère de .
-        assert_eq!(result[2], Operator(Concatenation));
+        assert!(matches!(result[2], Char(_))); // un caractère de .
+        assert_eq!(result[3], Operator(Or));
     }
 
     #[test]
