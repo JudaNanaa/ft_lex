@@ -3,11 +3,11 @@ use std::collections::VecDeque;
 use super::{DfaTransition, State, DFA};
 use crate::regex::{Transition, NFA};
 
-fn get_target_state_for_input(transitions: &Vec<Transition>, input_char: &char) -> State {
+fn get_target_state_for_input(transitions: &Vec<Transition>, input_char: char) -> State {
     let mut resulting_state = State { state: Vec::new() };
 
     for transition in transitions {
-        if transition.input == *input_char {
+        if transition.input == input_char {
             resulting_state.state.push(transition.target_state);
         }
     }
@@ -32,6 +32,9 @@ pub fn construct_dfa(nfa: NFA) -> DFA {
 	let mut unprocessed_states = VecDeque::from(vec![State { state: vec![0] }]);
 
     while let Some(current_state) = unprocessed_states.pop_front() {
+		if dfa.transitions.contains_key(&current_state) {
+			continue;
+		}
         let mut transitions_from_current = Vec::with_capacity(alphabet.len());
 
         for nfa_state_id in &current_state.state {
@@ -41,7 +44,7 @@ pub fn construct_dfa(nfa: NFA) -> DFA {
             };
 
             for input_char in &alphabet {
-                let target_state = get_target_state_for_input(nfa_transitions, input_char);
+                let target_state = get_target_state_for_input(nfa_transitions, *input_char);
                 transitions_from_current.push(DfaTransition {
                     input: *input_char,
                     target_state,
@@ -54,7 +57,7 @@ pub fn construct_dfa(nfa: NFA) -> DFA {
 
         for transition in transitions_from_current {
             if !dfa.transitions.contains_key(&transition.target_state)
-                && !unprocessed_states.contains(&transition.target_state)
+                // && !unprocessed_states.contains(&transition.target_state)
             {
                 unprocessed_states.push_back(transition.target_state);
             }
