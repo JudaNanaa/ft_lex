@@ -45,11 +45,11 @@ pub fn construct_nfa(tokens: &Vec<Token>) -> NFA {
                 _ => panic!("Internal error"),
             },
         };
-        dbg!(&nfa);
         stack.push(nfa);
     }
     let mut output = stack.pop().unwrap();
     output.final_states.sort();
+    println!("nb state nfa == {}", output.transitions.len());
     return output;
 }
 

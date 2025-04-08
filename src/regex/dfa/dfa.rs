@@ -1,10 +1,14 @@
 use std::collections::VecDeque;
 
 use super::{DfaTransition, State, DFA};
-use crate::regex::{Transition, NFA};
+use crate::regex::{utils::VecUtils, Transition, NFA};
 
 fn get_target_state_for_input(transitions: &Vec<Transition>, input_char: char) -> State {
     let mut resulting_state = State { state: Vec::new() };
+
+	if transitions.is_empty() {
+		return resulting_state;
+	}
 
     for transition in transitions {
         if transition.input == input_char {
@@ -32,32 +36,34 @@ pub fn construct_dfa(nfa: NFA) -> DFA {
     let mut unprocessed_states = VecDeque::from(vec![State { state: vec![0] }]);
 
     while let Some(current_state) = unprocessed_states.pop_front() {
-        if dfa.transitions.contains_key(&current_state) {
-            continue;
-        }
         let mut transitions_from_current = Vec::with_capacity(alphabet.len());
 
-        for nfa_state_id in &current_state.state {
-            let nfa_transitions = match nfa.transitions.get(nfa_state_id) {
-                Some(transitions) => transitions,
-                None => continue,
-            };
+		for input_char in &alphabet {
+			let mut store = Vec::new();
+	        for nfa_state_id in &current_state.state {
+				let nfa_transitions = match nfa.transitions.get(nfa_state_id) {
+					Some(transitions) => transitions,
+					None => continue,
+				};
 
-            for input_char in &alphabet {
                 let target_state = get_target_state_for_input(nfa_transitions, *input_char);
-                transitions_from_current.push(DfaTransition {
-                    input: *input_char,
-                    target_state,
-                });
-            }
-        }
+				for state in target_state.state {
+					store.push_unique(state);
+				}
+			}
+			store.sort();
+			transitions_from_current.push(DfaTransition {
+				input: *input_char,
+				target_state: State { state: store },
+			});
+		}
 
         dfa.transitions
             .insert(current_state, transitions_from_current.clone());
 
         for transition in transitions_from_current {
             if !dfa.transitions.contains_key(&transition.target_state)
-            // && !unprocessed_states.contains(&transition.target_state)
+            && !unprocessed_states.contains(&transition.target_state)
             {
                 unprocessed_states.push_back(transition.target_state);
             }
