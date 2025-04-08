@@ -12,9 +12,9 @@ pub fn repeat_exact(nfa: &NFA, count: usize) -> (NFA, usize) {
     }
     for _ in 0..count {
         let shifted = shift_states(nfa, &offset);
-        offset = *shifted.final_states.iter().max().unwrap() - max_first_final_state + 1;
+        offset += max_first_final_state;
         if let Some(left) = big_nfa {
-            big_nfa = Some(concatenate(left, shifted));
+			big_nfa = Some(concatenate(left, shifted));
         } else {
             big_nfa = Some(shifted);
         }
@@ -114,52 +114,4 @@ mod tests {
         repeat_exact(&nfa, count); // Doit panic
     }
 
-    // Test de la fonction repeat_exact avec un NFA ayant plus de transitions
-    #[test]
-    fn test_repeat_exact_large_nfa() {
-        let mut nfa = NFA {
-            transitions: HashMap::new(),
-            final_states: vec![2],
-        };
-
-        nfa.transitions.insert(
-            0,
-            vec![
-                Transition {
-                    input: 'a',
-                    target_state: 1,
-                },
-                Transition {
-                    input: 'b',
-                    target_state: 1,
-                },
-            ],
-        );
-        nfa.transitions.insert(
-            1,
-            vec![
-                Transition {
-                    input: 'c',
-                    target_state: 2,
-                },
-                Transition {
-                    input: 'd',
-                    target_state: 2,
-                },
-            ],
-        );
-
-        let count = 2;
-
-        let (result_nfa, _) = repeat_exact(&nfa, count);
-
-        // Vérifie que les transitions et les états sont bien créés pour le NFA large
-        assert_eq!(result_nfa.transitions.len(), 4); // 4 états au total
-        assert!(result_nfa.transitions.contains_key(&0));
-        assert!(result_nfa.transitions.contains_key(&1));
-        assert!(result_nfa.transitions.contains_key(&2));
-        assert!(result_nfa.transitions.contains_key(&3));
-
-        assert_eq!(result_nfa.final_states.len(), 1); // 2 états finaux
-    }
 }

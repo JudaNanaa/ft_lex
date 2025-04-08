@@ -15,12 +15,13 @@ pub fn range(nfa: NFA, min: usize, max: usize) -> (NFA, usize) {
     let mut big_nfa: Option<NFA> = None;
     let mut total_offset = 0;
     let mut accumulated_final_states = Vec::new();
+	let max_first_final_state = nfa.final_states.iter().max().unwrap();
 
     // Partie obligatoire : min répétitions
     if min > 0 {
         let (mandatory_nfa, _) = repeat_exact(&nfa, min);
         accumulated_final_states = mandatory_nfa.final_states.clone();
-        total_offset += mandatory_nfa.transitions.len();
+        total_offset += mandatory_nfa.final_states.iter().max().unwrap();
         big_nfa = Some(mandatory_nfa);
     } else {
         accumulated_final_states.push(0); // L’état initial est final si min == 0
@@ -34,7 +35,9 @@ pub fn range(nfa: NFA, min: usize, max: usize) -> (NFA, usize) {
             accumulated_final_states.push_unique(*state);
         }
 
-        total_offset += optional_nfa.transitions.len();
+		total_offset += max_first_final_state;
+	
+        // total_offset += optional_nfa.transitions.len();
         if let Some(left) = big_nfa {
             big_nfa = Some(concatenate(left, optional_nfa));
         } else {

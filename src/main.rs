@@ -19,7 +19,7 @@ fn main() {
         let nfa = construct_nfa(&tokens);
         dbg!(&nfa);
         let _dfa = construct_dfa(nfa);
-        dbg!(&_dfa);
+        // dbg!(&_dfa);
 
         println!("fini");
     }

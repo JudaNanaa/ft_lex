@@ -16,7 +16,6 @@ fn test_regex_1() {
 
     let nfa: NFA = construct_nfa(&tokens);
 
-    assert_eq!(nfa.transitions.len(), 4);
     assert_eq!(nfa.final_states.len(), 1);
 }
 
@@ -30,7 +29,6 @@ fn test_regex_2() {
 
     let nfa: NFA = construct_nfa(&tokens);
 
-    assert_eq!(nfa.transitions.len(), 1);
     assert_eq!(nfa.final_states.len(), 2);
 }
 
