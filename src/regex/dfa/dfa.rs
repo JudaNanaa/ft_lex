@@ -29,12 +29,12 @@ pub fn construct_dfa(nfa: NFA) -> DFA {
         .collect::<Vec<char>>();
 
     // Stack of DFA states to process
-	let mut unprocessed_states = VecDeque::from(vec![State { state: vec![0] }]);
+    let mut unprocessed_states = VecDeque::from(vec![State { state: vec![0] }]);
 
     while let Some(current_state) = unprocessed_states.pop_front() {
-		if dfa.transitions.contains_key(&current_state) {
-			continue;
-		}
+        if dfa.transitions.contains_key(&current_state) {
+            continue;
+        }
         let mut transitions_from_current = Vec::with_capacity(alphabet.len());
 
         for nfa_state_id in &current_state.state {
@@ -57,7 +57,7 @@ pub fn construct_dfa(nfa: NFA) -> DFA {
 
         for transition in transitions_from_current {
             if !dfa.transitions.contains_key(&transition.target_state)
-                // && !unprocessed_states.contains(&transition.target_state)
+            // && !unprocessed_states.contains(&transition.target_state)
             {
                 unprocessed_states.push_back(transition.target_state);
             }

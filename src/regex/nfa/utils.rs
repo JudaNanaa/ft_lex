@@ -20,7 +20,7 @@ pub fn shift_states(nfa: &NFA, offset: &usize) -> NFA {
         .final_states
         .clone()
         .iter()
-        .map(|state| state + offset)
+        .map(|state| if *state == 0 { 0 } else { state + offset })
         .collect();
 
     return new_nfa;

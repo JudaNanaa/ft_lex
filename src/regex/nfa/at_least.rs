@@ -8,12 +8,12 @@ fn apply_kleene_star(nfa: &mut NFA) {
         .expect("No initial state, internal error");
 
     for &final_state in &nfa.final_states {
-		for initial_state in &initial_transitions {
-			let tab = nfa.transitions.entry(final_state).or_default();
-			if !tab.contains(initial_state) {
-				tab.push(*initial_state);
-			}
-		}
+        for initial_state in &initial_transitions {
+            let tab = nfa.transitions.entry(final_state).or_default();
+            if !tab.contains(initial_state) {
+                tab.push(*initial_state);
+            }
+        }
     }
 
     if !nfa.final_states.contains(&0) {
