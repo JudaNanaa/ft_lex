@@ -25,17 +25,37 @@ pub fn at_least(nfa: NFA, count: usize) -> (NFA, usize) {
     if count == 0 {
         let mut kleene = nfa.clone();
         apply_kleene_star(&mut kleene);
-        let next_id = kleene.final_states.iter().max().unwrap() + 1;
+
+        let next_id = kleene.final_states.iter().max().copied().unwrap_or(0) + 1;
+
         return (kleene, next_id);
     }
 
     let (repeated, _) = repeat_exact(&nfa, count);
+
     let mut kleene_part = nfa.clone();
     apply_kleene_star(&mut kleene_part);
 
-    let shifted_kleene = shift_states(&kleene_part, &repeated.final_states.iter().max().unwrap());
+    let repeated_max_final = repeated
+        .final_states
+        .iter()
+        .max()
+        .expect("Need at least one final state");
+    let min_nonzero_state = repeated
+        .transitions
+        .keys()
+        .copied()
+        .filter(|&state| state != 0)
+        .min()
+        .expect("NFA must contain at least one non-zero state");
+
+    let kleene_offset = repeated_max_final + 1 - min_nonzero_state;
+    let shifted_kleene = shift_states(&kleene_part, &kleene_offset);
+
     let result = concatenate(repeated, shifted_kleene);
-    let next_id = result.final_states.iter().max().unwrap() + 1;
+
+    let next_id = result.final_states.iter().max().copied().unwrap_or(0) + 1;
+
     return (result, next_id);
 }
 

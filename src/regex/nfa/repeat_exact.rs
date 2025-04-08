@@ -6,22 +6,29 @@ pub fn repeat_exact(nfa: &NFA, count: usize) -> (NFA, usize) {
     let mut big_nfa: Option<NFA> = None;
     let mut offset = 0;
     let max_first_final_state = nfa.final_states.iter().max().unwrap();
+    let min_nonzero_state = nfa
+        .transitions
+        .keys()
+        .copied()
+        .filter(|&state| state != 0)
+        .min()
+        .expect("NFA must contain at least one non-zero state");
 
     if count == 0 {
         panic!("iteration value must be positive");
     }
     for _ in 0..count {
         let shifted = shift_states(nfa, &offset);
-        offset += max_first_final_state;
+        offset += max_first_final_state + 1 - min_nonzero_state;
         if let Some(left) = big_nfa {
-			big_nfa = Some(concatenate(left, shifted));
+            big_nfa = Some(concatenate(left, shifted));
         } else {
             big_nfa = Some(shifted);
         }
     }
 
     let output = big_nfa.unwrap();
-    let next_id = output.final_states.iter().max().unwrap() + 1;
+    let next_id = offset + 1;
     return (output, next_id);
 }
 
@@ -113,5 +120,4 @@ mod tests {
 
         repeat_exact(&nfa, count); // Doit panic
     }
-
 }

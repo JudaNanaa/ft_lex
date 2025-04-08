@@ -6,51 +6,69 @@ use crate::regex::{
 
 pub fn range(nfa: NFA, min: usize, max: usize) -> (NFA, usize) {
     assert!(min <= max, "Invalid range");
-    assert!(max > 0, "bad iteration values");
+    assert!(max > 0, "Bad iteration values");
 
     if min == max {
         return repeat_exact(&nfa, min);
     }
 
-    let mut big_nfa: Option<NFA> = None;
+    let mut result_nfa: Option<NFA> = None;
     let mut total_offset = 0;
     let mut accumulated_final_states = Vec::new();
-	let max_first_final_state = nfa.final_states.iter().max().unwrap();
 
-    // Partie obligatoire : min répétitions
+    let max_final_state = *nfa.final_states.iter().max().unwrap();
+    let min_nonzero_state = nfa
+        .transitions
+        .keys()
+        .copied()
+        .filter(|&s| s != 0)
+        .min()
+        .expect("NFA must contain at least one non-zero state");
+
+    let offset_increment = max_final_state + 1 - min_nonzero_state;
+
+    // Partie obligatoire (min répétitions)
     if min > 0 {
         let (mandatory_nfa, _) = repeat_exact(&nfa, min);
+        total_offset = *mandatory_nfa.final_states.iter().max().unwrap() + 1
+            - mandatory_nfa
+                .transitions
+                .keys()
+                .copied()
+                .filter(|&s| s != 0)
+                .min()
+                .unwrap();
         accumulated_final_states = mandatory_nfa.final_states.clone();
-        total_offset += mandatory_nfa.final_states.iter().max().unwrap();
-        big_nfa = Some(mandatory_nfa);
+        result_nfa = Some(mandatory_nfa);
     } else {
-        accumulated_final_states.push(0); // L’état initial est final si min == 0
+        accumulated_final_states.push(0); // état initial final si min == 0
     }
 
-    // Parties optionnelles : (max - min) répétitions
+    // Partie optionnelle (max - min répétitions)
     for _ in min..max {
-        let optional_nfa = shift_states(&nfa, &total_offset);
+        let shifted_nfa = shift_states(&nfa, &total_offset);
 
-        for state in &optional_nfa.final_states {
+        // Ajout des nouveaux états finaux
+        for state in &shifted_nfa.final_states {
             accumulated_final_states.push_unique(*state);
         }
 
-		total_offset += max_first_final_state;
-	
-        // total_offset += optional_nfa.transitions.len();
-        if let Some(left) = big_nfa {
-            big_nfa = Some(concatenate(left, optional_nfa));
-        } else {
-            big_nfa = Some(optional_nfa);
-        }
+        total_offset += offset_increment;
+
+        result_nfa = Some(match result_nfa {
+            Some(current) => concatenate(current, shifted_nfa),
+            None => shifted_nfa,
+        });
     }
 
-    let mut final_nfa = big_nfa.unwrap();
+    // Mise à jour des états finaux
+    let mut final_nfa = result_nfa.expect("Should have constructed a valid NFA");
     for state in accumulated_final_states {
         final_nfa.final_states.push_unique(state);
     }
 
-    return (final_nfa, total_offset + 1);
+    let next_id = total_offset + 1;
+    return (final_nfa, next_id);
 }
 
 #[cfg(test)]
@@ -138,7 +156,7 @@ mod tests {
 
     // Test avec min == 0 et max == 0
     #[test]
-    #[should_panic(expected = "bad iteration values")]
+    #[should_panic(expected = "Bad iteration values")]
     fn test_range_min_and_max_are_zero() {
         let nfa = create_test_nfa();
         let min = 0;
