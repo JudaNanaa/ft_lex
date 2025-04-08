@@ -1,27 +1,30 @@
 use std::collections::VecDeque;
+use std::collections::HashSet;
 
 use super::{DfaTransition, State, DFA};
-use crate::regex::{utils::VecUtils, Transition, NFA};
+use crate::regex::NFA;
 
-fn get_target_state_for_input(transitions: &Vec<Transition>, input_char: char) -> State {
-    let mut resulting_state = State { state: Vec::new() };
-
-	if transitions.is_empty() {
-		return resulting_state;
+fn get_target_state_for_input(nfa: &NFA, current_state: &State, input_char: &char) -> State {
+	let mut store: HashSet<usize> = HashSet::new();
+		
+	for nfa_state_id in &current_state.state {
+		if let Some(nfa_transitions) = nfa.transitions.get(nfa_state_id) {
+			for transition in nfa_transitions {
+				if transition.input == *input_char {
+					store.insert(transition.target_state);
+				}
+			}
+		}
 	}
 
-    for transition in transitions {
-        if transition.input == input_char {
-            resulting_state.state.push(transition.target_state);
-        }
-    }
-
-    if resulting_state.state.is_empty() {
-        return State::trap(); // dead-end state
-    }
-
-    resulting_state.state.sort();
-    return resulting_state;
+	if store.is_empty() {
+		return State::trap();
+	}
+	let mut sorted_states: Vec<usize> = store.into_iter().collect();
+	sorted_states.sort_unstable();
+	return State {
+		state: sorted_states,
+	};
 }
 
 pub fn construct_dfa(nfa: NFA) -> DFA {
@@ -36,26 +39,17 @@ pub fn construct_dfa(nfa: NFA) -> DFA {
     let mut unprocessed_states = VecDeque::from(vec![State { state: vec![0] }]);
 
     while let Some(current_state) = unprocessed_states.pop_front() {
+		
         let mut transitions_from_current = Vec::with_capacity(alphabet.len());
 
 		for input_char in &alphabet {
-			let mut store = Vec::new();
-	        for nfa_state_id in &current_state.state {
-				let nfa_transitions = match nfa.transitions.get(nfa_state_id) {
-					Some(transitions) => transitions,
-					None => continue,
-				};
-
-                let target_state = get_target_state_for_input(nfa_transitions, *input_char);
-				for state in target_state.state {
-					store.push_unique(state);
-				}
+			let state = get_target_state_for_input(&nfa, &current_state, input_char);
+			if !state.is_trap() {
+				transitions_from_current.push(DfaTransition {
+					input: *input_char,
+					target_state: state,
+				});
 			}
-			store.sort();
-			transitions_from_current.push(DfaTransition {
-				input: *input_char,
-				target_state: State { state: store },
-			});
 		}
 
         dfa.transitions
