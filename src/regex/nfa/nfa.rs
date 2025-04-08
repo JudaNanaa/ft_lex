@@ -49,6 +49,7 @@ pub fn construct_nfa(tokens: &Vec<Token>) -> NFA {
     }
     let mut output = stack.pop().unwrap();
     output.final_states.sort();
+    println!("nb state nfa == {}", output.transitions.len());
     return output;
 }
 

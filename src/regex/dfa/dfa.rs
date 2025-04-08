@@ -65,5 +65,6 @@ pub fn construct_dfa(nfa: NFA) -> DFA {
     }
 
     dfa.final_states = nfa.final_states;
+    println!("nb state dfa == {}", dfa.transitions.len());
     return dfa;
 }

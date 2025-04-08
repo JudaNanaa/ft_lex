@@ -5,17 +5,14 @@ use super::{concatenate::concatenate, utils::shift_states};
 pub fn repeat_exact(nfa: &NFA, count: usize) -> (NFA, usize) {
     let mut big_nfa: Option<NFA> = None;
     let mut offset = 0;
+    let max_first_final_state = nfa.final_states.iter().max().unwrap();
 
     if count == 0 {
         panic!("iteration value must be positive");
     }
     for _ in 0..count {
         let shifted = shift_states(nfa, &offset);
-        if shifted.transitions.len() > *shifted.final_states.iter().max().unwrap() {
-            offset += shifted.transitions.len() - 1;
-        } else {
-            offset += shifted.transitions.len();
-        }
+        offset = *shifted.final_states.iter().max().unwrap() - max_first_final_state + 1;
         if let Some(left) = big_nfa {
             big_nfa = Some(concatenate(left, shifted));
         } else {
