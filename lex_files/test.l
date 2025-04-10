@@ -1,2 +1,8 @@
+%{
+#include <stdio.h>
+int line_num = 1;
+%}
+
+	test
 %%
-a*{100} printf("----YES----\n");
+{test}  printf("trouve a\n");

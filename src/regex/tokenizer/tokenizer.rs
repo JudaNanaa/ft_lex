@@ -10,9 +10,10 @@ use std::str::Chars;
 
 const WHITESPACE: &str = " \n\r\t";
 
-pub fn regex_tokenizer(regex: &str) -> Vec<Token> {
+pub fn regex_tokenizer(regex: &str) -> (Vec<Token>, usize) {
     let mut token_list: Vec<Token> = Vec::new();
     let mut chars: Chars<'_> = regex.chars();
+	let mut index = 0;
 
     while let Some(current_char) = chars.next() {
         match current_char {
@@ -57,10 +58,11 @@ pub fn regex_tokenizer(regex: &str) -> Vec<Token> {
                 token_list.push(Token::Char(current_char))
             }
         }
+		index += 1;
     }
     token_list = add_concatenation_token(token_list);
     token_list = to_postfix(token_list);
-    return token_list;
+    return (token_list, index);
 }
 
 #[cfg(test)]
@@ -69,7 +71,8 @@ mod tests {
     use super::*;
 
     fn tok(regex: &str) -> Vec<Token> {
-        regex_tokenizer(&regex.to_string())
+        let (token_list, _) = regex_tokenizer(&regex.to_string());
+		return token_list;
     }
 
     #[test]
