@@ -25,11 +25,11 @@ fn main() {
     }
 
     // Tokenizer
-    // let tokens: Vec<Token> = regex_tokenizer(&input);
-    // println!("les tokens sont == {:#?}", tokens);
-    // let nfa = construct_nfa(&tokens);
+    let tokens: Vec<Token> = regex_tokenizer(&input);
+    println!("les tokens sont == {:#?}", tokens);
+    let nfa = construct_nfa(&tokens);
     // // dbg!(&nfa);
-    // let _dfa = construct_dfa(nfa);
+    let _dfa = construct_dfa(nfa);
     // dbg!(&_dfa);
 
     println!("fini");

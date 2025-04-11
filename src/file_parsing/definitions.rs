@@ -40,7 +40,7 @@ fn get_content_under_brace(file: &mut FileInfo) -> Result<String, String> {
             }
         }
     }
-    return Err(format!("{}:{}: premature EOF", file.name, file.line_nb));
+    return Err("premature EOF".to_string());
 }
 
 fn get_line_with_space(file: &mut FileInfo) -> String {
@@ -183,5 +183,5 @@ pub fn parse_definitions_part(file: &mut FileInfo) -> Result<Vec<DefinitionToken
             }
         }
     }
-    return Err(format!("{}:{}: premature EOF", file.name, file.line_nb));
+    return Err("premature EOF".to_string());
 }
