@@ -1,22 +1,13 @@
 use std::char;
 
-use super::FileInfo;
+use super::{DefinitionToken, FileInfo};
 
 const WHITESPACE: &str = " \r\t";
 
 #[derive(Debug)]
-pub enum DefinitionState {
+enum DefinitionState {
     Inclusive,
     Exclusive,
-}
-
-#[derive(Debug)]
-pub enum DefinitionToken {
-    Bloc { content: String },
-    LineWithSpace { content: String },
-    Definition { name: String, value: String },
-    InclusiveState { names: Vec<String> },
-    ExclusiveState { names: Vec<String> },
 }
 
 fn get_content_under_brace(file: &mut FileInfo) -> Result<String, String> {

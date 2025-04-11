@@ -14,6 +14,15 @@ enum FileState {
     UserRoutine,
 }
 
+#[derive(Debug)]
+pub enum DefinitionToken {
+    Bloc { content: String },
+    LineWithSpace { content: String },
+    Definition { name: String, value: String },
+    InclusiveState { names: Vec<String> },
+    ExclusiveState { names: Vec<String> },
+}
+
 struct RuleAction {
     nfa: NFA,
     action: String,
