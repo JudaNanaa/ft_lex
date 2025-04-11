@@ -6,9 +6,16 @@ const WHITESPACE: &str = " \r\t";
 
 #[derive(Debug)]
 pub enum DefinitionToken {
-	Bloc(String),
-	LineWithSpace(String),
-	Definition(String, String),
+	Bloc{
+		content: String,
+	},
+	LineWithSpace {
+		content: String,
+	},
+	Definition{
+		name: String,
+		value: String
+	},
 
 }
 
@@ -64,9 +71,12 @@ fn get_definition(first_letter: char, file: &mut FileInfo) -> Result<DefinitionT
 	line = line.trim().to_string();
 	match line.find(' ') {
 		Some(index) => {
-			let def_name = line[0..index].to_string();
-			let def_value = line[index+1..].trim().to_string();
-			return Ok(DefinitionToken::Definition(def_name, def_value));
+			let name = line[0..index].to_string();
+			let value = line[index+1..].trim().to_string();
+			return Ok(DefinitionToken::Definition {
+				name, 
+				value
+			});
 		}, 
 		None => {
 			return Err("incomplete name definition".to_string());
@@ -83,7 +93,9 @@ pub fn parse_definitions_part(file: &mut FileInfo) -> Result<Vec<DefinitionToken
 					if *char_next == '{' {
 						file.it.next();
 						let content = get_content_under_brace(file)?;
-						definition_list.push(DefinitionToken::Bloc(content));
+						definition_list.push(DefinitionToken::Bloc{
+							content
+						});
 					}
 					else if *char_next == '%' {
 						dbg!(&definition_list);
@@ -95,7 +107,9 @@ pub fn parse_definitions_part(file: &mut FileInfo) -> Result<Vec<DefinitionToken
 			c => {
 				if WHITESPACE.contains(c) {
 					let content = get_line_with_space(file);
-					definition_list.push(DefinitionToken::LineWithSpace(content));
+					definition_list.push(DefinitionToken::LineWithSpace {
+						content
+					});
 				}
 				else {
 					let definition_token = get_definition(c, file)?;
@@ -106,5 +120,4 @@ pub fn parse_definitions_part(file: &mut FileInfo) -> Result<Vec<DefinitionToken
 		}
 	}
 	return Err(format!("{}:{}: premature EOF", file.name, file.line_nb));
-	// Error car no rules -> no %%
 }

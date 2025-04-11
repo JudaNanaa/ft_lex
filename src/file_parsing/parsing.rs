@@ -73,7 +73,7 @@ pub fn parsing_lex_file(file_path: &str) -> Result<(), String>  {
 	match parse_definitions_part(&mut file) {
 		Ok(_) => {},
 		Err(message) => {
-			println!("{}:{}: {}", file.name, file.line_nb, message);
+			eprintln!("{}:{}: {}", file.name, file.line_nb, message);
 		}
 	}
 	// parse_rules_part(&mut file_content_it);

@@ -2,7 +2,9 @@
 #include <stdio.h>
 int line_num = 1;
 %}
+test yes
 
-	test
+%a 1000000
+%n 1000000
 %%
-{test}  printf("trouve a\n");
+.*{10000}  printf("trouve a\n");
