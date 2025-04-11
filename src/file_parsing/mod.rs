@@ -2,21 +2,21 @@ use std::{iter::Peekable, str::Chars};
 
 use crate::regex::NFA;
 
-pub mod parsing;
 mod definitions;
+pub mod parsing;
 mod rules;
 mod user_routine;
 
 #[derive(PartialEq)]
 enum FileState {
-	Definition,
-	Rules,
-	UserRoutine,
+    Definition,
+    Rules,
+    UserRoutine,
 }
 
 struct RuleAction {
-	nfa: NFA,
-	action: String,
+    nfa: NFA,
+    action: String,
 }
 
 pub struct FileInfo<'a> {
