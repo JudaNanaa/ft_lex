@@ -118,6 +118,14 @@ fn get_state(file: &mut FileInfo) -> Result<Vec<String>, String> {
     return Err("Premature EOF".to_string());
 }
 
+fn skip_to_newline(file: &mut FileInfo) {
+    while let Some(char) = file.it.next() {
+        if char == '\n' {
+            return;
+        }
+    }
+}
+
 pub fn parse_definitions_part(file: &mut FileInfo) -> Result<Vec<DefinitionToken>, String> {
     let mut definition_list = Vec::new();
     let mut inclusive_states = Vec::new();
@@ -137,6 +145,7 @@ pub fn parse_definitions_part(file: &mut FileInfo) -> Result<Vec<DefinitionToken
                         definition_list.push(DefinitionToken::ExclusiveState {
                             names: exclusive_states,
                         });
+                        skip_to_newline(file);
                         dbg!(&definition_list);
                         return Ok(definition_list);
                     } else if *char_next == 's' || *char_next == 'x' {

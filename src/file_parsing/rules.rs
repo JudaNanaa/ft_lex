@@ -1,24 +1,32 @@
 use std::{iter::Peekable, slice::Iter, str::Chars};
 
-use crate::regex::{nfa::nfa::construct_nfa, regex_tokenizer};
+use crate::{
+    file_parsing::rules,
+    regex::{nfa::nfa::construct_nfa, regex_tokenizer},
+};
 
-use super::RuleAction;
+use super::{DefinitionToken, FileInfo, RuleAction};
 
-fn extract_action(
-    line: &str,
-    start_index: usize,
-    line_it: &mut Peekable<Iter<'_, &str>>,
-) -> String {
-    if start_index == line.len() {
-        return String::new();
+pub fn parse_rules_part(
+    file: &mut FileInfo,
+    definitions: Vec<DefinitionToken>,
+) -> Result<Vec<RuleAction, String>> {
+    let rules = Vec::new();
+
+    while let Some(char) = file.it.next() {
+        match char {
+            '%' => {
+                if let Some(c) = file.it.peek() {
+                    if c == '%' {
+                        file.it.next();
+                        return Ok(rules);
+                    }
+                }
+            }
+
+            _ => todo!(),
+        }
     }
-    let action = String::new();
-    let char_it = line.chars();
 
-    todo!();
-}
-
-pub fn parse_rules_part(line_it: &mut Peekable<Chars<'_>>) -> RuleAction {
-    // let action = extract_action(line, end_regex, line_it);
     todo!();
 }

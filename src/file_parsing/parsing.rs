@@ -70,13 +70,13 @@ pub fn parsing_lex_file(file_path: &str) -> Result<(), String> {
         name: file_path,
     };
 
-    match parse_definitions_part(&mut file) {
-        Ok(_) => {}
+    let definitions = match parse_definitions_part(&mut file) {
+        Ok(value) => value,
         Err(message) => {
             eprintln!("{}:{}: {}", file.name, file.line_nb, message);
         }
-    }
-    // parse_rules_part(&mut file_content_it);
+    };
+    parse_rules_part(&mut file_content_it, definitions);
     // parse_user_routine_part(&mut file_content_it);
     return Ok(());
 }
