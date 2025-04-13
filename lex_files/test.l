@@ -3,8 +3,19 @@
 int line_num = 1;
 %}
 
-%s test 
+%s test
+%s comment
+
+test [0-9]
 
 %%
-%%sss printf("yes\n");
-.*{1000}  {while(1) printf("a\n");};
+<test> {
+	{
+		{
+			<comment>a printf("test\n");
+			b printf("test\n");BEGIN(test);
+		}
+	}
+}
+
+. BEGIN(comment);

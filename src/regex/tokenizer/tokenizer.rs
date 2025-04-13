@@ -21,11 +21,11 @@ pub fn regex_tokenizer(regex: &str) -> Vec<Token> {
                 token_list.append(&mut string_tokens);
             }
             '\\' => {
-                if let Some(escaped_char) = chars.next() {
-                    token_list.push(Token::Char(expand_escape(escaped_char)));
-                } else {
-                    token_list.push(Token::Char('\\'));
-                }
+                if let Some(escaped_char) = expand_escape(&mut chars) {
+					token_list.push(Token::Char(escaped_char));
+				} else {
+					token_list.push(Token::Char('\\')); // caractère invalide ou fin de chaîne
+				}
             }
             '[' => {
                 let mut charset_tokens = extract_charset(&mut chars);

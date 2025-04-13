@@ -15,7 +15,7 @@ enum FileState {
 }
 
 #[derive(Debug)]
-pub enum DefinitionToken {
+pub enum Definition {
     Bloc { content: String },
     LineWithSpace { content: String },
     Definition { name: String, value: String },

@@ -1,6 +1,6 @@
 use std::char;
 
-use super::{DefinitionToken, FileInfo};
+use super::{Definition, FileInfo};
 
 const WHITESPACE: &str = " \r\t";
 
@@ -47,7 +47,7 @@ fn get_line_with_space(file: &mut FileInfo) -> String {
     return content;
 }
 
-fn get_definition(first_letter: char, file: &mut FileInfo) -> Result<DefinitionToken, String> {
+fn get_definition(first_letter: char, file: &mut FileInfo) -> Result<Definition, String> {
     let mut line = String::new();
 
     line.push(first_letter);
@@ -64,7 +64,7 @@ fn get_definition(first_letter: char, file: &mut FileInfo) -> Result<DefinitionT
         Some(index) => {
             let name = line[0..index].to_string();
             let value = line[index + 1..].trim().to_string();
-            return Ok(DefinitionToken::Definition { name, value });
+            return Ok(Definition::Definition { name, value });
         }
         None => {
             return Err("incomplete name definition".to_string());
@@ -126,7 +126,7 @@ fn skip_to_newline(file: &mut FileInfo) {
     }
 }
 
-pub fn parse_definitions_part(file: &mut FileInfo) -> Result<Vec<DefinitionToken>, String> {
+pub fn parse_definitions_part(file: &mut FileInfo) -> Result<Vec<Definition>, String> {
     let mut definition_list = Vec::new();
     let mut inclusive_states = Vec::new();
     let mut exclusive_states = Vec::new();
@@ -137,12 +137,12 @@ pub fn parse_definitions_part(file: &mut FileInfo) -> Result<Vec<DefinitionToken
                     if *char_next == '{' {
                         file.it.next();
                         let content = get_content_under_brace(file)?;
-                        definition_list.push(DefinitionToken::Bloc { content });
+                        definition_list.push(Definition::Bloc { content });
                     } else if *char_next == '%' {
-                        definition_list.push(DefinitionToken::InclusiveState {
+                        definition_list.push(Definition::InclusiveState {
                             names: inclusive_states,
                         });
-                        definition_list.push(DefinitionToken::ExclusiveState {
+                        definition_list.push(Definition::ExclusiveState {
                             names: exclusive_states,
                         });
                         skip_to_newline(file);
@@ -175,7 +175,7 @@ pub fn parse_definitions_part(file: &mut FileInfo) -> Result<Vec<DefinitionToken
             c => {
                 if WHITESPACE.contains(c) {
                     let content = get_line_with_space(file);
-                    definition_list.push(DefinitionToken::LineWithSpace { content });
+                    definition_list.push(Definition::LineWithSpace { content });
                 } else {
                     let definition_token = get_definition(c, file)?;
                     definition_list.push(definition_token);
