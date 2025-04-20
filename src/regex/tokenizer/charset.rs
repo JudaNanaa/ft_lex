@@ -56,8 +56,8 @@ fn check_if_negative_charset(chars: &mut Chars<'_>, charset: &mut String) -> (bo
             ']' => return (is_negative, CharsetState::Exit),
             '\\' => {
                 if let Some(escaped_char) = expand_escape(chars) {
-					charset.push(escaped_char);
-				} else {
+                    charset.push(escaped_char);
+                } else {
                     panic!("No Ending bracket");
                 }
             }
@@ -95,8 +95,8 @@ fn minus_gesture(chars: &mut Chars<'_>, charset: &mut String) -> CharsetState {
             }
             '\\' => {
                 if let Some(escaped_char) = expand_escape(chars) {
-					charset.push(escaped_char);
-				} else {
+                    charset.push(escaped_char);
+                } else {
                     panic!("No Ending bracket");
                 }
             }
@@ -131,9 +131,9 @@ pub fn extract_charset(chars: &mut Chars<'_>) -> Vec<Token> {
                 return create_charset_group(charset, is_negative);
             }
             '\\' => {
-				if let Some(escaped_char) = expand_escape(chars) {
-					charset.push(escaped_char);
-				} else {
+                if let Some(escaped_char) = expand_escape(chars) {
+                    charset.push(escaped_char);
+                } else {
                     panic!("No Ending bracket");
                 }
             }

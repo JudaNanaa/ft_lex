@@ -9,13 +9,8 @@ int line_num = 1;
 test [0-9]
 
 %%
-<test> {
-	{
-		{
-			<comment>a printf("test\n");
-			b printf("test\n");BEGIN(test);
-		}
-	}
-}
-
-. BEGIN(comment);
+	printf("test\n");
+a{1,3
+a{13}* printf("test\n");
+{test}{test}* printf("test\n");
+a{1,}* printf("test\n");

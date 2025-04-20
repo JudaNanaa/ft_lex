@@ -22,10 +22,10 @@ pub fn regex_tokenizer(regex: &str) -> Vec<Token> {
             }
             '\\' => {
                 if let Some(escaped_char) = expand_escape(&mut chars) {
-					token_list.push(Token::Char(escaped_char));
-				} else {
-					token_list.push(Token::Char('\\')); // caractère invalide ou fin de chaîne
-				}
+                    token_list.push(Token::Char(escaped_char));
+                } else {
+                    token_list.push(Token::Char('\\')); // caractère invalide ou fin de chaîne
+                }
             }
             '[' => {
                 let mut charset_tokens = extract_charset(&mut chars);

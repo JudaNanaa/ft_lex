@@ -39,7 +39,6 @@ where
 //     }
 // }
 
-
 pub fn expand_escape(chars: &mut Chars<'_>) -> Option<char> {
     match chars.next()? {
         // Classiques

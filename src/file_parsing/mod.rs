@@ -23,6 +23,11 @@ pub enum Definition {
     ExclusiveState { names: Vec<String> },
 }
 
+enum RuleSection {
+	Rule(RuleAction),
+	Text(String),
+}
+
 struct RuleAction {
     nfa: NFA,
     action: String,

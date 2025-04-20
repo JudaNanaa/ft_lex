@@ -29,10 +29,16 @@ pub fn parsing_lex_file(file_path: &str) -> Result<(), String> {
         Ok(value) => value,
         Err(message) => {
             eprintln!("{}:{}: {}", file.name, file.line_nb, message);
-			vec![] // a changer
+            vec![] // a changer
         }
     };
-    parse_rules_part(&mut file, definitions);
+    let rules = match parse_rules_part(&mut file, definitions) {
+		Ok(value) => value,
+		Err(message) => {
+			eprintln!("{}:{}: {}", file.name, file.line_nb, message);
+			vec![] // a changer
+		}
+	};
     // parse_user_routine_part(&mut file_content_it);
     return Ok(());
 }
