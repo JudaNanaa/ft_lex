@@ -10,7 +10,7 @@ test [0-9]
 
 %%
 	printf("test\n");
-a{1,3
-a{13}* printf("test\n");
+a{1,3}* printf("test\n");
 {test}{test}* printf("test\n");
-a{1,}* printf("test\n");
+a{1,3}* printf("test\n");
+a{1,3}* printf("test\n");

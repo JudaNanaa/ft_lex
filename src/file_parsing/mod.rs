@@ -33,8 +33,14 @@ struct RuleAction {
     action: String,
 }
 
-pub struct FileInfo<'a> {
+struct FileInfo<'a> {
     it: Peekable<Chars<'a>>,
     line_nb: usize,
     name: &'a str,
+}
+
+pub struct FilePart {
+	definitions: Definition,
+	rules: Vec<RuleSection>,
+	user_routine: String,
 }

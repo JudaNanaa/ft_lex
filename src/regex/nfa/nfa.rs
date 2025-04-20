@@ -16,19 +16,19 @@ pub fn construct_nfa(tokens: &Vec<Token>) -> NFA {
             Token::Operator(op) => match op {
                 Operator::Quantifier(q) => match q {
                     Quantifier::AtLeast(n) => {
-                        let base = stack.pop().expect("Error applying Kleene star");
+                        let base = stack.pop().expect("unrecognized rule");
                         let (new_nfa, new_id) = at_least(base, n);
                         state_id = new_id;
                         new_nfa
                     }
                     Quantifier::Equal(n) => {
-                        let base = stack.pop().expect("Error applying Equal");
+                        let base = stack.pop().expect("unrecognized rule");
                         let (new_nfa, new_id) = repeat_exact(&base, n);
                         state_id = new_id;
                         new_nfa
                     }
                     Quantifier::Range(min, max) => {
-                        let base = stack.pop().expect("Error applying Range");
+                        let base = stack.pop().expect("unrecognized rule");
                         let (new_nfa, new_id) = range(base, min, max);
                         state_id = new_id;
                         new_nfa

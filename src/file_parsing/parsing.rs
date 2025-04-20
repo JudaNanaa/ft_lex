@@ -39,6 +39,9 @@ pub fn parsing_lex_file(file_path: &str) -> Result<(), String> {
 			vec![] // a changer
 		}
 	};
-    // parse_user_routine_part(&mut file_content_it);
+
+	let user_routine = parse_user_routine_part(&mut file);
+
+	//  TODO j'ai fait filePArt qui prends toutes les parties et va les return
     return Ok(());
 }
