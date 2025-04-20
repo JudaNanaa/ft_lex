@@ -194,7 +194,7 @@ fn split_rule_action(file: &mut FileInfo, first_char: char, definitions: &Vec<De
         }
     }
 
-	let action = extract_action(file)?;
+	let action = extract_action(file)?.trim().to_string();
 	dbg!(&rule);
 	dbg!(&action);
 	return Ok((rule, action));
