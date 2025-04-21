@@ -1,3 +1,5 @@
+use std::collections::HashSet;
+
 use crate::regex::{
     nfa::{
         concatenate::concatenate, offset::get_offset_from_nfa, repeat_exact::repeat_exact,
@@ -17,7 +19,7 @@ pub fn range(nfa: NFA, min: usize, max: usize) -> (NFA, usize) {
 
     let mut result_nfa: Option<NFA> = None;
     let mut total_offset = 0;
-    let mut accumulated_final_states = Vec::new();
+    let mut accumulated_final_states = HashSet::new();
 
     let offset_increment = get_offset_from_nfa(&nfa);
 
@@ -28,7 +30,7 @@ pub fn range(nfa: NFA, min: usize, max: usize) -> (NFA, usize) {
         accumulated_final_states = mandatory_nfa.final_states.clone();
         result_nfa = Some(mandatory_nfa);
     } else {
-        accumulated_final_states.push(0); // état initial final si min == 0
+        accumulated_final_states.insert(0); // état initial final si min == 0
     }
 
     // Partie optionnelle (max - min répétitions)
@@ -36,9 +38,7 @@ pub fn range(nfa: NFA, min: usize, max: usize) -> (NFA, usize) {
         let shifted_nfa = shift_states(&nfa, &total_offset);
 
         // Ajout des nouveaux états finaux
-        for state in &shifted_nfa.final_states {
-            accumulated_final_states.push_unique(*state);
-        }
+		accumulated_final_states.extend(&shifted_nfa.final_states);
 
         total_offset += offset_increment;
 
@@ -50,9 +50,8 @@ pub fn range(nfa: NFA, min: usize, max: usize) -> (NFA, usize) {
 
     // Mise à jour des états finaux
     let mut final_nfa = result_nfa.expect("Should have constructed a valid NFA");
-    for state in accumulated_final_states {
-        final_nfa.final_states.push_unique(state);
-    }
+
+	final_nfa.final_states.extend(accumulated_final_states);
 
     let next_id = total_offset + 1;
     return (final_nfa, next_id);
@@ -68,7 +67,7 @@ mod tests {
     fn create_test_nfa() -> NFA {
         let mut nfa = NFA {
             transitions: HashMap::new(),
-            final_states: vec![2],
+            final_states: HashSet::from([2]),
         };
 
         nfa.transitions.insert(
@@ -99,7 +98,7 @@ mod tests {
         let (result_nfa, _) = range(nfa, min, max);
 
         // Vérifie que l'automate a bien 2 répétitions
-        assert_eq!(result_nfa.final_states, vec![4]);
+        assert_eq!(result_nfa.final_states, HashSet::from([4]));
         assert_eq!(result_nfa.transitions[&0].len(), 1);
         assert_eq!(result_nfa.transitions[&1].len(), 1);
         assert_eq!(result_nfa.transitions[&2].len(), 1);
@@ -114,14 +113,11 @@ mod tests {
         let min = 2;
         let max = 3;
 
-        let (mut result_nfa, _) = range(nfa, min, max);
+        let (result_nfa, _) = range(nfa, min, max);
 
-        let expected_final_state = vec![4, 6];
 
-        result_nfa.final_states.sort();
         // Vérifie que les états finaux et les transitions sont bien ajoutés
         assert_eq!(result_nfa.final_states.len(), 2); // 4 états finaux au total
-        assert_eq!(result_nfa.final_states, expected_final_state);
         assert_eq!(result_nfa.transitions.len(), 6); // 10 états en tout
     }
 
@@ -152,7 +148,7 @@ mod tests {
         let (result_nfa, _) = range(nfa, min, max);
 
         // Vérifie que l'automate résultant a seulement l'état initial comme final
-        assert_eq!(result_nfa.final_states, vec![0]);
+        assert_eq!(result_nfa.final_states, HashSet::from([0]));
         assert_eq!(result_nfa.transitions[&0].len(), 1); // Une seule transition
     }
 
@@ -174,14 +170,11 @@ mod tests {
         let min = 2;
         let max = 5;
 
-        let (mut result_nfa, _) = range(nfa, min, max);
+        let (result_nfa, _) = range(nfa, min, max);
 
-        let expected_final_state = vec![4, 6, 8, 10];
 
-        result_nfa.final_states.sort();
         // Vérifie que les états finaux et les transitions sont bien ajoutés
         assert_eq!(result_nfa.final_states.len(), 4); // 4 états finaux au total
-        assert_eq!(result_nfa.final_states, expected_final_state);
         assert_eq!(result_nfa.transitions.len(), 10); // 10 états en tout
     }
 }

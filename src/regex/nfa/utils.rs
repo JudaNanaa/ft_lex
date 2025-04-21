@@ -37,13 +37,13 @@ pub fn pop_last_two(stack: &mut Vec<NFA>) -> (NFA, NFA) {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::collections::HashMap;
+    use std::collections::{HashMap, HashSet};
 
     // Fonction de création d'un NFA simple
     fn create_test_nfa() -> NFA {
         let mut nfa = NFA {
             transitions: HashMap::new(),
-            final_states: vec![2],
+            final_states: HashSet::from([2]),
         };
 
         nfa.transitions.insert(
@@ -80,7 +80,7 @@ mod tests {
         assert_eq!(shifted_nfa.transitions[&3][0].target_state, 4); // Transition de 3 à 4
 
         // Vérifie les états finaux après décalage
-        assert_eq!(shifted_nfa.final_states, vec![4]);
+        assert_eq!(shifted_nfa.final_states, HashSet::from([4]));
     }
 
     // Test de la fonction shift_states avec un offset de 0 (aucun changement)
@@ -97,7 +97,7 @@ mod tests {
         assert_eq!(shifted_nfa.transitions[&1][0].target_state, 2);
 
         // Vérifie que les états finaux sont identiques
-        assert_eq!(shifted_nfa.final_states, vec![2]);
+        assert_eq!(shifted_nfa.final_states, HashSet::from([2]));
     }
 
     // Test de la fonction pop_last_two
@@ -105,7 +105,7 @@ mod tests {
     fn test_pop_last_two() {
         let nfa1 = create_test_nfa();
         let mut nfa2 = create_test_nfa();
-        nfa2.final_states.push(3); // Ajoute un état final supplémentaire pour nfa2
+        nfa2.final_states.insert(3); // Ajoute un état final supplémentaire pour nfa2
 
         let mut stack: Vec<NFA> = Vec::new();
         stack.push(nfa1);
@@ -114,8 +114,8 @@ mod tests {
         let (first, second) = pop_last_two(&mut stack);
 
         // Vérifie que pop_last_two a correctement extrait les NFA
-        assert_eq!(first.final_states, vec![2]);
-        assert_eq!(second.final_states, vec![2, 3]);
+        assert_eq!(first.final_states, HashSet::from([2]));
+        assert_eq!(second.final_states, HashSet::from([2, 3]));
     }
 
     // Test de la fonction pop_last_two avec une pile vide

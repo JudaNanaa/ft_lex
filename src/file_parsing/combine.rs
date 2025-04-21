@@ -1,6 +1,29 @@
-use crate::file_parsing::rules;
+use std::collections::HashMap;
 
-use super::RuleAction;
+use super::{rules, RuleAction};
+
+fn create_hashmap_final_states(rules: &Vec<RuleAction>) -> HashMap<usize, Vec<String>> {
+	let mut output = HashMap::new();
+	let mut action_for_initial = Vec::new();
+
+	for rule in rules {
+		for state in &rule.nfa.final_states {
+			match state {
+				0 => {
+					action_for_initial.push(rule.action.clone());					
+				},
+				_ => {
+					output.insert(*state, vec![rule.action.clone()]);
+				}
+			}
+		}
+	}
+
+	if !action_for_initial.is_empty() {
+		output.insert(0, action_for_initial);
+	}
+	return output;
+}
 
 pub fn combine_nfa(rules: Vec<RuleAction>) -> Result<Vec<RuleAction>, &'static str> {
 
@@ -22,6 +45,8 @@ pub fn combine_nfa(rules: Vec<RuleAction>) -> Result<Vec<RuleAction>, &'static s
 	if !rule_stack.is_empty() {
 		return Err("| not close");
 	}
+	let hash = create_hashmap_final_states(&new_rules);
 	dbg!(&new_rules);
+	dbg!(&hash);
 	return Ok(new_rules);
 }

@@ -1,3 +1,4 @@
+use std::collections::HashSet;
 use std::{collections::HashMap, fmt::Debug};
 
 pub mod dfa;
@@ -26,14 +27,14 @@ pub struct DfaTransition {
 #[derive(Clone, PartialEq, Eq)]
 pub struct DFA {
     transitions: HashMap<State, Vec<DfaTransition>>,
-    final_states: Vec<usize>,
+    final_states: HashSet<usize>,
 }
 
 impl DFA {
     pub fn new() -> Self {
         return Self {
             transitions: HashMap::new(),
-            final_states: Vec::new(),
+            final_states: HashSet::new(),
         };
     }
 }

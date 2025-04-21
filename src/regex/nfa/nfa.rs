@@ -1,3 +1,5 @@
+use std::collections::HashSet;
+
 use crate::regex::{
     nfa::{
         at_least::at_least, concatenate::concatenate, from_char::from_char, or::or, range::range,
@@ -5,6 +7,20 @@ use crate::regex::{
     },
     Operator, Quantifier, Token, NFA,
 };
+
+fn sort_final_states(final_states: HashSet<usize>) -> HashSet<usize> {
+
+	let mut sort_vec: Vec<&usize> = final_states.iter().collect();
+
+	sort_vec.sort_unstable();
+	
+	let mut output = HashSet::new();
+
+	for elem in sort_vec {
+		output.insert(*elem);
+	}
+	return output;
+}
 
 pub fn construct_nfa(tokens: &Vec<Token>, start_id: usize) -> (NFA, usize) {
     let mut stack: Vec<NFA> = Vec::new();
@@ -48,7 +64,7 @@ pub fn construct_nfa(tokens: &Vec<Token>, start_id: usize) -> (NFA, usize) {
         stack.push(nfa);
     }
     let mut output = stack.pop().unwrap();
-    output.final_states.sort();
+    output.final_states = sort_final_states(output.final_states);
     println!("nb state nfa == {}", output.transitions.len());
     return (output, state_id);
 }
@@ -65,7 +81,7 @@ mod tests {
         let (result, _) = construct_nfa(&tokens, 1);
 
         // Vérifie que le résultat est un NFA valide (en fonction de l'implémentation de `from_char`)
-        assert_eq!(result.final_states, vec![1]);
+        assert_eq!(result.final_states, HashSet::from([1]));
     }
 
     // Test pour la concaténation de deux caractères
@@ -79,7 +95,7 @@ mod tests {
         let (result, _) = construct_nfa(&tokens, 1);
 
         // Vérifie la concaténation des deux caractères 'a' et 'b'
-        assert_eq!(result.final_states, vec![2]);
+        assert_eq!(result.final_states, HashSet::from([2]));
     }
 
     // Test pour l'opérateur OR entre deux caractères
@@ -93,7 +109,7 @@ mod tests {
         let (result, _) = construct_nfa(&tokens, 1);
 
         // Vérifie que l'OR entre 'a' et 'b' a été correctement appliqué
-        assert_eq!(result.final_states, vec![1, 2]);
+        assert_eq!(result.final_states, HashSet::from([1, 2]));
     }
 
     // Test pour l'opérateur de répétition exacte
@@ -106,7 +122,7 @@ mod tests {
         let (result, _) = construct_nfa(&tokens, 1);
 
         // Vérifie que la répétition exacte de 3 fois de 'a' a été appliquée
-        assert_eq!(result.final_states, vec![3]);
+        assert_eq!(result.final_states, HashSet::from([3]));
     }
 
     // Test pour l'opérateur "at least" avec un minimum de répétitions
@@ -120,7 +136,7 @@ mod tests {
 
         // Vérifie que la répétition "at least" a été correctement appliquée
         assert_eq!(result.transitions.len(), 4); // 4 états au total
-        assert_eq!(result.final_states, vec![2, 3]);
+        assert_eq!(result.final_states, HashSet::from([2, 3]));
     }
 
     // Test pour l'opérateur de plage de répétitions (min, max)
@@ -133,7 +149,7 @@ mod tests {
         let (result, _) = construct_nfa(&tokens, 1);
 
         // Vérifie que la plage de répétition a été correctement appliquée
-        assert_eq!(result.final_states, vec![2, 3, 4]);
+        assert_eq!(result.final_states, HashSet::from([2, 3, 4]));
     }
 
     // Test combiné avec plusieurs opérateurs (Concaténation et OR)
@@ -149,7 +165,7 @@ mod tests {
         let (result, _) = construct_nfa(&tokens, 1);
 
         // Vérifie que la concaténation a bien eu lieu avant l'OR
-        assert_eq!(result.final_states, vec![2, 3]);
+        assert_eq!(result.final_states, HashSet::from([2, 3]));
     }
 
     // Fonction utilitaire pour vérifier les transitions d'un NFA
@@ -297,7 +313,7 @@ mod tests {
         check_transition(&result, 1, 'c', 3);
         check_transition(&result, 2, 'c', 3);
 
-        assert_eq!(result.final_states, vec![3]); // 3 est l'état final
+        assert_eq!(result.final_states, HashSet::from([3])); // 3 est l'état final
     }
 
     // Test pour un très grand NFA (pour tester les performances)

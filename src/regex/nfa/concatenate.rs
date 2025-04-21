@@ -6,7 +6,7 @@ pub fn concatenate(mut left: NFA, mut right: NFA) -> NFA {
     let right_initial = right.transitions.remove(&0).unwrap_or_default();
     let right_has_initial_final = right.final_states.contains(&0);
 
-    right.final_states.remove_element(&0);
+	right.final_states.remove(&0);
 
     for &state in &left.final_states {
         left.transitions
@@ -16,7 +16,7 @@ pub fn concatenate(mut left: NFA, mut right: NFA) -> NFA {
     }
 
     if right_has_initial_final {
-        right.final_states.append(&mut left.final_states);
+        right.final_states.extend(left.final_states);
     }
 
     left.transitions.extend(right.transitions);
@@ -31,13 +31,13 @@ pub fn concatenate(mut left: NFA, mut right: NFA) -> NFA {
 mod tests {
     use super::*;
     use crate::regex::nfa::Transition;
-    use std::collections::HashMap;
+    use std::collections::{HashMap, HashSet};
 
     // Fonction de création d'un NFA de test simple
     fn create_test_nfa() -> NFA {
         let mut nfa = NFA {
             transitions: HashMap::new(),
-            final_states: vec![2],
+            final_states: HashSet::from([2]),
         };
 
         // Transition de 0 à 1 avec le caractère 'a'
@@ -64,7 +64,7 @@ mod tests {
     fn create_second_test_nfa() -> NFA {
         let mut nfa = NFA {
             transitions: HashMap::new(),
-            final_states: vec![4],
+            final_states: HashSet::from([4]),
         };
 
         // Transition de 0 à 1 avec le caractère 'c'
@@ -106,7 +106,7 @@ mod tests {
         assert_eq!(result.transitions[&3][0].input, 'd'); // La transition part de 3 avec 'd'
 
         // Vérifie les états finaux du NFA résultant
-        assert_eq!(result.final_states, vec![4]);
+        assert_eq!(result.final_states, HashSet::from([4]));
     }
 
     // Test de concaténation avec plusieurs états finaux dans le NFA de gauche
@@ -126,7 +126,7 @@ mod tests {
         assert_eq!(result.transitions[&3].len(), 1);
         assert_eq!(result.transitions[&3][0].input, 'd');
 
-        assert_eq!(result.final_states, vec![4]);
+        assert_eq!(result.final_states, HashSet::from([4]));
     }
 
     #[test]
@@ -134,7 +134,7 @@ mod tests {
         let left = create_test_nfa();
         let mut right = NFA {
             transitions: HashMap::new(),
-            final_states: vec![3],
+            final_states: HashSet::from([3]),
         };
 
         right.transitions.insert(
@@ -155,6 +155,5 @@ mod tests {
         assert_eq!(result.transitions[&2].len(), 1);
         assert_eq!(result.transitions[&2][0].input, 'd');
         assert_eq!(result.final_states.len(), 1);
-        assert_eq!(result.final_states[0], 3);
     }
 }

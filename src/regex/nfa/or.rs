@@ -11,11 +11,7 @@ pub fn or(left: NFA, right: NFA) -> NFA {
             .or_insert(trans);
     }
 
-    for state in right.final_states {
-        if !final_states.contains(&state) {
-            final_states.push(state);
-        }
-    }
+	final_states.extend(right.final_states);
 
     return NFA {
         transitions,
@@ -30,13 +26,13 @@ mod tests {
     use crate::regex::nfa::Transition;
 
     use super::*;
-    use std::collections::HashMap;
+    use std::collections::{HashMap, HashSet};
 
     // Fonction pour créer un NFA simple
     fn create_test_nfa_a() -> NFA {
         let mut nfa = NFA {
             transitions: HashMap::new(),
-            final_states: vec![1],
+            final_states: HashSet::from([1]),
         };
 
         nfa.transitions.insert(
@@ -54,7 +50,7 @@ mod tests {
     fn create_test_nfa_b() -> NFA {
         let mut nfa = NFA {
             transitions: HashMap::new(),
-            final_states: vec![2],
+            final_states: HashSet::from([2]),
         };
 
         nfa.transitions.insert(
@@ -95,6 +91,6 @@ mod tests {
         assert!(result.transitions[&0].contains(&expected_transition[1]));
 
         // Vérification des états finaux
-        assert_eq!(result.final_states, vec![1, 2]);
+        assert_eq!(result.final_states, HashSet::from([1, 2]));
     }
 }

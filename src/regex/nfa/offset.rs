@@ -13,6 +13,8 @@ pub fn get_offset_from_nfa(nfa: &NFA) -> usize {
 
 #[cfg(test)]
 mod tests {
+    use std::collections::HashSet;
+
     use crate::regex::Transition;
 
     use super::*;
@@ -45,7 +47,7 @@ mod tests {
         );
 
         // Définir les états finaux
-        nfa.final_states = vec![3];
+        nfa.final_states = HashSet::from([3]);
 
         // Le max des états finaux est 3, +1 = 4
         // Le min des états non-zéro est 1
@@ -78,7 +80,7 @@ mod tests {
             ],
         );
 
-        nfa.final_states = vec![3, 4, 5];
+        nfa.final_states = HashSet::from([3, 4, 5]);
 
         // Le max des états finaux est 5, +1 = 6
         // Le min des états non-zéro est 1
@@ -105,7 +107,7 @@ mod tests {
             }],
         );
 
-        nfa.final_states = vec![3];
+        nfa.final_states = HashSet::from([3]);
 
         // Le max des états finaux est 3, +1 = 4
         // Le min des états non-zéro est 2 (l'état 0 est ignoré dans le calcul)
@@ -132,7 +134,7 @@ mod tests {
             }],
         );
 
-        nfa.final_states = vec![15, 20];
+        nfa.final_states = HashSet::from([15, 20]);
 
         // Le max des états finaux est 20, +1 = 21
         // Le min des états non-zéro est 5
@@ -159,7 +161,7 @@ mod tests {
             }],
         );
 
-        nfa.final_states = vec![12];
+        nfa.final_states = HashSet::from([12]);
 
         // Le max des états finaux est 12, +1 = 13
         // Le min des états non-zéro est 3
@@ -186,7 +188,7 @@ mod tests {
                 target_state: 0,
             }],
         );
-        nfa.final_states = vec![0];
+        nfa.final_states = HashSet::from([0]);
 
         get_offset_from_nfa(&nfa); // Devrait paniquer car pas d'états non-zéro
     }

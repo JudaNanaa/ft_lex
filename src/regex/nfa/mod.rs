@@ -9,7 +9,7 @@ mod range;
 mod repeat_exact;
 mod utils;
 
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct Transition {
@@ -20,14 +20,14 @@ pub struct Transition {
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct NFA {
     pub transitions: HashMap<usize, Vec<Transition>>,
-    pub final_states: Vec<usize>,
+    pub final_states: HashSet<usize>,
 }
 
 impl NFA {
     pub fn new() -> Self {
         return Self {
             transitions: HashMap::new(),
-            final_states: Vec::new(),
+            final_states: HashSet::new(),
         };
     }
 }

@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 
 use super::{Transition, NFA};
 
@@ -17,7 +17,7 @@ pub fn from_char(c: char, state_id: &mut usize) -> NFA {
 
     return NFA {
         transitions,
-        final_states: vec![final_state],
+        final_states: HashSet::from([final_state]),
     };
 }
 
@@ -36,7 +36,7 @@ mod tests {
         assert_eq!(result.transitions[&0].len(), 1); // L'état 0 a une seule transition
         assert_eq!(result.transitions[&0][0].input, 'a'); // La transition devrait utiliser 'a' comme caractère
         assert_eq!(result.transitions[&0][0].target_state, 1); // La transition doit mener à l'état final
-        assert_eq!(result.final_states, vec![1]); // L'état final doit être 1
+        assert_eq!(result.final_states, HashSet::from([1])); // L'état final doit être 1
     }
 
     // Test avec un autre caractère
@@ -50,7 +50,7 @@ mod tests {
         assert_eq!(result.transitions[&0].len(), 1);
         assert_eq!(result.transitions[&0][0].input, 'b');
         assert_eq!(result.transitions[&0][0].target_state, 2);
-        assert_eq!(result.final_states, vec![2]);
+        assert_eq!(result.final_states, HashSet::from([2]));
     }
 
     // Test avec plusieurs appels pour vérifier la gestion du state_id
@@ -67,14 +67,14 @@ mod tests {
         assert_eq!(result1.transitions[&0].len(), 1);
         assert_eq!(result1.transitions[&0][0].input, 'a');
         assert_eq!(result1.transitions[&0][0].target_state, 1);
-        assert_eq!(result1.final_states, vec![1]);
+        assert_eq!(result1.final_states, HashSet::from([1]));
 
         // Vérification du second NFA
         assert_eq!(result2.transitions.len(), 2);
         assert_eq!(result2.transitions[&0].len(), 1);
         assert_eq!(result2.transitions[&0][0].input, 'b');
         assert_eq!(result2.transitions[&0][0].target_state, 2);
-        assert_eq!(result2.final_states, vec![2]);
+        assert_eq!(result2.final_states, HashSet::from([2]));
     }
 
     // Test avec un état initial donné
@@ -87,6 +87,6 @@ mod tests {
         assert_eq!(result.transitions[&0].len(), 1);
         assert_eq!(result.transitions[&0][0].input, 'c');
         assert_eq!(result.transitions[&0][0].target_state, 10);
-        assert_eq!(result.final_states, vec![10]);
+        assert_eq!(result.final_states, HashSet::from([10]));
     }
 }

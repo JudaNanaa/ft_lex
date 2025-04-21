@@ -20,7 +20,7 @@ fn apply_kleene_star(nfa: &mut NFA) {
     }
 
     if !nfa.final_states.contains(&0) {
-        nfa.final_states.push(0);
+        nfa.final_states.insert(0);
     }
 }
 
@@ -54,13 +54,13 @@ mod tests {
     use crate::regex::nfa::Transition;
 
     use super::*;
-    use std::collections::HashMap;
+    use std::collections::{HashMap, HashSet};
 
     // Fonction de création d'un NFA de test simple
     fn create_test_nfa() -> NFA {
         let mut nfa = NFA {
             transitions: HashMap::new(),
-            final_states: vec![2],
+            final_states: HashSet::from([2]),
         };
 
         // Transition de 0 à 1 avec le caractère 'a'
@@ -90,7 +90,8 @@ mod tests {
         apply_kleene_star(&mut nfa);
 
         // Après application du Kleene Star
-        assert_eq!(nfa.final_states, vec![2, 0]); // L'état initial 0 est aussi final
+		let expected_final_state = HashSet::from([2, 0]);
+        assert_eq!(nfa.final_states, expected_final_state); // L'état initial 0 est aussi final
         assert!(nfa.transitions.contains_key(&2)); // La transition depuis l'état final vers l'état initial
         assert_eq!(
             nfa.transitions[&2],
@@ -108,7 +109,8 @@ mod tests {
         let (result_nfa, _) = at_least(nfa, 0);
 
         // Vérifie si l'automate résultant a bien l'état 0 comme état final avec une répétition de Kleene
-        assert_eq!(result_nfa.final_states, vec![2, 0]);
+		let expected_final_state = HashSet::from([2, 0]);
+        assert_eq!(result_nfa.final_states, expected_final_state);
         assert!(result_nfa.transitions.contains_key(&2));
         assert_eq!(
             result_nfa.transitions[&2],
@@ -136,7 +138,7 @@ mod tests {
     fn test_complex_nfa() {
         let mut nfa = NFA {
             transitions: HashMap::new(),
-            final_states: vec![3],
+            final_states: HashSet::from([3]),
         };
 
         // Transitions pour le NFA
@@ -172,7 +174,8 @@ mod tests {
 
         // L'état initial 0 doit aussi être final
         assert!(nfa.final_states.contains(&0));
-        assert_eq!(nfa.final_states, vec![3, 0]);
+		let expected_final_state = HashSet::from([3, 0]);
+        assert_eq!(nfa.final_states, expected_final_state);
 
         // Tester les transitions
         assert!(nfa.transitions.contains_key(&3));
@@ -186,7 +189,7 @@ mod tests {
     fn test_multiple_states() {
         let mut nfa = NFA {
             transitions: HashMap::new(),
-            final_states: vec![4],
+            final_states: HashSet::from([4]),
         };
 
         // Définir plusieurs transitions

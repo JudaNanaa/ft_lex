@@ -10,5 +10,5 @@ test [0-9]
 
 %%
 	printf("test\n");
-a|b printf("yes");
 dc |
+a|b printf("yes");

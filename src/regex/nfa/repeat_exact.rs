@@ -31,13 +31,13 @@ pub fn repeat_exact(nfa: &NFA, count: usize) -> (NFA, usize) {
 mod tests {
     use super::*;
     use crate::regex::{Transition, NFA};
-    use std::collections::HashMap;
+    use std::collections::{HashMap, HashSet};
 
     // Fonction pour créer un NFA simple
     fn create_test_nfa() -> NFA {
         let mut nfa = NFA {
             transitions: HashMap::new(),
-            final_states: vec![2],
+            final_states: HashSet::from([2]),
         };
 
         nfa.transitions.insert(
@@ -67,7 +67,7 @@ mod tests {
         let (result_nfa, _) = repeat_exact(&nfa, count);
 
         // Vérifie que l'automate résultant a bien les transitions et les états
-        assert_eq!(result_nfa.final_states, vec![2]);
+        assert_eq!(result_nfa.final_states, HashSet::from([2]));
         assert_eq!(result_nfa.transitions[&0].len(), 1);
         assert_eq!(result_nfa.transitions[&1].len(), 1);
         assert_eq!(result_nfa, nfa);
