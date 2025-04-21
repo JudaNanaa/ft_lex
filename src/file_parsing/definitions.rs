@@ -121,7 +121,7 @@ fn get_state(file: &mut FileInfo) -> Result<Vec<String>, String> {
 fn skip_to_newline(file: &mut FileInfo) {
     while let Some(char) = file.it.next() {
         if char == '\n' {
-			file.line_nb += 1;
+            file.line_nb += 1;
             return;
         }
     }

@@ -1,6 +1,6 @@
 use std::{fs::File, io::Read, process::exit};
 
-use crate::file_parsing::{rules::parse_rules_part, FileState};
+use crate::file_parsing::rules::parse_rules_part;
 
 use super::{definitions::parse_definitions_part, user_routine::parse_user_routine_part, FileInfo};
 
@@ -33,17 +33,17 @@ pub fn parsing_lex_file(file_path: &str) -> Result<(), String> {
         }
     };
     let rules = match parse_rules_part(&mut file, definitions) {
-		Ok(value) => value,
-		Err(message) => {
-			eprintln!("{}:{}: {}", file.name, file.line_nb, message);
-			exit(1); // TODO a changer
-		}
-	};
+        Ok(value) => value,
+        Err(message) => {
+            eprintln!("{}:{}: {}", file.name, file.line_nb, message);
+            exit(1); // TODO a changer
+        }
+    };
 
-	let user_routine = parse_user_routine_part(&mut file);
+    dbg!(&rules.0);
+    let user_routine = parse_user_routine_part(&mut file);
 
-	//  TODO j'ai fait filePArt qui prends toutes les parties et va les return
+    //  TODO j'ai fait filePArt qui prends toutes les parties et va les return
 
-	
     return Ok(());
 }

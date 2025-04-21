@@ -23,11 +23,7 @@ pub enum Definition {
     ExclusiveState { names: Vec<String> },
 }
 
-enum RuleSection {
-	Rule(RuleAction),
-	Text(String),
-}
-
+#[derive(Debug)]
 struct RuleAction {
     nfa: NFA,
     action: String,
@@ -39,8 +35,8 @@ struct FileInfo<'a> {
     name: &'a str,
 }
 
-pub struct FilePart {
-	definitions: Definition,
-	rules: Vec<RuleSection>,
-	user_routine: String,
-}
+// pub struct FilePart {
+//     definitions: Definition,
+//     rules: Vec<RuleSection>,
+//     user_routine: String,
+// }

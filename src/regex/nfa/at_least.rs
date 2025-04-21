@@ -1,4 +1,7 @@
-use super::{concatenate::concatenate, offset::get_offset_from_nfa, repeat_exact::repeat_exact, utils::shift_states, NFA};
+use super::{
+    concatenate::concatenate, offset::get_offset_from_nfa, repeat_exact::repeat_exact,
+    utils::shift_states, NFA,
+};
 
 fn apply_kleene_star(nfa: &mut NFA) {
     let initial_transitions = nfa

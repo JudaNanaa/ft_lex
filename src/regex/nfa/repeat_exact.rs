@@ -5,7 +5,7 @@ use super::{concatenate::concatenate, offset::get_offset_from_nfa, utils::shift_
 pub fn repeat_exact(nfa: &NFA, count: usize) -> (NFA, usize) {
     let mut big_nfa: Option<NFA> = None;
     let mut offset = 0;
-	let offset_increment = get_offset_from_nfa(nfa);
+    let offset_increment = get_offset_from_nfa(nfa);
 
     if count == 0 {
         panic!("iteration value must be positive");

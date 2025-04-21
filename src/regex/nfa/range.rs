@@ -1,5 +1,8 @@
 use crate::regex::{
-    nfa::{concatenate::concatenate, offset::get_offset_from_nfa, repeat_exact::repeat_exact, utils::shift_states},
+    nfa::{
+        concatenate::concatenate, offset::get_offset_from_nfa, repeat_exact::repeat_exact,
+        utils::shift_states,
+    },
     utils::VecUtils,
     NFA,
 };
@@ -21,7 +24,7 @@ pub fn range(nfa: NFA, min: usize, max: usize) -> (NFA, usize) {
     // Partie obligatoire (min répétitions)
     if min > 0 {
         let (mandatory_nfa, _) = repeat_exact(&nfa, min);
-		total_offset = get_offset_from_nfa(&mandatory_nfa);
+        total_offset = get_offset_from_nfa(&mandatory_nfa);
         accumulated_final_states = mandatory_nfa.final_states.clone();
         result_nfa = Some(mandatory_nfa);
     } else {
