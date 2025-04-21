@@ -5,6 +5,7 @@ use crate::regex::NFA;
 mod definitions;
 pub mod parsing;
 mod rules;
+mod combine;
 mod user_routine;
 
 #[derive(PartialEq)]
@@ -23,7 +24,7 @@ pub enum Definition {
     ExclusiveState { names: Vec<String> },
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 struct RuleAction {
     nfa: NFA,
     action: String,

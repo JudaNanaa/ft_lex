@@ -1,6 +1,6 @@
 use std::{fs::File, io::Read, process::exit};
 
-use crate::file_parsing::rules::parse_rules_part;
+use crate::file_parsing::{combine::combine_nfa, rules::parse_rules_part};
 
 use super::{definitions::parse_definitions_part, user_routine::parse_user_routine_part, FileInfo};
 
@@ -41,6 +41,8 @@ pub fn parsing_lex_file(file_path: &str) -> Result<(), String> {
     };
 
     dbg!(&rules.0);
+	combine_nfa(rules.0);
+
     let user_routine = parse_user_routine_part(&mut file);
 
     //  TODO j'ai fait filePArt qui prends toutes les parties et va les return
