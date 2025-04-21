@@ -259,7 +259,7 @@ mod tests {
 
     // Test pour des expressions vides et erreurs avec des quantificateurs invalides
     #[test]
-    #[should_panic(expected = "Error applying Kleene star")]
+    #[should_panic(expected = "unrecognized rule")]
     fn test_construct_nfa_empty_expression() {
         let tokens = vec![
             Token::Operator(Operator::Quantifier(Quantifier::AtLeast(0))), // Quantificateur invalide

@@ -1,25 +1,18 @@
 use crate::NFA;
 
-use super::{concatenate::concatenate, utils::shift_states};
+use super::{concatenate::concatenate, offset::get_offset_from_nfa, utils::shift_states};
 
 pub fn repeat_exact(nfa: &NFA, count: usize) -> (NFA, usize) {
     let mut big_nfa: Option<NFA> = None;
     let mut offset = 0;
-    let max_first_final_state = nfa.final_states.iter().max().unwrap();
-    let min_nonzero_state = nfa
-        .transitions
-        .keys()
-        .copied()
-        .filter(|&state| state != 0)
-        .min()
-        .expect("NFA must contain at least one non-zero state");
+	let offset_increment = get_offset_from_nfa(nfa);
 
     if count == 0 {
         panic!("iteration value must be positive");
     }
     for _ in 0..count {
         let shifted = shift_states(nfa, &offset);
-        offset += max_first_final_state + 1 - min_nonzero_state;
+        offset += offset_increment;
         if let Some(left) = big_nfa {
             big_nfa = Some(concatenate(left, shifted));
         } else {

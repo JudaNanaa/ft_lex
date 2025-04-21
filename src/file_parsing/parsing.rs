@@ -1,4 +1,4 @@
-use std::{f64::consts::E, fs::File, io::Read, iter::Peekable, str::Chars};
+use std::{fs::File, io::Read, process::exit};
 
 use crate::file_parsing::{rules::parse_rules_part, FileState};
 
@@ -36,12 +36,14 @@ pub fn parsing_lex_file(file_path: &str) -> Result<(), String> {
 		Ok(value) => value,
 		Err(message) => {
 			eprintln!("{}:{}: {}", file.name, file.line_nb, message);
-			vec![] // a changer
+			exit(1); // TODO a changer
 		}
 	};
 
 	let user_routine = parse_user_routine_part(&mut file);
 
 	//  TODO j'ai fait filePArt qui prends toutes les parties et va les return
+
+	
     return Ok(());
 }

@@ -1,5 +1,5 @@
 use crate::regex::{
-    nfa::{concatenate::concatenate, repeat_exact::repeat_exact, utils::shift_states},
+    nfa::{concatenate::concatenate, offset::get_offset_from_nfa, repeat_exact::repeat_exact, utils::shift_states},
     utils::VecUtils,
     NFA,
 };
@@ -16,28 +16,12 @@ pub fn range(nfa: NFA, min: usize, max: usize) -> (NFA, usize) {
     let mut total_offset = 0;
     let mut accumulated_final_states = Vec::new();
 
-    let max_final_state = *nfa.final_states.iter().max().unwrap();
-    let min_nonzero_state = nfa
-        .transitions
-        .keys()
-        .copied()
-        .filter(|&s| s != 0)
-        .min()
-        .expect("NFA must contain at least one non-zero state");
-
-    let offset_increment = max_final_state + 1 - min_nonzero_state;
+    let offset_increment = get_offset_from_nfa(&nfa);
 
     // Partie obligatoire (min répétitions)
     if min > 0 {
         let (mandatory_nfa, _) = repeat_exact(&nfa, min);
-        total_offset = *mandatory_nfa.final_states.iter().max().unwrap() + 1
-            - mandatory_nfa
-                .transitions
-                .keys()
-                .copied()
-                .filter(|&s| s != 0)
-                .min()
-                .unwrap();
+		total_offset = get_offset_from_nfa(&mandatory_nfa);
         accumulated_final_states = mandatory_nfa.final_states.clone();
         result_nfa = Some(mandatory_nfa);
     } else {

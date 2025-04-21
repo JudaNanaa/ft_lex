@@ -203,8 +203,9 @@ fn split_rule_action(file: &mut FileInfo, first_char: char, definitions: &Vec<De
 pub fn parse_rules_part(
     file: &mut FileInfo,
     definitions: Vec<Definition>,
-) -> Result<Vec<RuleSection>, String> {
-    let mut rules: Vec<RuleSection> = Vec::new();
+) -> Result<(Vec<RuleAction>, Vec<String>), String> {
+    let mut texts: Vec<String> = Vec::new();
+    let mut rules: Vec<RuleAction> = Vec::new();
 
     while let Some(char) = file.it.next() {
         match char {
@@ -216,7 +217,7 @@ pub fn parse_rules_part(
                 if let Some(next_char) = file.it.peek() {
                     if *next_char == '%' {
                         file.it.next();
-                        return Ok(rules);
+						return Ok((rules, texts));
                     }
                 }
             },
@@ -232,19 +233,19 @@ pub fn parse_rules_part(
 					}
 				}
 				dbg!(&text);
-				rules.push(RuleSection::Text(text));
+				texts.push(text);
 			},
             c => {
                 let (rule, action) = split_rule_action(file, c, &definitions)?;
 				let tokens = regex_tokenizer(&rule);
 				let nfa = construct_nfa(&tokens);
-				rules.push(RuleSection::Rule(RuleAction {
+				rules.push(RuleAction {
 					nfa,
 					action
-				}));
+				});
             }
         }
     }
 
-    todo!();
+	return Ok((rules, texts));
 }

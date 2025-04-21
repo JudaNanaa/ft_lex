@@ -1,4 +1,4 @@
-use super::{concatenate::concatenate, repeat_exact::repeat_exact, utils::shift_states, NFA};
+use super::{concatenate::concatenate, offset::get_offset_from_nfa, repeat_exact::repeat_exact, utils::shift_states, NFA};
 
 fn apply_kleene_star(nfa: &mut NFA) {
     let initial_transitions = nfa
@@ -36,20 +36,7 @@ pub fn at_least(nfa: NFA, count: usize) -> (NFA, usize) {
     let mut kleene_part = nfa.clone();
     apply_kleene_star(&mut kleene_part);
 
-    let repeated_max_final = repeated
-        .final_states
-        .iter()
-        .max()
-        .expect("Need at least one final state");
-    let min_nonzero_state = repeated
-        .transitions
-        .keys()
-        .copied()
-        .filter(|&state| state != 0)
-        .min()
-        .expect("NFA must contain at least one non-zero state");
-
-    let kleene_offset = repeated_max_final + 1 - min_nonzero_state;
+    let kleene_offset = get_offset_from_nfa(&repeated);
     let shifted_kleene = shift_states(&kleene_part, &kleene_offset);
 
     let result = concatenate(repeated, shifted_kleene);

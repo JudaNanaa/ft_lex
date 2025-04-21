@@ -2,6 +2,7 @@ mod at_least;
 mod concatenate;
 mod from_char;
 pub mod nfa;
+mod offset;
 mod or;
 mod range;
 mod repeat_exact;
