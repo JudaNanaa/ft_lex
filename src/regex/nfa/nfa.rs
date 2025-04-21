@@ -9,17 +9,16 @@ use crate::regex::{
 };
 
 fn sort_final_states(final_states: HashSet<usize>) -> HashSet<usize> {
+    let mut sort_vec: Vec<&usize> = final_states.iter().collect();
 
-	let mut sort_vec: Vec<&usize> = final_states.iter().collect();
+    sort_vec.sort_unstable();
 
-	sort_vec.sort_unstable();
-	
-	let mut output = HashSet::new();
+    let mut output = HashSet::new();
 
-	for elem in sort_vec {
-		output.insert(*elem);
-	}
-	return output;
+    for elem in sort_vec {
+        output.insert(*elem);
+    }
+    return output;
 }
 
 pub fn construct_nfa(tokens: &Vec<Token>, start_id: usize) -> (NFA, usize) {

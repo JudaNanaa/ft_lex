@@ -11,7 +11,7 @@ pub fn or(left: NFA, right: NFA) -> NFA {
             .or_insert(trans);
     }
 
-	final_states.extend(right.final_states);
+    final_states.extend(right.final_states);
 
     return NFA {
         transitions,

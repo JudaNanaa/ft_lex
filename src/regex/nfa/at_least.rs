@@ -90,7 +90,7 @@ mod tests {
         apply_kleene_star(&mut nfa);
 
         // Après application du Kleene Star
-		let expected_final_state = HashSet::from([2, 0]);
+        let expected_final_state = HashSet::from([2, 0]);
         assert_eq!(nfa.final_states, expected_final_state); // L'état initial 0 est aussi final
         assert!(nfa.transitions.contains_key(&2)); // La transition depuis l'état final vers l'état initial
         assert_eq!(
@@ -109,7 +109,7 @@ mod tests {
         let (result_nfa, _) = at_least(nfa, 0);
 
         // Vérifie si l'automate résultant a bien l'état 0 comme état final avec une répétition de Kleene
-		let expected_final_state = HashSet::from([2, 0]);
+        let expected_final_state = HashSet::from([2, 0]);
         assert_eq!(result_nfa.final_states, expected_final_state);
         assert!(result_nfa.transitions.contains_key(&2));
         assert_eq!(
@@ -174,7 +174,7 @@ mod tests {
 
         // L'état initial 0 doit aussi être final
         assert!(nfa.final_states.contains(&0));
-		let expected_final_state = HashSet::from([3, 0]);
+        let expected_final_state = HashSet::from([3, 0]);
         assert_eq!(nfa.final_states, expected_final_state);
 
         // Tester les transitions

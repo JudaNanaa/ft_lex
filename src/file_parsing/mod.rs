@@ -2,10 +2,10 @@ use std::{iter::Peekable, str::Chars};
 
 use crate::regex::NFA;
 
+mod combine;
 mod definitions;
 pub mod parsing;
 mod rules;
-mod combine;
 mod user_routine;
 
 #[derive(PartialEq)]

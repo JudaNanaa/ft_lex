@@ -1,12 +1,10 @@
-use crate::regex::utils::VecUtils;
-
 use super::NFA;
 
 pub fn concatenate(mut left: NFA, mut right: NFA) -> NFA {
     let right_initial = right.transitions.remove(&0).unwrap_or_default();
     let right_has_initial_final = right.final_states.contains(&0);
 
-	right.final_states.remove(&0);
+    right.final_states.remove(&0);
 
     for &state in &left.final_states {
         left.transitions

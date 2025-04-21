@@ -1,44 +1,5 @@
 use std::str::Chars;
 
-pub trait VecUtils<T>
-where
-    T: PartialEq,
-{
-    fn remove_element(&mut self, element: &T) -> Option<T>;
-    fn push_unique(&mut self, element: T);
-}
-
-impl<T> VecUtils<T> for Vec<T>
-where
-    T: PartialEq + std::cmp::Ord,
-{
-    fn remove_element(&mut self, element: &T) -> Option<T> {
-        self.iter()
-            .position(|e| e == element)
-            .map(|index| self.remove(index))
-    }
-
-    fn push_unique(&mut self, element: T) {
-        if !self.contains(&element) {
-            self.push(element);
-        }
-    }
-}
-
-// pub fn expand_escape(c: char) -> char {
-// 	match c {
-//         '\\' => return '\\',
-//         'a' => return '\x07', // bell
-//         'b' => return '\x08', // backspace
-//         'f' => return '\x0C', // formfeed
-//         'n' => return '\n',   // newline
-//         'r' => return '\r',   // carriage return
-//         't' => return '\t',   // horizontal tab
-//         'v' => return '\x0B', // vertical tab
-//         _ => return c, // Not a recognized escape
-//     }
-// }
-
 pub fn expand_escape(chars: &mut Chars<'_>) -> Option<char> {
     match chars.next()? {
         // Classiques

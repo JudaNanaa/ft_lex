@@ -1,9 +1,9 @@
 mod at_least;
+pub mod combine_nfa;
 mod concatenate;
 mod from_char;
 pub mod nfa;
 mod offset;
-mod combine_nfa;
 mod or;
 mod range;
 mod repeat_exact;

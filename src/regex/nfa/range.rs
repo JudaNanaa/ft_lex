@@ -5,7 +5,6 @@ use crate::regex::{
         concatenate::concatenate, offset::get_offset_from_nfa, repeat_exact::repeat_exact,
         utils::shift_states,
     },
-    utils::VecUtils,
     NFA,
 };
 
@@ -38,7 +37,7 @@ pub fn range(nfa: NFA, min: usize, max: usize) -> (NFA, usize) {
         let shifted_nfa = shift_states(&nfa, &total_offset);
 
         // Ajout des nouveaux états finaux
-		accumulated_final_states.extend(&shifted_nfa.final_states);
+        accumulated_final_states.extend(&shifted_nfa.final_states);
 
         total_offset += offset_increment;
 
@@ -51,7 +50,7 @@ pub fn range(nfa: NFA, min: usize, max: usize) -> (NFA, usize) {
     // Mise à jour des états finaux
     let mut final_nfa = result_nfa.expect("Should have constructed a valid NFA");
 
-	final_nfa.final_states.extend(accumulated_final_states);
+    final_nfa.final_states.extend(accumulated_final_states);
 
     let next_id = total_offset + 1;
     return (final_nfa, next_id);
@@ -115,7 +114,6 @@ mod tests {
 
         let (result_nfa, _) = range(nfa, min, max);
 
-
         // Vérifie que les états finaux et les transitions sont bien ajoutés
         assert_eq!(result_nfa.final_states.len(), 2); // 4 états finaux au total
         assert_eq!(result_nfa.transitions.len(), 6); // 10 états en tout
@@ -171,7 +169,6 @@ mod tests {
         let max = 5;
 
         let (result_nfa, _) = range(nfa, min, max);
-
 
         // Vérifie que les états finaux et les transitions sont bien ajoutés
         assert_eq!(result_nfa.final_states.len(), 4); // 4 états finaux au total
