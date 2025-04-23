@@ -1,6 +1,6 @@
-use std::{iter::Peekable, str::Chars};
+use std::{collections::HashMap, iter::Peekable, str::Chars};
 
-use crate::regex::NFA;
+use crate::regex::{dfa::DFA, NFA};
 
 mod combine;
 mod definitions;
@@ -36,8 +36,11 @@ struct FileInfo<'a> {
     name: &'a str,
 }
 
-// pub struct FilePart {
-//     definitions: Definition,
-//     rules: Vec<RuleSection>,
-//     user_routine: String,
-// }
+#[derive(Debug)]
+pub struct FilePart {
+    definitions: Vec<Definition>,
+	in_yylex: Vec<String>,
+    dfa: DFA,
+    actions: HashMap<usize, Vec<String>>,
+    user_routine: String,
+}

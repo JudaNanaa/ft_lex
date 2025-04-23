@@ -1,6 +1,8 @@
 use std::collections::HashMap;
 
-use crate::regex::{combine_nfa, NFA};
+use crate::regex::{
+    combine_nfa::{self, combine_nfa}, dfa::{dfa::construct_dfa, DFA}, NFA
+};
 
 use super::{rules, RuleAction};
 
@@ -36,7 +38,7 @@ fn get_all_nfa(rules: &Vec<RuleAction>) -> Vec<NFA> {
     return output;
 }
 
-pub fn combine_rules(rules: Vec<RuleAction>) -> Result<Vec<RuleAction>, &'static str> {
+pub fn combine_rules(rules: Vec<RuleAction>) -> Result<(DFA, HashMap<usize, Vec<String>>), &'static str> {
     let mut rule_stack = Vec::new();
     let mut new_rules = Vec::new();
 
@@ -55,9 +57,8 @@ pub fn combine_rules(rules: Vec<RuleAction>) -> Result<Vec<RuleAction>, &'static
         return Err("| not close");
     }
     let hash = create_hashmap_final_states(&new_rules);
-    dbg!(&new_rules);
-    // get_all_nfa(&rules) TODO: a regarder
-    // combine_nfa()
-    dbg!(&hash);
-    return Ok(new_rules);
+    let nfas = get_all_nfa(&new_rules);
+    let nfa_combine = combine_nfa(nfas);
+	let dfa = construct_dfa(nfa_combine);
+    return Ok((dfa, hash));
 }

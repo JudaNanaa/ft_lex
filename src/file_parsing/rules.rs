@@ -205,7 +205,7 @@ fn split_rule_action(
 
 pub fn parse_rules_part(
     file: &mut FileInfo,
-    definitions: Vec<Definition>,
+    definitions: &Vec<Definition>,
 ) -> Result<(Vec<RuleAction>, Vec<String>), String> {
     let mut texts: Vec<String> = Vec::new();
     let mut rules: Vec<RuleAction> = Vec::new();

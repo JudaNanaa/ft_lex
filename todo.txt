@@ -1,0 +1,6 @@
+
+
+faire les states
+
+mettre les alias de POSIX dans les regles
+
