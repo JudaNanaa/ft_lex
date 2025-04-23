@@ -1,4 +1,4 @@
-use crate::NFA;
+use crate::regex::NFA;
 
 use super::{concatenate::concatenate, offset::get_offset_from_nfa, utils::shift_states};
 

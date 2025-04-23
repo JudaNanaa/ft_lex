@@ -1,8 +1,9 @@
 mod file_parsing;
+mod lex_creation;
 mod regex;
 
 use file_parsing::parsing::parsing_lex_file;
-use regex::{dfa::dfa::construct_dfa, nfa::nfa::construct_nfa, *};
+use lex_creation::creation::lex_creation;
 
 fn main() {
     let args: Vec<String> = std::env::args().into_iter().collect();
@@ -11,10 +12,10 @@ fn main() {
             println!("Error: {}", error);
             return;
         }
-        Ok(elems) => {
-			elems
-		}
+        Ok(elems) => elems,
     };
 
-	dbg!(file_parts);
+    dbg!(&file_parts);
+
+    lex_creation(file_parts);
 }

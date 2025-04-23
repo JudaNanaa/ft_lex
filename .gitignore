@@ -1,3 +1,6 @@
 /target
 a.out
 lex.yy.c
+ft_lex.yy.c
+dfa.dot
+dfa.png

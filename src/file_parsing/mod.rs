@@ -39,7 +39,7 @@ struct FileInfo<'a> {
 #[derive(Debug)]
 pub struct FilePart {
     definitions: Vec<Definition>,
-	in_yylex: Vec<String>,
+    in_yylex: Vec<String>,
     dfa: DFA,
     actions: HashMap<usize, Vec<String>>,
     user_routine: String,

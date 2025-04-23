@@ -1,5 +1,8 @@
 use std::collections::HashSet;
 use std::collections::VecDeque;
+use std::fs::File;
+use std::io::Write;
+use std::process::Command;
 
 use super::{DfaTransition, State, DFA};
 use crate::regex::NFA;
@@ -65,5 +68,46 @@ pub fn construct_dfa(nfa: NFA) -> DFA {
 
     dfa.final_states = nfa.final_states;
     println!("nb state dfa == {}", dfa.transitions.len());
+	generate_file_dot(&dfa);
     return dfa;
+}
+
+pub fn generate_file_dot(dfa: &DFA) -> std::io::Result<()> {
+	let mut file = File::create("dfa.dot")?;
+
+	file.write("digraph DFA {\n".as_bytes())?;
+	file.write("  rankdir=LR;\n".as_bytes())?;
+	file.write("  node [shape=circle];\n".as_bytes())?;
+
+	// États finaux avec double cercle
+	for state in dfa.transitions.keys() {
+		if state.state.iter().any(|s| dfa.final_states.contains(s)) {
+			writeln!(file, "  \"{:?}\" [shape=doublecircle];", state.state)?;
+		}
+	}
+
+	for (from_state, transitions) in &dfa.transitions {
+        for transition in transitions {
+            // On ignore les pièges
+            if transition.target_state.is_trap() {
+                continue;
+            }
+            writeln!(
+                file,
+                "  \"{:?}\" -> \"{:?}\" [label=\"{}\"]",
+                from_state.state,
+                transition.target_state.state,
+                transition.input
+            )?;
+        }
+    }
+
+	writeln!(file, "}}")?;
+
+
+    Command::new("dot")
+        .args(&["-Tpng", "dfa.dot", "-o", "dfa.png"])
+        .output()
+        .expect("Échec lors de l'exécution de Graphviz (dot)");
+	return Ok(());
 }

@@ -45,10 +45,10 @@ pub fn parsing_lex_file(file_path: &str) -> Result<FilePart, String> {
     let user_routine = parse_user_routine_part(&mut file);
 
     return Ok(FilePart {
-		definitions,
-		in_yylex,
-		dfa,
-		actions,
-		user_routine
-	});
+        definitions,
+        in_yylex,
+        dfa,
+        actions,
+        user_routine,
+    });
 }
