@@ -68,46 +68,61 @@ pub fn construct_dfa(nfa: NFA) -> DFA {
 
     dfa.final_states = nfa.final_states;
     println!("nb state dfa == {}", dfa.transitions.len());
-	generate_file_dot(&dfa);
+    match generate_file_dot(&dfa) {
+        Ok(_) => {}
+        Err(error) => {
+            eprintln!("Unexpected error with dfa.dot generating {}", error);
+        }
+    }
     return dfa;
 }
 
+fn escape_label(label: &str) -> String {
+    dbg!(&label);
+    label
+        .replace('\\', "\\\\") // échappe \ en \\
+        .replace('"', "\\\"") // échappe " en \"
+        .replace('\n', "\\\\n") // échappe retour ligne en \n
+}
+
 pub fn generate_file_dot(dfa: &DFA) -> std::io::Result<()> {
-	let mut file = File::create("dfa.dot")?;
+    let mut file = File::create("dfa.dot")?;
 
-	file.write("digraph DFA {\n".as_bytes())?;
-	file.write("  rankdir=LR;\n".as_bytes())?;
-	file.write("  node [shape=circle];\n".as_bytes())?;
+    writeln!(file, "digraph DFA {{")?;
+    writeln!(file, "  rankdir=LR;")?;
+    writeln!(file, "  node [shape=circle];")?;
 
-	// États finaux avec double cercle
-	for state in dfa.transitions.keys() {
-		if state.state.iter().any(|s| dfa.final_states.contains(s)) {
-			writeln!(file, "  \"{:?}\" [shape=doublecircle];", state.state)?;
-		}
-	}
+    // États finaux avec double cercle
+    for state in dfa.transitions.keys() {
+        if state.state.iter().any(|s| dfa.final_states.contains(s)) {
+            writeln!(file, "  \"{:?}\" [shape=doublecircle];", state.state)?;
+        }
+    }
 
-	for (from_state, transitions) in &dfa.transitions {
+    // Transitions
+    for (from_state, transitions) in &dfa.transitions {
         for transition in transitions {
-            // On ignore les pièges
             if transition.target_state.is_trap() {
                 continue;
             }
+
+            let escaped_label = escape_label(&transition.input.to_string());
+
             writeln!(
                 file,
                 "  \"{:?}\" -> \"{:?}\" [label=\"{}\"]",
-                from_state.state,
-                transition.target_state.state,
-                transition.input
+                from_state.state, transition.target_state.state, escaped_label
             )?;
         }
     }
 
-	writeln!(file, "}}")?;
+    writeln!(file, "}}")?;
 
-
+    // Appelle Graphviz pour générer le PNG
     Command::new("dot")
         .args(&["-Tpng", "dfa.dot", "-o", "dfa.png"])
         .output()
         .expect("Échec lors de l'exécution de Graphviz (dot)");
-	return Ok(());
+
+    Ok(())
 }

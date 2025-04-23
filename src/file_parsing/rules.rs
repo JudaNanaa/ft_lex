@@ -12,7 +12,20 @@ fn add_to_next_quote(rule: &mut String, file: &mut FileInfo) -> Result<(), &'sta
                 file.line_nb += 1;
                 return Err("missing quote");
             }
+            '\\' => {
+                if let Some(c) = file.it.next() {
+                    if c == '\n' {
+                        file.line_nb += 1;
+                        return Err("missing quote");
+                    }
+                    rule.push('\\');
+                    rule.push(c);
+                } else {
+                    return Err("missing quote");
+                }
+            }
             '"' => {
+                rule.push('"');
                 break;
             }
             _ => {
@@ -20,6 +33,7 @@ fn add_to_next_quote(rule: &mut String, file: &mut FileInfo) -> Result<(), &'sta
             }
         }
     }
+    println!("tets {}", &rule);
     return Ok(());
 }
 
@@ -71,6 +85,30 @@ fn extract_brace(
             }
             _ => {
                 name.push(char);
+            }
+        }
+    }
+    return Err("unrecognized rule");
+}
+
+fn extract_bracket(
+    rule: &mut String,
+    file: &mut FileInfo,
+    definitions: &Vec<Definition>,
+) -> Result<(), &'static str> {
+    rule.push('[');
+    while let Some(char) = file.it.next() {
+        match char {
+            '\n' => {
+                file.line_nb += 1;
+                return Err("missing ]");
+            }
+            ']' => {
+                rule.push(']');
+                return Ok(());
+            }
+            _ => {
+                rule.push(char);
             }
         }
     }
@@ -171,7 +209,10 @@ fn split_rule_action(
         '{' => {
             extract_brace(&mut rule, file, definitions)?;
         }
-        '}' => {
+        '[' => {
+            extract_bracket(&mut rule, file, definitions)?;
+        }
+        '}' | ']' => {
             return Err("unrecognized rule");
         }
         _ => rule.push(first_char),
@@ -188,7 +229,10 @@ fn split_rule_action(
             '{' => {
                 extract_brace(&mut rule, file, definitions)?;
             }
-            '}' => {
+            '[' => {
+                extract_bracket(&mut rule, file, definitions)?;
+            }
+            '}' | ']' => {
                 return Err("unrecognized rule");
             }
             _ => {

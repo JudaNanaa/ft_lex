@@ -1,3 +1,5 @@
+use crate::regex::utils::expand_escape;
+
 use super::Operator::CloseParen;
 use super::Operator::OpenParen;
 use super::Token;
@@ -20,16 +22,20 @@ pub fn get_string_under_quotes(chars: &mut Chars<'_>, quote_to_match: char) -> V
     let mut dest: String = String::new();
     let mut last_seen_backslash: bool = false;
 
-    for c in chars {
+    while let Some(c) = chars.next() {
         match c {
-            '\\' if !last_seen_backslash => last_seen_backslash = true,
+            '\\' => {
+                if let Some(expended) = expand_escape(chars) {
+                    dbg!(&expended);
+                    dest.push(expended);
+                } else {
+                    panic!("unclose quotes");
+                }
+            }
             q if q == quote_to_match && !last_seen_backslash => {
                 return string_to_tokens(dest);
             }
             _ => {
-                if last_seen_backslash {
-                    dest.push('\\');
-                }
                 dest.push(c);
                 last_seen_backslash = false;
             }

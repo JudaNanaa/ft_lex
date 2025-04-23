@@ -9,15 +9,6 @@ int line_num = 1;
 test [0-9]
 
 %%
-	printf("test\n");
-dc |
-a|b printf("yes");
-d*b printf("yes");
-gs printf("yes");
-ha printf("yes");
-%%
+yesbb printf("ff")
 
-int main(void)
-{
-	
-}
+%%
