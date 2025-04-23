@@ -3,7 +3,6 @@ all: run
 
 run:
 	cargo r -- lex_files/test.l
-	dot -Tpng dfa.dot -o dfa.png
 
 test:
 	cargo t

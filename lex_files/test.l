@@ -9,6 +9,10 @@ int line_num = 1;
 test [0-9]
 
 %%
-yesbb printf("ff")
-
+(0|1)+ printf("okokoko");
 %%
+
+int main(void)
+{
+	
+}
