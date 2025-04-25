@@ -8,7 +8,6 @@ int line_num = 1;
 test [0-9]
 
 %%
-(0|1)* printf("chef");
-1* printf("test");
+ab|abc printf("chef");
 %%
 

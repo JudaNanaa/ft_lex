@@ -5,3 +5,5 @@ faire les states
 mettre les alias de POSIX dans les regles
 
 array or pointer
+
+passer de 127 a 255 chars
