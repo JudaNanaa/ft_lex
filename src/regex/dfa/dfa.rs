@@ -131,7 +131,7 @@ pub fn generate_dot_file(dfa: &DFA) -> std::io::Result<()> {
 
     // Appelle Graphviz pour générer le PNG
     Command::new("dot")
-        .args(&["-Tpng", "dfa.dot", "-o", "dfa.png"])
+        .args(["-Tpng", "dfa.dot", "-o", "dfa.png"])
         .output()
         .expect("Échec lors de l'exécution de Graphviz (dot)");
 

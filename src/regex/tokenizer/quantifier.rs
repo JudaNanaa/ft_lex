@@ -14,7 +14,7 @@ fn parse_range(range_str: &str) -> Quantifier {
     }
 
     let min_repeats = parts[0];
-    if min_repeats.is_empty() || !is_numeric_string(&min_repeats.to_string()) {
+    if min_repeats.is_empty() || !is_numeric_string(min_repeats) {
         panic!("Invalid numeric value inside {}", "{}")
     }
 
@@ -28,7 +28,7 @@ fn parse_range(range_str: &str) -> Quantifier {
     if max_repeats.is_empty() {
         return Quantifier::AtLeast(min_value);
     }
-    if !is_numeric_string(&max_repeats.to_string()) {
+    if !is_numeric_string(max_repeats) {
         panic!("Invalid numeric value inside {}", "{}")
     }
 

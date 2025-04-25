@@ -72,7 +72,7 @@ fn get_definition(first_letter: char, file: &mut FileInfo) -> Result<Definition,
     }
 }
 
-fn split(str: &String, charser: &String) -> Vec<String> {
+fn split(str: &str, charser: &str) -> Vec<String> {
     let mut split = Vec::new();
 
     let mut str_it = str.chars();
@@ -100,12 +100,12 @@ fn get_state(file: &mut FileInfo) -> Result<Vec<String>, String> {
     let mut content = String::new();
 
     file.it.next();
-    while let Some(char) = file.it.next() {
+    for char in file.it.by_ref() {
         match char {
             '\n' => {
                 file.line_nb += 1;
                 let split = split(&content, &" \t".to_string());
-                if split.len() == 0 {
+                if split.is_empty() {
                     return Err("bad start condition list".to_string());
                 }
                 return Ok(split);
@@ -119,7 +119,7 @@ fn get_state(file: &mut FileInfo) -> Result<Vec<String>, String> {
 }
 
 fn skip_to_newline(file: &mut FileInfo) {
-    while let Some(char) = file.it.next() {
+    for char in file.it.by_ref() {
         if char == '\n' {
             file.line_nb += 1;
             return;

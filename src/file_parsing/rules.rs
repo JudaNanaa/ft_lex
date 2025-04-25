@@ -36,8 +36,8 @@ fn append_quoted_string(rule: &mut String, file: &mut FileInfo) -> Result<(), &'
 }
 
 /// Remplace une référence à une définition par sa valeur.
-fn resolve_definition(name: String, definitions: &Vec<Definition>) -> Result<String, &'static str> {
-    if name.chars().next().map_or(false, |c| c.is_digit(10)) {
+fn resolve_definition(name: &str, definitions: &[Definition]) -> Result<String, &'static str> {
+    if name.chars().next().is_some_and(|c| c.is_ascii_digit()) {
         return Ok(format!("{{{}}}", name));
     }
 
@@ -59,18 +59,18 @@ fn resolve_definition(name: String, definitions: &Vec<Definition>) -> Result<Str
 fn extract_braced_definition(
     rule: &mut String,
     file: &mut FileInfo,
-    defs: &Vec<Definition>,
+    defs: &[Definition],
 ) -> Result<(), &'static str> {
     let mut def_name = String::new();
 
-    while let Some(ch) = file.it.next() {
+    for ch in file.it.by_ref() {
         match ch {
             '\n' => {
                 file.line_nb += 1;
                 return Err("missing }");
             }
             '}' => {
-                let replacement = resolve_definition(def_name, defs)?;
+                let replacement = resolve_definition(&def_name, defs)?;
                 rule.push_str(&replacement);
                 return Ok(());
             }
@@ -83,7 +83,7 @@ fn extract_braced_definition(
 /// Extrait un ensemble de caractères entre crochets.
 fn extract_character_class(rule: &mut String, file: &mut FileInfo) -> Result<(), &'static str> {
     rule.push('[');
-    while let Some(ch) = file.it.next() {
+    for ch in file.it.by_ref() {
         match ch {
             '\n' => {
                 file.line_nb += 1;
@@ -165,7 +165,7 @@ fn parse_action(file: &mut FileInfo) -> Result<String, &'static str> {
 fn parse_rule_and_action(
     file: &mut FileInfo,
     first_char: char,
-    defs: &Vec<Definition>,
+    defs: &[Definition],
 ) -> Result<(String, String), &'static str> {
     let mut rule = String::new();
 
@@ -210,7 +210,7 @@ fn parse_rule_and_action(
 /// Parse la section des règles d'un fichier.
 pub fn parse_rules_section(
     file: &mut FileInfo,
-    definitions: &Vec<Definition>,
+    definitions: &[Definition],
 ) -> Result<(Vec<RuleAction>, Vec<String>), String> {
     let mut texts = Vec::new();
     let mut rules = Vec::new();
@@ -230,7 +230,7 @@ pub fn parse_rules_section(
             }
             ' ' | '\t' => {
                 let mut text = String::new();
-                while let Some(ch) = file.it.next() {
+                for ch in file.it.by_ref() {
                     if ch == '\n' {
                         file.line_nb += 1;
                         break;

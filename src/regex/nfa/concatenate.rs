@@ -9,7 +9,7 @@ pub fn concatenate(mut left: NFA, mut right: NFA) -> NFA {
     for &state in &left.final_states {
         left.transitions
             .entry(state)
-            .or_insert_with(Vec::new)
+            .or_default()
             .extend(right_initial.clone());
     }
 

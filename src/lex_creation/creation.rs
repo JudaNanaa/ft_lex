@@ -23,7 +23,7 @@ pub fn lex_creation(file_parts: FilePart) -> std::io::Result<()> {
 
     let file_content = open_template_file(INCLUDES)?;
 
-    file.write(file_content.as_bytes())?;
+    file.write_all(file_content.as_bytes())?;
     // writeln!(&mut file, )?;
     todo!();
 }

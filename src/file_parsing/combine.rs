@@ -8,7 +8,7 @@ use crate::regex::{
 
 use super::RuleAction;
 
-fn map_final_states_to_actions(rules: &Vec<RuleAction>) -> HashMap<usize, Vec<String>> {
+fn map_final_states_to_actions(rules: &[RuleAction]) -> HashMap<usize, Vec<String>> {
     let mut final_state_actions = HashMap::new();
     let mut initial_state_actions = Vec::new();
 
@@ -29,7 +29,7 @@ fn map_final_states_to_actions(rules: &Vec<RuleAction>) -> HashMap<usize, Vec<St
     return final_state_actions;
 }
 
-fn extract_all_nfas(rules: &Vec<RuleAction>) -> Vec<NFA> {
+fn extract_all_nfas(rules: &[RuleAction]) -> Vec<NFA> {
     return rules.iter().map(|rule| rule.nfa.clone()).collect();
 }
 
