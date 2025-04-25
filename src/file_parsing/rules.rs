@@ -42,7 +42,11 @@ fn resolve_definition(name: String, definitions: &Vec<Definition>) -> Result<Str
     }
 
     for def in definitions {
-        if let Definition::Definition { name: def_name, value } = def {
+        if let Definition::Definition {
+            name: def_name,
+            value,
+        } = def
+        {
             if *def_name == name {
                 return Ok(format!("({})", value));
             }
@@ -52,7 +56,11 @@ fn resolve_definition(name: String, definitions: &Vec<Definition>) -> Result<Str
 }
 
 /// Extrait le contenu entre accolades dans une règle.
-fn extract_braced_definition(rule: &mut String, file: &mut FileInfo, defs: &Vec<Definition>) -> Result<(), &'static str> {
+fn extract_braced_definition(
+    rule: &mut String,
+    file: &mut FileInfo,
+    defs: &Vec<Definition>,
+) -> Result<(), &'static str> {
     let mut def_name = String::new();
 
     while let Some(ch) = file.it.next() {

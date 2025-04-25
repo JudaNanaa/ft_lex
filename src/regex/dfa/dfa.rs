@@ -8,16 +8,15 @@ use super::{DfaTransition, State, DFA};
 use crate::regex::NFA;
 
 fn final_states(dfa: &DFA, final_states: HashSet<usize>) -> HashSet<State> {
+    let mut new_final_state = HashSet::new();
 
-	let mut new_final_state = HashSet::new();
+    for state in dfa.transitions.keys() {
+        if state.state.iter().any(|s| final_states.contains(s)) {
+            new_final_state.insert(state.clone());
+        }
+    }
 
-	for state in dfa.transitions.keys() {
-		if state.state.iter().any(|s| final_states.contains(s)) {
-			new_final_state.insert(state.clone());
-		}
-	}
-
-	return new_final_state;
+    return new_final_state;
 }
 
 fn get_target_state_for_input(nfa: &NFA, current_state: &State, input_char: &char) -> State {
@@ -90,7 +89,6 @@ pub fn construct_dfa(nfa: NFA) -> DFA {
     return dfa;
 }
 
-
 fn escape_label(label: &str) -> String {
     label
         .replace('\\', "\\\\") // échappe \ en \\
@@ -107,7 +105,7 @@ pub fn generate_dot_file(dfa: &DFA) -> std::io::Result<()> {
 
     // États finaux avec double cercle
     for state in dfa.transitions.keys() {
-		if dfa.final_states.contains(state) {
+        if dfa.final_states.contains(state) {
             writeln!(file, "  \"{:?}\" [shape=doublecircle];", state.state)?;
         }
     }

@@ -2,7 +2,10 @@ use std::{fs::File, io::Read, process::exit};
 
 use crate::file_parsing::FilePart;
 
-use super::{combine::process_and_combine_rules, definitions::parse_definitions_part, rules::parse_rules_section, user_routine::parse_user_routine_part, FileInfo};
+use super::{
+    combine::process_and_combine_rules, definitions::parse_definitions_part,
+    rules::parse_rules_section, user_routine::parse_user_routine_part, FileInfo,
+};
 
 fn get_file_content(file_path: &str) -> Result<String, Box<dyn std::error::Error>> {
     let mut file = File::open(file_path)?;

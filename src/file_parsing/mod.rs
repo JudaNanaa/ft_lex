@@ -1,6 +1,9 @@
 use std::{collections::HashMap, iter::Peekable, str::Chars};
 
-use crate::regex::{dfa::{State, DFA}, NFA};
+use crate::regex::{
+    dfa::{State, DFA},
+    NFA,
+};
 
 mod combine;
 mod definitions;
