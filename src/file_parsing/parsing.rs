@@ -1,8 +1,8 @@
 use std::{fs::File, io::Read, process::exit};
 
-use crate::file_parsing::{combine::combine_rules, rules::parse_rules_part, FilePart};
+use crate::file_parsing::FilePart;
 
-use super::{definitions::parse_definitions_part, user_routine::parse_user_routine_part, FileInfo};
+use super::{combine::process_and_combine_rules, definitions::parse_definitions_part, rules::parse_rules_section, user_routine::parse_user_routine_part, FileInfo};
 
 fn get_file_content(file_path: &str) -> Result<String, Box<dyn std::error::Error>> {
     let mut file = File::open(file_path)?;
@@ -32,7 +32,7 @@ pub fn parsing_lex_file(file_path: &str) -> Result<FilePart, String> {
         }
     };
 
-    let (rules, in_yylex) = match parse_rules_part(&mut file, &definitions) {
+    let (rules, in_yylex) = match parse_rules_section(&mut file, &definitions) {
         Ok(value) => value,
         Err(message) => {
             eprintln!("{}:{}: {}", file.name, file.line_nb, message);
@@ -40,7 +40,7 @@ pub fn parsing_lex_file(file_path: &str) -> Result<FilePart, String> {
         }
     };
 
-    let (dfa, actions) = combine_rules(rules)?;
+    let (dfa, actions) = process_and_combine_rules(rules)?;
 
     let user_routine = parse_user_routine_part(&mut file);
 

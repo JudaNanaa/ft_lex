@@ -2,67 +2,65 @@ use std::collections::HashMap;
 
 use crate::regex::{
     combine_nfa::combine_nfa,
-    dfa::{dfa::construct_dfa, DFA},
+    dfa::{dfa::construct_dfa, rule_actions::assiociate_rule_actions, State, DFA},
     NFA,
 };
 
 use super::RuleAction;
 
-fn create_hashmap_final_states(rules: &Vec<RuleAction>) -> HashMap<usize, Vec<String>> {
-    let mut output = HashMap::new();
-    let mut action_for_initial = Vec::new();
+fn map_final_states_to_actions(rules: &Vec<RuleAction>) -> HashMap<usize, Vec<String>> {
+    let mut final_state_actions = HashMap::new();
+    let mut initial_state_actions = Vec::new();
 
     for rule in rules {
-        for state in &rule.nfa.final_states {
-            match state {
-                0 => {
-                    action_for_initial.push(rule.action.clone());
-                }
-                _ => {
-                    output.insert(*state, vec![rule.action.clone()]);
-                }
+        for &final_state in &rule.nfa.final_states {
+            if final_state == 0 {
+                initial_state_actions.push(rule.action.clone());
+            } else {
+                final_state_actions.insert(final_state, vec![rule.action.clone()]);
             }
         }
     }
 
-    if !action_for_initial.is_empty() {
-        output.insert(0, action_for_initial);
+    if !initial_state_actions.is_empty() {
+        final_state_actions.insert(0, initial_state_actions);
     }
-    return output;
+
+    return final_state_actions;
 }
 
-fn get_all_nfa(rules: &Vec<RuleAction>) -> Vec<NFA> {
-    let mut output = Vec::new();
-
-    for rule in rules {
-        output.push(rule.nfa.clone());
-    }
-    return output;
+fn extract_all_nfas(rules: &Vec<RuleAction>) -> Vec<NFA> {
+    return rules.iter().map(|rule| rule.nfa.clone()).collect();
 }
 
-pub fn combine_rules(
+pub fn process_and_combine_rules(
     rules: Vec<RuleAction>,
-) -> Result<(DFA, HashMap<usize, Vec<String>>), &'static str> {
-    let mut rule_stack = Vec::new();
-    let mut new_rules = Vec::new();
+) -> Result<(DFA, HashMap<State, Vec<String>>), &'static str> {
+    let mut pipe_buffer = Vec::new();
+    let mut processed_rules = Vec::new();
 
     for rule in rules {
         if rule.action == "|" {
-            rule_stack.push(rule.clone());
+            pipe_buffer.push(rule.clone());
         } else {
-            while let Some(mut elem) = rule_stack.pop() {
-                elem.action = rule.action.clone();
-                new_rules.push(elem);
+            while let Some(mut pending_rule) = pipe_buffer.pop() {
+                pending_rule.action = rule.action.clone();
+                processed_rules.push(pending_rule);
             }
-            new_rules.push(rule);
+            processed_rules.push(rule);
         }
     }
-    if !rule_stack.is_empty() {
-        return Err("| not close");
+
+    if !pipe_buffer.is_empty() {
+        return Err("Un symbole '|' n’a pas été suivi d’une action.");
     }
-    let hash = create_hashmap_final_states(&new_rules);
-    let nfas = get_all_nfa(&new_rules);
-    let nfa_combine = combine_nfa(nfas);
-    let dfa = construct_dfa(nfa_combine);
-    return Ok((dfa, hash));
+
+    let final_state_map = map_final_states_to_actions(&processed_rules);
+    let nfa_list = extract_all_nfas(&processed_rules);
+    let combined_nfa = combine_nfa(nfa_list);
+    let dfa = construct_dfa(combined_nfa);
+
+    let action_mapping = assiociate_rule_actions(&dfa, final_state_map.clone());
+
+    return Ok((dfa, action_mapping));
 }

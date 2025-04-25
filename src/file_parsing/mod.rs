@@ -1,6 +1,6 @@
 use std::{collections::HashMap, iter::Peekable, str::Chars};
 
-use crate::regex::{dfa::DFA, NFA};
+use crate::regex::{dfa::{State, DFA}, NFA};
 
 mod combine;
 mod definitions;
@@ -41,6 +41,6 @@ pub struct FilePart {
     definitions: Vec<Definition>,
     in_yylex: Vec<String>,
     dfa: DFA,
-    actions: HashMap<usize, Vec<String>>,
+    actions: HashMap<State, Vec<String>>,
     user_routine: String,
 }

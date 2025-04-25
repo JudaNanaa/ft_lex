@@ -7,6 +7,19 @@ use std::process::Command;
 use super::{DfaTransition, State, DFA};
 use crate::regex::NFA;
 
+fn final_states(dfa: &DFA, final_states: HashSet<usize>) -> HashSet<State> {
+
+	let mut new_final_state = HashSet::new();
+
+	for state in dfa.transitions.keys() {
+		if state.state.iter().any(|s| final_states.contains(s)) {
+			new_final_state.insert(state.clone());
+		}
+	}
+
+	return new_final_state;
+}
+
 fn get_target_state_for_input(nfa: &NFA, current_state: &State, input_char: &char) -> State {
     let mut store: HashSet<usize> = HashSet::new();
 
@@ -66,9 +79,9 @@ pub fn construct_dfa(nfa: NFA) -> DFA {
         }
     }
 
-    dfa.final_states = nfa.final_states;
+    dfa.final_states = final_states(&dfa, nfa.final_states);
     println!("nb state dfa == {}", dfa.transitions.len());
-    match generate_file_dot(&dfa) {
+    match generate_dot_file(&dfa) {
         Ok(_) => {}
         Err(error) => {
             eprintln!("Unexpected error with dfa.dot generating {}", error);
@@ -77,15 +90,15 @@ pub fn construct_dfa(nfa: NFA) -> DFA {
     return dfa;
 }
 
+
 fn escape_label(label: &str) -> String {
-    dbg!(&label);
     label
         .replace('\\', "\\\\") // échappe \ en \\
         .replace('"', "\\\"") // échappe " en \"
         .replace('\n', "\\\\n") // échappe retour ligne en \n
 }
 
-pub fn generate_file_dot(dfa: &DFA) -> std::io::Result<()> {
+pub fn generate_dot_file(dfa: &DFA) -> std::io::Result<()> {
     let mut file = File::create("dfa.dot")?;
 
     writeln!(file, "digraph DFA {{")?;
@@ -94,7 +107,7 @@ pub fn generate_file_dot(dfa: &DFA) -> std::io::Result<()> {
 
     // États finaux avec double cercle
     for state in dfa.transitions.keys() {
-        if state.state.iter().any(|s| dfa.final_states.contains(s)) {
+		if dfa.final_states.contains(state) {
             writeln!(file, "  \"{:?}\" [shape=doublecircle];", state.state)?;
         }
     }

@@ -2,6 +2,7 @@ use std::collections::HashSet;
 use std::{collections::HashMap, fmt::Debug};
 
 pub mod dfa;
+pub mod rule_actions;
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct State {
@@ -27,7 +28,7 @@ pub struct DfaTransition {
 #[derive(Clone, PartialEq, Eq)]
 pub struct DFA {
     transitions: HashMap<State, Vec<DfaTransition>>,
-    final_states: HashSet<usize>,
+    final_states: HashSet<State>,
 }
 
 impl DFA {
