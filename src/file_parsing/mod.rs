@@ -44,7 +44,7 @@ pub struct FilePart {
     definitions: Vec<Definition>,
     in_yylex: Vec<String>,
     dfa: DFA,
-    actions: HashMap<State, Vec<String>>,
+    actions: HashMap<usize, Vec<String>>,
     user_routine: String,
 }
 

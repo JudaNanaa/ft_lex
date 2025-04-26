@@ -26,10 +26,19 @@ pub struct DfaTransition {
     target_state: State,
 }
 
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub struct NewDfaTransition {
+    input: char,
+    target_state: usize,
+}
+
 #[derive(Clone, PartialEq, Eq)]
 pub struct DFA {
     transitions: HashMap<State, Vec<DfaTransition>>,
     final_states: HashSet<State>,
+	test:HashMap<State, usize>,
+    new_transitions: HashMap<usize, Vec<NewDfaTransition>>,
+    new_final_states: HashSet<usize>,
 }
 
 impl DFA {
@@ -37,6 +46,9 @@ impl DFA {
         return Self {
             transitions: HashMap::new(),
             final_states: HashSet::new(),
+			test: HashMap::new(),
+            new_transitions: HashMap::new(),
+            new_final_states: HashSet::new(),
         };
     }
 }

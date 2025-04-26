@@ -35,7 +35,7 @@ fn extract_all_nfas(rules: &[RuleAction]) -> Vec<NFA> {
 
 pub fn process_and_combine_rules(
     rules: Vec<RuleAction>,
-) -> Result<(DFA, HashMap<State, Vec<String>>), &'static str> {
+) -> Result<(DFA, HashMap<usize, Vec<String>>), &'static str> {
     let mut pipe_buffer = Vec::new();
     let mut processed_rules = Vec::new();
 
