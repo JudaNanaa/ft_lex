@@ -47,3 +47,9 @@ pub struct FilePart {
     actions: HashMap<State, Vec<String>>,
     user_routine: String,
 }
+
+impl FilePart {
+    pub fn user_routine(&self) -> &str {
+        return &self.user_routine;
+    }
+}

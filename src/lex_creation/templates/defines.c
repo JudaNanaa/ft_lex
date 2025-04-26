@@ -5,3 +5,4 @@
  *   integer in range [0..255] for use as an array index.
  */
 #define YY_CHAR_TO_INT(c) ((uint_8_t) (c))
+

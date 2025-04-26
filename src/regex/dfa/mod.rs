@@ -2,6 +2,7 @@ use std::collections::HashSet;
 use std::{collections::HashMap, fmt::Debug};
 
 pub mod dfa;
+mod dot;
 pub mod rule_actions;
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]

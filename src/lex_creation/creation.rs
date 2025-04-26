@@ -1,29 +1,22 @@
-use std::{
-    fs::File,
-    io::{Read, Write},
-};
+use std::fs::File;
 
 use crate::{
     file_parsing::FilePart,
-    lex_creation::{INCLUDES, LEX_FILE},
+    lex_creation::{
+        write::{write_defines, write_includes, write_user_routine, write_variables},
+        LEX_FILE,
+    },
 };
-
-fn open_template_file(file_path: &str) -> std::io::Result<String> {
-    let mut file = File::open(file_path)?;
-
-    let mut file_content = String::new();
-
-    file.read_to_string(&mut file_content)?;
-
-    return Ok(file_content);
-}
 
 pub fn lex_creation(file_parts: FilePart) -> std::io::Result<()> {
     let mut file = File::create(LEX_FILE)?;
 
-    let file_content = open_template_file(INCLUDES)?;
+    write_includes(&mut file)?;
+    write_defines(&mut file)?;
+    write_variables(&mut file)?;
 
-    file.write_all(file_content.as_bytes())?;
-    // writeln!(&mut file, )?;
+    // Write user routine
+    write_user_routine(file_parts.user_routine(), &mut file)?;
+
     todo!();
 }
