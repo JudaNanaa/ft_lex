@@ -36,7 +36,7 @@ pub struct NewDfaTransition {
 pub struct DFA {
     transitions: HashMap<State, Vec<DfaTransition>>,
     final_states: HashSet<State>,
-	test:HashMap<State, usize>,
+    test: HashMap<State, usize>,
     new_transitions: HashMap<usize, Vec<NewDfaTransition>>,
     new_final_states: HashSet<usize>,
 }
@@ -46,7 +46,7 @@ impl DFA {
         return Self {
             transitions: HashMap::new(),
             final_states: HashSet::new(),
-			test: HashMap::new(),
+            test: HashMap::new(),
             new_transitions: HashMap::new(),
             new_final_states: HashSet::new(),
         };
@@ -57,23 +57,9 @@ use std::fmt::{Formatter, Result as FmtResult};
 
 impl Debug for DFA {
     fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
-        let filtered: HashMap<_, Vec<_>> = self
-            .transitions
-            .iter()
-            .map(|(state, transitions)| {
-                let filtered_transitions: Vec<_> = transitions
-                    .iter()
-                    .filter(|t| !t.target_state.is_trap())
-                    .cloned()
-                    .collect();
-                (state, filtered_transitions)
-            })
-            .filter(|(_, transitions)| !transitions.is_empty())
-            .collect();
-
         f.debug_struct("DFA")
-            .field("transitions", &filtered)
-            .field("final_states", &self.final_states)
+            .field("new_transitions", &self.new_transitions)
+            .field("new_final_states", &self.new_final_states)
             .finish()
     }
 }

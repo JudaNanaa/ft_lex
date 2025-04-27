@@ -12,8 +12,8 @@ pub fn assiociate_rule_actions(
         let mut action_for_state = Vec::new();
         for elem in &state.state {
             if let Some(tab) = actions_table.get(elem) {
-				action_for_state.extend(tab.clone());
-			}
+                action_for_state.extend(tab.clone());
+            }
         }
         new_hash.insert(*dfa.test.get(state).unwrap(), action_for_state);
     }

@@ -52,7 +52,7 @@ pub fn process_and_combine_rules(
     }
 
     if !pipe_buffer.is_empty() {
-        return Err("Un symbole '|' n’a pas été suivi d’une action.");
+        return Err("Un symbole '|' n'a pas été suivi d'une action.");
     }
 
     let final_state_map = map_final_states_to_actions(&processed_rules);

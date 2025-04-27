@@ -7,6 +7,18 @@ use crate::regex::dfa::dot::generate_dot_file;
 use crate::regex::dfa::NewDfaTransition;
 use crate::regex::NFA;
 
+fn new_final_states(dfa: &DFA) -> HashSet<usize> {
+    let mut new_final_state = HashSet::new();
+
+    for state in &dfa.final_states {
+        if let Some(nb) = dfa.test.get(&state) {
+            new_final_state.insert(*nb);
+        }
+    }
+
+    return new_final_state;
+}
+
 fn final_states(dfa: &DFA, final_states: HashSet<usize>) -> HashSet<State> {
     let mut new_final_state = HashSet::new();
 
@@ -53,9 +65,9 @@ pub fn construct_dfa(nfa: NFA) -> DFA {
     // Stack of DFA states to process
     let mut unprocessed_states = VecDeque::from(vec![State { state: vec![0] }]);
 
-	dfa.test.insert(State { state: vec![0] }, 0);
+    dfa.test.insert(State { state: vec![0] }, 0);
 
-	let mut new_state = 1;
+    let mut new_state = 1;
 
     while let Some(current_state) = unprocessed_states.pop_front() {
         let mut transitions_from_current = Vec::with_capacity(alphabet.len());
@@ -65,18 +77,15 @@ pub fn construct_dfa(nfa: NFA) -> DFA {
         for input_char in &alphabet {
             let state = get_target_state_for_input(&nfa, &current_state, input_char);
             if !state.is_trap() {
-
-				let nb = match dfa.test.contains_key(&state) {
-					true => {
-						*dfa.test.get(&state).unwrap()
-					},
-					false => {
-						let n = new_state;
-						dfa.test.insert(state.clone(), new_state);
-						new_state += 1;
-						n
-					}
-				};
+                let nb = match dfa.test.contains_key(&state) {
+                    true => *dfa.test.get(&state).unwrap(),
+                    false => {
+                        let n = new_state;
+                        dfa.test.insert(state.clone(), new_state);
+                        new_state += 1;
+                        n
+                    }
+                };
 
                 transitions_from_current.push(DfaTransition {
                     input: *input_char,
@@ -89,12 +98,13 @@ pub fn construct_dfa(nfa: NFA) -> DFA {
                 });
             }
         }
-        dfa.new_transitions
-            .insert(*dfa.test.get(&current_state).unwrap(), new_transitions_from_current.clone());
-		
+        dfa.new_transitions.insert(
+            *dfa.test.get(&current_state).unwrap(),
+            new_transitions_from_current.clone(),
+        );
+
         dfa.transitions
             .insert(current_state, transitions_from_current.clone());
-
 
         for transition in transitions_from_current {
             if !dfa.transitions.contains_key(&transition.target_state)
@@ -105,9 +115,8 @@ pub fn construct_dfa(nfa: NFA) -> DFA {
         }
     }
 
-	dbg!(&dfa.new_transitions);
-
     dfa.final_states = final_states(&dfa, nfa.final_states);
+    dfa.new_final_states = new_final_states(&dfa);
     println!("nb state dfa == {}", dfa.transitions.len());
     match generate_dot_file(&dfa) {
         Ok(_) => {}
