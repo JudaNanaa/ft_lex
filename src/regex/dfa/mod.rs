@@ -39,6 +39,7 @@ pub struct DFA {
     test: HashMap<State, usize>,
     new_transitions: HashMap<usize, Vec<NewDfaTransition>>,
     new_final_states: HashSet<usize>,
+	charset: HashSet<char>,
 }
 
 impl DFA {
@@ -49,8 +50,13 @@ impl DFA {
             test: HashMap::new(),
             new_transitions: HashMap::new(),
             new_final_states: HashSet::new(),
+            charset: HashSet::new(),
         };
     }
+
+	pub fn charset(&self) -> &HashSet<char> {
+		return &self.charset;
+	} 
 }
 
 use std::fmt::{Formatter, Result as FmtResult};
@@ -60,6 +66,7 @@ impl Debug for DFA {
         f.debug_struct("DFA")
             .field("new_transitions", &self.new_transitions)
             .field("new_final_states", &self.new_final_states)
+            .field("charset", &self.charset)
             .finish()
     }
 }

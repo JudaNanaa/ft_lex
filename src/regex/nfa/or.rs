@@ -3,6 +3,7 @@ use super::NFA;
 pub fn or(left: NFA, right: NFA) -> NFA {
     let mut transitions = left.transitions;
     let mut final_states = left.final_states;
+	let mut charset = left.charset;
 
     for (state, mut trans) in right.transitions {
         transitions
@@ -12,10 +13,12 @@ pub fn or(left: NFA, right: NFA) -> NFA {
     }
 
     final_states.extend(right.final_states);
+    charset.extend(right.charset);
 
     return NFA {
         transitions,
         final_states,
+		charset,
     };
 }
 
@@ -33,6 +36,7 @@ mod tests {
         let mut nfa = NFA {
             transitions: HashMap::new(),
             final_states: HashSet::from([1]),
+            charset: HashSet::from(['a']),
         };
 
         nfa.transitions.insert(
@@ -51,6 +55,7 @@ mod tests {
         let mut nfa = NFA {
             transitions: HashMap::new(),
             final_states: HashSet::from([2]),
+            charset: HashSet::from(['b']),
         };
 
         nfa.transitions.insert(

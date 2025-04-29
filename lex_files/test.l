@@ -5,8 +5,9 @@ int line_num = 1;
 %s test
 %s comment
 
-test [0-9]
+DIGIT [0-9]
 
 %%
-ab|abc printf("chef");
+
+dad printf("NUMBER: %s\n", yytext);
 %%

@@ -1,4 +1,3 @@
-use std::collections::HashMap;
 use std::collections::HashSet;
 use std::collections::VecDeque;
 
@@ -117,6 +116,7 @@ pub fn construct_dfa(nfa: NFA) -> DFA {
 
     dfa.final_states = final_states(&dfa, nfa.final_states);
     dfa.new_final_states = new_final_states(&dfa);
+	dfa.charset = nfa.charset;
     println!("nb state dfa == {}", dfa.transitions.len());
     match generate_dot_file(&dfa) {
         Ok(_) => {}

@@ -52,4 +52,7 @@ impl FilePart {
     pub fn user_routine(&self) -> &str {
         return &self.user_routine;
     }
+    pub fn dfa(&self) -> &DFA {
+        return &self.dfa;
+    }
 }

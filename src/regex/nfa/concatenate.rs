@@ -18,10 +18,12 @@ pub fn concatenate(mut left: NFA, mut right: NFA) -> NFA {
     }
 
     left.transitions.extend(right.transitions);
+	left.charset.extend(right.charset);
 
     return NFA {
         transitions: left.transitions,
         final_states: right.final_states,
+		charset: left.charset
     };
 }
 
@@ -36,6 +38,7 @@ mod tests {
         let mut nfa = NFA {
             transitions: HashMap::new(),
             final_states: HashSet::from([2]),
+            charset: HashSet::from(['a', 'b']),
         };
 
         // Transition de 0 à 1 avec le caractère 'a'
@@ -63,6 +66,7 @@ mod tests {
         let mut nfa = NFA {
             transitions: HashMap::new(),
             final_states: HashSet::from([4]),
+            charset: HashSet::from(['a', 'b']),
         };
 
         // Transition de 0 à 1 avec le caractère 'c'
@@ -133,6 +137,7 @@ mod tests {
         let mut right = NFA {
             transitions: HashMap::new(),
             final_states: HashSet::from([3]),
+            charset: HashSet::from(['a', 'b']),
         };
 
         right.transitions.insert(
