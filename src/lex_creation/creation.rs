@@ -2,8 +2,7 @@ use std::fs::File;
 
 use crate::{
     file_parsing::FilePart,
-    lex_creation::{
-        tables::tables_creation, write::{write_defines, write_includes, write_user_routine, write_variables}, LEX_FILE
+    lex_creation::{tables::table::tables_creation, write::{write_defines, write_includes, write_user_routine, write_variables}, LEX_FILE
     },
 };
 

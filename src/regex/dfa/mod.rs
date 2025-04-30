@@ -32,6 +32,16 @@ pub struct NewDfaTransition {
     target_state: usize,
 }
 
+impl NewDfaTransition {
+	pub fn input(&self) -> &char {
+		return &self.input;
+	}
+
+	pub fn target_state(&self) -> &usize {
+		return &self.target_state;
+	}
+}
+
 #[derive(Clone, PartialEq, Eq)]
 pub struct DFA {
     transitions: HashMap<State, Vec<DfaTransition>>,
