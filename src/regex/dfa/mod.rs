@@ -56,7 +56,11 @@ impl DFA {
 
 	pub fn charset(&self) -> &HashSet<char> {
 		return &self.charset;
-	} 
+	}
+
+	pub fn new_transitions(&self) -> &HashMap<usize, Vec<NewDfaTransition>> {
+		return &self.new_transitions;
+	}
 }
 
 use std::fmt::{Formatter, Result as FmtResult};

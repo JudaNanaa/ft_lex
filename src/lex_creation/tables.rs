@@ -1,6 +1,6 @@
 use std::{collections::{HashMap, HashSet}, fs::File, io::Write};
 
-use crate::file_parsing::FilePart;
+use crate::{file_parsing::FilePart, regex::dfa::DFA};
 
 const SPACE: &str = "    ";
 
@@ -38,9 +38,23 @@ fn create_yy_ec(charset: &HashSet<char>, file: &mut File) -> std::io::Result<Has
     return Ok(hash);
 }
 
+fn create_yy_nxt(dfa: &DFA, hash: &HashMap<char, usize>, file: &mut File) -> std::io::Result<()> {
+
+	let nb_states = dfa.new_transitions().iter().count();
+	dbg!(nb_states);
+
+	for i in 0..nb_states {
+		let transitions = dfa.new_transitions().get(&i).unwrap();
+		dbg!(transitions);
+	}
+
+	todo!();
+}
 
 pub fn tables_creation(file_parts: &FilePart, file: &mut File) -> std::io::Result<()> {
 
 	let eq_hash = create_yy_ec(file_parts.dfa().charset(), file)?;
+
+	create_yy_nxt(file_parts.dfa(), &eq_hash, file)?;
     return Ok(());
 }
