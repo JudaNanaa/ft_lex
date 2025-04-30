@@ -8,5 +8,5 @@ int line_num = 1;
 DIGIT [0-9]
 
 %%
-dad printf("NUMBER: %s\n", yytext);
+dadadadadadadad printf("NUMBER: %s\n", yytext);
 %%

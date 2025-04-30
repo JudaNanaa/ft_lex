@@ -71,6 +71,10 @@ impl DFA {
 	pub fn new_transitions(&self) -> &HashMap<usize, Vec<NewDfaTransition>> {
 		return &self.new_transitions;
 	}
+
+	pub fn new_final_states(&self) -> &HashSet<usize> {
+		return &self.new_final_states;
+	}
 }
 
 use std::fmt::{Formatter, Result as FmtResult};

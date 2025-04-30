@@ -1,4 +1,4 @@
-use std::{collections::HashMap, fs::File, io::Write};
+use std::{any::type_name, collections::HashMap, fs::File, io::Write};
 
 use crate::{lex_creation::tables::SPACE, regex::dfa::DFA};
 
@@ -14,6 +14,9 @@ fn write_yy_nxt(transition_table: &Vec<Vec<usize>>, file: &mut File) -> std::io:
 			write!(file, "{}", elem)?;
 			if index != 0 && index % 10 == 0 {
 				write!(file, ",")?;
+				if index != state.len() - 1 {
+					write!(file, "\n{}", SPACE.repeat(2))?;
+				}
 			}
 			else if index != state.len() - 1 {
 				write!(file, ",{}", SPACE)?;
@@ -29,13 +32,12 @@ fn write_yy_nxt(transition_table: &Vec<Vec<usize>>, file: &mut File) -> std::io:
 			writeln!(file, "{}}}", SPACE.repeat(2))?;
 		}
 	}
-    writeln!(file, "{}}} ;", SPACE)?;
+    writeln!(file, "{}}} ;\n", SPACE)?;
 
-
-	todo!();
+	return Ok(());
 }
 
-pub fn create_yy_nxt(dfa: &DFA, hash: &HashMap<char, usize>, file: &mut File) -> std::io::Result<()> {
+pub fn create_yy_nxt(dfa: &DFA, hash: &HashMap<char, usize>, file: &mut File) -> std::io::Result<Vec<Vec<usize>>> {
 
 	let nb_states = dfa.new_transitions().iter().count();
 	dbg!(nb_states);
@@ -60,5 +62,5 @@ pub fn create_yy_nxt(dfa: &DFA, hash: &HashMap<char, usize>, file: &mut File) ->
 	dbg!(&transition_table);
 
 	write_yy_nxt(&transition_table, file)?;
-	todo!();
+	return Ok(transition_table);
 }
