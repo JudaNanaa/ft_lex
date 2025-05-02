@@ -30,6 +30,8 @@ int yyleng;
 static int yy_init = 0;		/* whether we need to initialize */
 static int yy_start = -1;	/* start state number */
 
+#define ECHO fwrite( yytext, (size_t) yyleng, 1, yyout );
+
 static const unsigned char yy_ec[256] =
     { 0,
         0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
@@ -146,7 +148,18 @@ void if_no_match(char *last_pos) {
 	// printf("remaining if_no_match = [%s]\n", buffer.str);
 }
 
+void set_yytext(char *last_pos) {
+	yyleng = (last_pos + 1) - buffer.str;
+	free(yytext);		
+	yytext = malloc(sizeof(char) * (yyleng + 1));
+	if (yytext == NULL)
+		yy_fatal_error( "out of dynamic memory in set_yytext()" );
+	memcpy(yytext, buffer.str, yyleng);
+	yytext[yyleng] = '\0';
+}
+
 void if_match(char *last_pos) {
+	set_yytext(last_pos);
 	memmove(buffer.str, last_pos + 1, (&buffer.str[buffer.len]) - (last_pos + 1));
 	bzero(&buffer.str[(&buffer.str[buffer.len]) - (last_pos + 1)], buffer.len - ((&buffer.str[buffer.len]) - (last_pos + 1)));
 	buffer.len = &buffer.str[buffer.len] - (last_pos + 1);
@@ -170,11 +183,17 @@ char *next_char(void) {
 	return pos;
 }
 
+void action_for_state(int final_state)
+{
+	switch (final_state) {
+		
+	}
+}
 
 int yylex(void) {
 	int current_state;
 	int last_accepting_state;
-	char *last_accepting_cpos;
+	char *last_accepting_cpos = NULL;
 	int c;
 	int yy_act;
 
@@ -224,7 +243,9 @@ int yylex(void) {
 			else
 			{
 				if_match(last_accepting_cpos);
-				printf("tu as ecris dad\n"); // TODO a changer
+				action_for_state(current_state);
+				printf("chef tu as ecris [%s]\n", yytext); // TODO a changer
+				printf("chef la len est de [%d]\n", yyleng); // TODO a changer
 			}
 			last_accepting_cpos = 0;
 			last_accepting_state = 0;
@@ -233,8 +254,9 @@ int yylex(void) {
 		current_state = next_state;
 	}
 
+	free(buffer.str);
 	printf("chef\n");
-	return 1;
+	return 0;
 }
 
 

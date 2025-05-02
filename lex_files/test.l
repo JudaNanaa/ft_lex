@@ -8,5 +8,12 @@ int line_num = 1;
 DIGIT [0-9]
 
 %%
-dad printf("NUMBER: [%s]\n", yytext);
+a printf("WORD: [%s]\n", yytext); ECHO; REJECT;
+a* printf("test: [%s]\n", yytext);
+a+ printf("ok: [%s]\n", yytext);
+ab printf("test: [%s]\n", yytext);
+ac printf("test: [%s]\n", yytext);
+ad printf("test: [%s]\n", yytext);
+
+
 %%

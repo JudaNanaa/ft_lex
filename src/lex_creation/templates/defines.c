@@ -6,3 +6,5 @@
  */
 #define YY_CHAR_TO_INT(c) ((uint8_t) (c))
 
+#define ECHO fwrite( yytext, (size_t) yyleng, 1, yyout );
+
