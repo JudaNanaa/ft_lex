@@ -5,5 +5,6 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdint.h>
+#include <unistd.h>
 
 /* end standard C headers. */

@@ -9,3 +9,5 @@ array or pointer
 passer de 127 a 255 chars
 
 compression des tables -> https://stackoverflow.com/questions/29139162/dfa-state-transition-table-compression
+
+changer le yy_accept
