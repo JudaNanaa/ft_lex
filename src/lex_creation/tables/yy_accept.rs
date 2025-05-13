@@ -17,7 +17,7 @@ fn generate_accept_tab(dfa: &DFA) -> Vec<u8> {
 	return tab;
 }
 
-pub fn yy_accept(dfa: &DFA, file: &mut File) -> std::io::Result<()> {
+pub fn yy_accept(dfa: &DFA, file: &mut File) -> std::io::Result<Vec<u8>> {
 
 	let nb_state = dfa.new_transitions().len();
 
@@ -44,5 +44,5 @@ pub fn yy_accept(dfa: &DFA, file: &mut File) -> std::io::Result<()> {
 	}
     writeln!(file, "{}}} ;\n", SPACE)?;
 
-	todo!();
+	return Ok(accept_tab);
 }

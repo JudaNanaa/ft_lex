@@ -55,4 +55,7 @@ impl FilePart {
     pub fn dfa(&self) -> &DFA {
         return &self.dfa;
     }
+    pub fn actions(&self) -> &HashMap<usize, Vec<String>> {
+        return &self.actions;
+    }
 }
