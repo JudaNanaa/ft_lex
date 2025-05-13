@@ -15,7 +15,7 @@ fn main() {
         Ok(elems) => elems,
     };
 
-    dbg!(&file_parts);
+    // dbg!(&file_parts);
 
     lex_creation(file_parts);
 }

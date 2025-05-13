@@ -147,7 +147,6 @@ pub fn parse_definitions_part(file: &mut FileInfo) -> Result<Vec<Definition>, St
                             names: exclusive_states,
                         });
                         skip_to_newline(file);
-                        dbg!(&definition_list);
                         return Ok(definition_list);
                     } else if *char_next == 's' || *char_next == 'x' {
                         let state = match *char_next {

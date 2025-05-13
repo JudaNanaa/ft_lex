@@ -42,10 +42,11 @@ pub fn at_least(nfa: NFA, count: usize) -> (NFA, usize) {
     let kleene_offset = get_offset_from_nfa(&repeated);
     let shifted_kleene = shift_states(&kleene_part, &kleene_offset);
 
-    let result = concatenate(repeated, shifted_kleene);
+    let mut result = concatenate(repeated, shifted_kleene);
 
     let next_id = result.final_states.iter().max().copied().unwrap_or(0) + 1;
 
+	result.charset = nfa.charset;
     return (result, next_id);
 }
 

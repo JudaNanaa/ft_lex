@@ -4,6 +4,9 @@ all: run
 run:
 	cargo r -- lex_files/test.l
 
+dotfile:
+	cargo run --features dotfile -- lex_files/test.l
+
 test:
 	cargo t
 

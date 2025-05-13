@@ -1,8 +1,10 @@
 use std::collections::HashSet;
 use std::collections::VecDeque;
 
+#[cfg(feature = "dotfile")]
+	use crate::regex::dfa::dot::generate_dot_file;
+
 use super::{DfaTransition, State, DFA};
-use crate::regex::dfa::dot::generate_dot_file;
 use crate::regex::dfa::NewDfaTransition;
 use crate::regex::NFA;
 
@@ -118,11 +120,13 @@ pub fn construct_dfa(nfa: NFA) -> DFA {
     dfa.new_final_states = new_final_states(&dfa);
 	dfa.charset = nfa.charset;
     println!("nb state dfa == {}", dfa.transitions.len());
-    match generate_dot_file(&dfa) {
-        Ok(_) => {}
-        Err(error) => {
-            eprintln!("Unexpected error with dfa.dot generating {}", error);
-        }
-    }
+
+	#[cfg(feature = "dotfile")]
+		match generate_dot_file(&dfa) {
+			Ok(_) => {}
+			Err(error) => {
+				eprintln!("Unexpected error with dfa.dot generating {}", error);
+			}
+		}
     return dfa;
 }

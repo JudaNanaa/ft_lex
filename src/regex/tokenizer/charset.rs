@@ -26,7 +26,7 @@ fn create_charset_group(charset: String, is_negative: bool) -> Vec<Token> {
             }
         }
     } else {
-        let all_chars = (0..=127u8) // Using ASCII range for simplicity
+        let all_chars = (0..=255u8) // Using ASCII range for simplicity
             .filter_map(|c| char::from_u32(c as u32))
             .collect::<Vec<char>>();
 
@@ -152,7 +152,7 @@ pub fn extract_charset(chars: &mut Chars<'_>) -> Vec<Token> {
 
 pub fn expand_dot() -> Vec<Token> {
     let mut dest = Vec::new();
-    let mut all_chars = (0..=127u8)
+    let mut all_chars = (0..=255u8)
         .filter_map(|c| char::from_u32(c as u32))
         .collect::<Vec<char>>();
 

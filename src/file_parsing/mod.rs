@@ -1,7 +1,7 @@
 use std::{collections::HashMap, iter::Peekable, str::Chars};
 
 use crate::regex::{
-    dfa::{State, DFA},
+    dfa::DFA,
     NFA,
 };
 

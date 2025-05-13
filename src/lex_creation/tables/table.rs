@@ -17,6 +17,7 @@ pub fn tables_creation(file_parts: &FilePart, file: &mut File) -> std::io::Resul
 
 	let transition_table = create_yy_nxt(file_parts.dfa(), &eq_hash, file)?;
 
+
 	let accept_table = yy_accept(file_parts.dfa(), file);
 	create_yylex(&transition_table, file)?;
     return Ok(());

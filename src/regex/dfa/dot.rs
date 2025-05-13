@@ -3,6 +3,7 @@ use std::{fs::File, io::Write};
 
 use super::DFA;
 
+#[cfg(feature = "dotfile")]
 fn escape_label(label: &str) -> String {
     label
         .replace('\\', "\\\\")
@@ -10,6 +11,7 @@ fn escape_label(label: &str) -> String {
         .replace('\n', "\\\\n")
 }
 
+#[cfg(feature = "dotfile")]
 pub fn generate_dot_file(dfa: &DFA) -> std::io::Result<()> {
     let mut file = File::create("dfa.dot")?;
 

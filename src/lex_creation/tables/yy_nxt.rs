@@ -1,4 +1,4 @@
-use std::{any::type_name, collections::HashMap, fs::File, io::Write};
+use std::{collections::HashMap, fs::File, io::Write};
 
 use crate::{lex_creation::tables::SPACE, regex::dfa::DFA};
 
@@ -40,8 +40,6 @@ fn write_yy_nxt(transition_table: &Vec<Vec<usize>>, file: &mut File) -> std::io:
 pub fn create_yy_nxt(dfa: &DFA, hash: &HashMap<char, usize>, file: &mut File) -> std::io::Result<Vec<Vec<usize>>> {
 
 	let nb_states = dfa.new_transitions().iter().count();
-	dbg!(nb_states);
-
 
 	let mut transition_table: Vec<Vec<usize>> = Vec::with_capacity(nb_states);
 
@@ -52,15 +50,13 @@ pub fn create_yy_nxt(dfa: &DFA, hash: &HashMap<char, usize>, file: &mut File) ->
 		let transitions = dfa.new_transitions().get(&i).unwrap();
 		let mut tab = vec![0; nb_possibilities];
 		for t in transitions {
-			let index = *hash.get(t.input()).unwrap();
-			
-			tab[index] = *t.target_state();
+			if let Some(index) = hash.get(t.input()) {
+				tab[*index] = *t.target_state();
+			}
 		}
 		transition_table.push(tab);
 	}
 	
-	dbg!(&transition_table);
-
 	write_yy_nxt(&transition_table, file)?;
 	return Ok(transition_table);
 }
