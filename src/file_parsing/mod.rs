@@ -45,6 +45,7 @@ pub struct FilePart {
     in_yylex: Vec<String>,
     dfa: DFA,
     actions: HashMap<usize, Vec<String>>,
+    action_hash: HashMap<String, usize>,
     user_routine: String,
 }
 
@@ -57,5 +58,8 @@ impl FilePart {
     }
     pub fn actions(&self) -> &HashMap<usize, Vec<String>> {
         return &self.actions;
+    }
+    pub fn action_hash(&self) -> &HashMap<String, usize>{
+        return &self.action_hash;
     }
 }

@@ -1,6 +1,6 @@
 use std::{fs::File, io::Write};
 
-use crate::{lex_creation::tables::SPACE, regex::dfa::DFA};
+use crate::{lex_creation::SPACE, regex::dfa::DFA};
 
 fn generate_accept_tab(dfa: &DFA) -> Vec<u8> {
 

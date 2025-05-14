@@ -4,7 +4,7 @@ use crate::file_parsing::FilePart;
 
 use super::{
     combine::process_and_combine_rules, definitions::parse_definitions_part,
-    rules::parse_rules_section, user_routine::parse_user_routine_part, FileInfo,
+    rules::{action_hash, parse_rules_section}, user_routine::parse_user_routine_part, FileInfo,
 };
 
 fn get_file_content(file_path: &str) -> Result<String, Box<dyn std::error::Error>> {
@@ -43,6 +43,8 @@ pub fn parsing_lex_file(file_path: &str) -> Result<FilePart, &'static str> {
         }
     };
 
+	let action_hash = action_hash(&rules);
+
     let (dfa, actions) = process_and_combine_rules(rules)?;
 
     let user_routine = parse_user_routine_part(&mut file);
@@ -52,6 +54,7 @@ pub fn parsing_lex_file(file_path: &str) -> Result<FilePart, &'static str> {
         in_yylex,
         dfa,
         actions,
+		action_hash,
         user_routine,
     });
 }

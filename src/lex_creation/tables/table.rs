@@ -21,7 +21,7 @@ pub fn tables_creation(file_parts: &FilePart, file: &mut File) -> std::io::Resul
 	let accept_table = yy_accept(file_parts.dfa(), file)?;
 
 	add_action(file_parts.actions(), file)?;
-	create_yylex(&transition_table, file)?;
+	// create_yylex(&transition_table, file)?;
     return Ok(());
 }
 

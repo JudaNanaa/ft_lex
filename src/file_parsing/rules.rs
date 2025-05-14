@@ -1,8 +1,25 @@
-use std::char;
+use std::{char, collections::HashMap};
 
 use crate::regex::{nfa::nfa::construct_nfa, regex_tokenizer};
 
 use super::{Definition, FileInfo, RuleAction};
+
+pub fn action_hash(rules: &Vec<RuleAction>) -> HashMap<String, usize> {
+
+	let mut hash = HashMap::new();
+	let mut index = 1;
+
+	for rule in rules.iter() {
+		if !hash.contains_key(&rule.action) {
+
+			hash.insert(rule.action.clone(), index);
+
+			index += 1;
+		}
+	}
+
+	return hash;
+}
 
 /// Ajoute tout le contenu entre guillemets dans `rule`.
 fn append_quoted_string(rule: &mut String, file: &mut FileInfo) -> Result<(), &'static str> {

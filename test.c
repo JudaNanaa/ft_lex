@@ -240,7 +240,8 @@ char *next_char(void) {
 void action_for_state(int action)
 {
 	switch (action) {
-		
+		case 1:
+			
 
 		default:
 			yy_fatal_error("not normal");

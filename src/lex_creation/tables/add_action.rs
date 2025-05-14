@@ -1,6 +1,7 @@
 use std::{collections::HashMap, fs::File, io::Write};
 
-use super::SPACE;
+use crate::lex_creation::SPACE;
+
 
 
 
