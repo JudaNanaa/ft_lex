@@ -33,3 +33,5 @@ typedef struct s_buffer {
 } t_buffer;
 
 static t_buffer buffer;
+
+change_me_in_variables!

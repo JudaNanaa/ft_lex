@@ -55,4 +55,7 @@ impl FilePart {
     pub fn in_yylex(&self) -> &[String] {
         return &self.in_yylex;
     }
+    pub fn definitions(&self) -> &[Definition] {
+        return &self.definitions;
+    }
 }

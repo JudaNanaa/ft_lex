@@ -3,6 +3,8 @@ use std::{
     io::{Read, Write},
 };
 
+use crate::file_parsing::Definition;
+
 use super::{
     DEFINES, INCLUDES, VARIABLES, YYLEX, YY_ADD_BUFFER, YY_FATAL_ERROR, YY_IF_MATCH,
     YY_IF_NO_MATCH, YY_INCREASE_ACCEPTING_STACK_LEN, YY_INIT_ACCEPTING_STACK, YY_INIT_BUFFER,
@@ -31,8 +33,23 @@ pub fn write_defines(file: &mut File) -> std::io::Result<()> {
     return Ok(());
 }
 
-pub fn write_variables(file: &mut File) -> std::io::Result<()> {
-    let file_content = open_template_file(VARIABLES)?;
+pub fn write_variables(definitions: &[Definition], file: &mut File) -> std::io::Result<()> {
+    let mut file_content = open_template_file(VARIABLES)?;
+
+    let mut to_add = String::new();
+
+    for elem in definitions {
+        match elem {
+            Definition::Bloc { content } | Definition::LineWithSpace { content } => {
+                to_add.push_str(&content);
+                to_add.push('\n');
+            }
+            _ => {}
+        }
+    }
+
+    file_content = file_content.replace("change_me_in_variables!", &to_add);
+
     file.write_all(file_content.as_bytes())?;
     return Ok(());
 }
@@ -82,15 +99,15 @@ pub fn write_yy_init_buffer(file: &mut File) -> std::io::Result<()> {
 pub fn write_yylex(in_yylex: &[String], file: &mut File) -> std::io::Result<()> {
     let mut file_content = open_template_file(YYLEX)?;
 
-	let mut to_add = String::new();
+    let mut to_add = String::new();
 
-	for elem in in_yylex {
-		to_add.push_str(&elem);
-	}
+    for elem in in_yylex {
+        to_add.push_str(&elem);
+    }
 
-	dbg!(&to_add);
+    dbg!(&to_add);
 
-	file_content = file_content.replace("change_me_in_yylex!", &to_add);
+    file_content = file_content.replace("change_me_in_yylex!", &to_add);
 
     file.write_all(file_content.as_bytes())?;
     return Ok(());

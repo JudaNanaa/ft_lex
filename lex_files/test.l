@@ -4,7 +4,7 @@ int line_num = 1;
 %}
 %s test
 %s comment
-
+	// okoo
 DIGIT [0-9]
 
 %%
