@@ -8,6 +8,7 @@ int line_num = 1;
 DIGIT [0-9]
 
 %%
+	printf("chef\n");
 "quote\\\"test" printf("ok\n");
 %%
 

@@ -27,6 +27,9 @@ int yylex(void) {
 	len_match = 0;
 	current_state = yy_start;
 	last_accepting_state = yy_start;
+
+	change_me_in_yylex!
+
 	while (1) {
 		char *pos = yy_next_char();
 		if (pos == NULL)
@@ -49,9 +52,7 @@ int yylex(void) {
 				yy_if_no_match(last_accepting_cpos);
 			}
 			else
-			{
 				yy_if_match();
-			}
 			last_accepting_cpos = 0;
 			last_accepting_state = 0;
 			current_state = 0;
