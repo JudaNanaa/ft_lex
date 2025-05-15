@@ -3,7 +3,7 @@ use super::NFA;
 pub fn or(left: NFA, right: NFA) -> NFA {
     let mut transitions = left.transitions;
     let mut final_states = left.final_states;
-	let mut charset = left.charset;
+    let mut charset = left.charset;
 
     for (state, mut trans) in right.transitions {
         transitions
@@ -18,7 +18,7 @@ pub fn or(left: NFA, right: NFA) -> NFA {
     return NFA {
         transitions,
         final_states,
-		charset,
+        charset,
     };
 }
 

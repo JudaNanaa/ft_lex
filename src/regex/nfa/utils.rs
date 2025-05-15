@@ -23,7 +23,7 @@ pub fn shift_states(nfa: &NFA, offset: &usize) -> NFA {
         .map(|state| if *state == 0 { 0 } else { state + offset })
         .collect();
 
-	new_nfa.charset = nfa.charset.clone();
+    new_nfa.charset = nfa.charset.clone();
     return new_nfa;
 }
 

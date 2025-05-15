@@ -15,11 +15,10 @@ fn main() {
         Ok(elems) => elems,
     };
 
-
     dbg!(&file_parts);
 
     match lex_creation(file_parts) {
-		Ok(()) => {},
-		Err(error) => eprintln!("Error: {}", error)
-	}
+        Ok(()) => {}
+        Err(error) => eprintln!("Error: {}", error),
+    }
 }

@@ -33,13 +33,13 @@ pub struct NewDfaTransition {
 }
 
 impl NewDfaTransition {
-	pub fn input(&self) -> &char {
-		return &self.input;
-	}
+    pub fn input(&self) -> &char {
+        return &self.input;
+    }
 
-	pub fn target_state(&self) -> &usize {
-		return &self.target_state;
-	}
+    pub fn target_state(&self) -> &usize {
+        return &self.target_state;
+    }
 }
 
 #[derive(Clone, PartialEq, Eq)]
@@ -49,7 +49,7 @@ pub struct DFA {
     test: HashMap<State, usize>,
     new_transitions: HashMap<usize, Vec<NewDfaTransition>>,
     new_final_states: HashSet<usize>,
-	charset: HashSet<char>,
+    charset: HashSet<char>,
 }
 
 impl DFA {
@@ -64,17 +64,17 @@ impl DFA {
         };
     }
 
-	pub fn charset(&self) -> &HashSet<char> {
-		return &self.charset;
-	}
+    pub fn charset(&self) -> &HashSet<char> {
+        return &self.charset;
+    }
 
-	pub fn new_transitions(&self) -> &HashMap<usize, Vec<NewDfaTransition>> {
-		return &self.new_transitions;
-	}
+    pub fn new_transitions(&self) -> &HashMap<usize, Vec<NewDfaTransition>> {
+        return &self.new_transitions;
+    }
 
-	pub fn new_final_states(&self) -> &HashSet<usize> {
-		return &self.new_final_states;
-	}
+    pub fn new_final_states(&self) -> &HashSet<usize> {
+        return &self.new_final_states;
+    }
 }
 
 use std::fmt::{Formatter, Result as FmtResult};

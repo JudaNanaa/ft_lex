@@ -1,9 +1,6 @@
 use std::{collections::HashMap, iter::Peekable, str::Chars};
 
-use crate::regex::{
-    dfa::DFA,
-    NFA,
-};
+use crate::regex::{dfa::DFA, NFA};
 
 mod combine;
 mod definitions;
@@ -52,7 +49,7 @@ impl FilePart {
     pub fn actions(&self) -> &HashMap<usize, Vec<String>> {
         return &self.actions;
     }
-    pub fn action_hash(&self) -> &HashMap<String, usize>{
+    pub fn action_hash(&self) -> &HashMap<String, usize> {
         return &self.action_hash;
     }
 }

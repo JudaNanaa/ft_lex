@@ -1,4 +1,3 @@
-
 #[cfg(feature = "dotfile")]
 use std::process::Command;
 #[cfg(feature = "dotfile")]
@@ -6,7 +5,6 @@ use std::{fs::File, io::Write};
 
 #[cfg(feature = "dotfile")]
 use super::DFA;
-
 
 #[cfg(feature = "dotfile")]
 fn escape_label(label: &str) -> String {

@@ -18,12 +18,12 @@ pub fn concatenate(mut left: NFA, mut right: NFA) -> NFA {
     }
 
     left.transitions.extend(right.transitions);
-	left.charset.extend(right.charset);
+    left.charset.extend(right.charset);
 
     return NFA {
         transitions: left.transitions,
         final_states: right.final_states,
-		charset: left.charset
+        charset: left.charset,
     };
 }
 
