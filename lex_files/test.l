@@ -8,5 +8,9 @@ int line_num = 1;
 DIGIT [0-9]
 
 %%
-"dad" printf("ok"); 
+a     |
+ab    |
+abc   |
+abcd  ECHO; REJECT;
+.|\n  printf("xx%c", *yytext);
 %%

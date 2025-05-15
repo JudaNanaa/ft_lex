@@ -121,6 +121,7 @@ pub fn construct_dfa(nfa: NFA) -> DFA {
 	dfa.charset = nfa.charset;
     println!("nb state dfa == {}", dfa.transitions.len());
 
+	dfa.new_final_states.remove(&0);
 	#[cfg(feature = "dotfile")]
 		match generate_dot_file(&dfa) {
 			Ok(_) => {}

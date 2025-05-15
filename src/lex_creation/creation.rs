@@ -2,7 +2,7 @@ use std::fs::File;
 
 use crate::{
     file_parsing::FilePart,
-    lex_creation::{functions::yy_action::yy_action, tables::table::tables_creation, write::{write_defines, write_includes, write_user_routine, write_variables}, LEX_FILE
+    lex_creation::{functions::{yy_action::yy_action, yy_final::yy_final, yy_search_final::create_yy_search_final}, tables::table::tables_creation, write::{write_defines, write_includes, write_user_routine, write_variables}, LEX_FILE
     },
 };
 
@@ -14,6 +14,8 @@ pub fn lex_creation(file_parts: FilePart) -> std::io::Result<()> {
     write_variables(&mut file)?;
 
 	tables_creation(&file_parts, &mut file)?;
+	yy_final(&file_parts, &mut file)?;
+	create_yy_search_final(file_parts.actions(), &mut file)?;
 	yy_action(&file_parts, &mut file)?;
 
     // Write user routine
