@@ -3,7 +3,7 @@ use std::{
     io::{Read, Write},
 };
 
-use super::{DEFINES, INCLUDES, VARIABLES};
+use super::{DEFINES, INCLUDES, VARIABLES, YYLEX, YY_ACTION, YY_ADD_BUFFER, YY_FATAL_ERROR, YY_IF_MATCH, YY_IF_NO_MATCH, YY_INCREASE_ACCEPTING_STACK_LEN, YY_INIT_ACCEPTING_STACK, YY_INIT_BUFFER, YY_NEXT_CHAR, YY_POP_ACCEPTING_STATE, YY_PUSH_ACCEPTING_STATE, YY_REJECT, YY_SET_YYTEXT};
 
 fn open_template_file(file_path: &str) -> std::io::Result<String> {
     let mut file = File::open(file_path)?;
@@ -29,6 +29,84 @@ pub fn write_defines(file: &mut File) -> std::io::Result<()> {
 
 pub fn write_variables(file: &mut File) -> std::io::Result<()> {
     let file_content = open_template_file(VARIABLES)?;
+    file.write_all(file_content.as_bytes())?;
+    return Ok(());
+}
+
+pub fn write_yy_add_buffer(file: &mut File) -> std::io::Result<()> {
+    let file_content = open_template_file(YY_ADD_BUFFER)?;
+    file.write_all(file_content.as_bytes())?;
+    return Ok(());
+}
+
+pub fn write_yy_fatal_error(file: &mut File) -> std::io::Result<()> {
+    let file_content = open_template_file(YY_FATAL_ERROR)?;
+    file.write_all(file_content.as_bytes())?;
+    return Ok(());
+}
+
+pub fn write_yy_if_match(file: &mut File) -> std::io::Result<()> {
+    let file_content = open_template_file(YY_IF_MATCH)?;
+    file.write_all(file_content.as_bytes())?;
+    return Ok(());
+}
+
+pub fn write_yy_if_no_match(file: &mut File) -> std::io::Result<()> {
+    let file_content = open_template_file(YY_IF_NO_MATCH)?;
+    file.write_all(file_content.as_bytes())?;
+    return Ok(());
+}
+
+pub fn write_yy_increase_accepting_stack_len(file: &mut File) -> std::io::Result<()> {
+    let file_content = open_template_file(YY_INCREASE_ACCEPTING_STACK_LEN)?;
+    file.write_all(file_content.as_bytes())?;
+    return Ok(());
+}
+
+pub fn write_yy_init_accepting_stack(file: &mut File) -> std::io::Result<()> {
+    let file_content = open_template_file(YY_INIT_ACCEPTING_STACK)?;
+    file.write_all(file_content.as_bytes())?;
+    return Ok(());
+}
+
+pub fn write_yy_init_buffer(file: &mut File) -> std::io::Result<()> {
+    let file_content = open_template_file(YY_INIT_BUFFER)?;
+    file.write_all(file_content.as_bytes())?;
+    return Ok(());
+}
+
+pub fn write_yylex(file: &mut File) -> std::io::Result<()> {
+    let file_content = open_template_file(YYLEX)?;
+    file.write_all(file_content.as_bytes())?;
+    return Ok(());
+}
+
+pub fn write_yy_next_char(file: &mut File) -> std::io::Result<()> {
+    let file_content = open_template_file(YY_NEXT_CHAR)?;
+    file.write_all(file_content.as_bytes())?;
+    return Ok(());
+}
+
+pub fn write_yy_pop_accepting_state(file: &mut File) -> std::io::Result<()> {
+    let file_content = open_template_file(YY_POP_ACCEPTING_STATE)?;
+    file.write_all(file_content.as_bytes())?;
+    return Ok(());
+}
+
+pub fn write_yy_push_accepting_state(file: &mut File) -> std::io::Result<()> {
+    let file_content = open_template_file(YY_PUSH_ACCEPTING_STATE)?;
+    file.write_all(file_content.as_bytes())?;
+    return Ok(());
+}
+
+pub fn write_yy_reject(file: &mut File) -> std::io::Result<()> {
+    let file_content = open_template_file(YY_REJECT)?;
+    file.write_all(file_content.as_bytes())?;
+    return Ok(());
+}
+
+pub fn write_yy_set_yytext(file: &mut File) -> std::io::Result<()> {
+    let file_content = open_template_file(YY_SET_YYTEXT)?;
     file.write_all(file_content.as_bytes())?;
     return Ok(());
 }

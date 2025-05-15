@@ -10,8 +10,7 @@ pub fn action_hash(rules: &Vec<RuleAction>) -> HashMap<String, usize> {
 	let mut index = 1;
 
 	for rule in rules.iter() {
-		if !hash.contains_key(&rule.action) {
-
+		if !hash.contains_key(&rule.action) && rule.action != "|" {
 			hash.insert(rule.action.clone(), index);
 
 			index += 1;

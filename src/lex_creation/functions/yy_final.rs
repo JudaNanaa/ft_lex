@@ -16,7 +16,7 @@ pub fn yy_final(file_parts: &FilePart, file: &mut File) -> std::io:: Result<()> 
 		for elem in actions.iter().rev() {
 			let action = hash.get(elem).unwrap();
 
-			writeln!(file, "{}push_accepting_state({}, len_match);", SPACE, action)?;
+			writeln!(file, "{}yy_push_accepting_state({}, len_match);", SPACE, action)?;
 			
 		}
 		writeln!(file, "}}")?;
