@@ -18,5 +18,8 @@ fn main() {
 
     dbg!(&file_parts);
 
-    lex_creation(file_parts);
+    match lex_creation(file_parts) {
+		Ok(()) => {},
+		Err(error) => eprintln!("Error: {}", error)
+	}
 }

@@ -11,13 +11,6 @@ pub mod parsing;
 mod rules;
 mod user_routine;
 
-#[derive(PartialEq)]
-enum FileState {
-    Definition,
-    Rules,
-    UserRoutine,
-}
-
 #[derive(Debug)]
 pub enum Definition {
     Bloc { content: String },

@@ -7,7 +7,6 @@ const LEX_FILE: &str = "ft_lex.yy.c";
 const INCLUDES: &str = "src/lex_creation/templates/includes.c";
 const DEFINES: &str = "src/lex_creation/templates/defines.c";
 const VARIABLES: &str = "src/lex_creation/templates/variables.c";
-const YY_ACTION: &str = "src/lex_creation/templates/yy_action.c";
 const YY_ADD_BUFFER: &str = "src/lex_creation/templates/yy_add_buffer.c";
 const YY_FATAL_ERROR: &str = "src/lex_creation/templates/yy_fatal_error.c";
 const YY_IF_MATCH: &str = "src/lex_creation/templates/yy_if_match.c";

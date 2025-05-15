@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use super::{State, DFA};
+use super::DFA;
 
 pub fn assiociate_rule_actions(
     dfa: &DFA,

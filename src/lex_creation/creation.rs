@@ -45,5 +45,5 @@ pub fn lex_creation(file_parts: FilePart) -> std::io::Result<()> {
     // Write user routine
     write_user_routine(file_parts.user_routine(), &mut file)?;
 
-    todo!();
+    Ok(())
 }
