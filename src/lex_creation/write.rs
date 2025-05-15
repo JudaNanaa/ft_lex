@@ -80,13 +80,17 @@ pub fn write_yy_init_buffer(file: &mut File) -> std::io::Result<()> {
 }
 
 pub fn write_yylex(in_yylex: &[String], file: &mut File) -> std::io::Result<()> {
-    let file_content = open_template_file(YYLEX)?;
+    let mut file_content = open_template_file(YYLEX)?;
 
 	let mut to_add = String::new();
 
 	for elem in in_yylex {
 		to_add.push_str(&elem);
 	}
+
+	dbg!(&to_add);
+
+	file_content = file_content.replace("change_me_in_yylex!", &to_add);
 
     file.write_all(file_content.as_bytes())?;
     return Ok(());

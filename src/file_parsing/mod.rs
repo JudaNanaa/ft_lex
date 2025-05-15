@@ -52,4 +52,7 @@ impl FilePart {
     pub fn action_hash(&self) -> &HashMap<String, usize> {
         return &self.action_hash;
     }
+    pub fn in_yylex(&self) -> &[String] {
+        return &self.in_yylex;
+    }
 }

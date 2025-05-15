@@ -45,7 +45,7 @@ pub fn lex_creation(file_parts: FilePart) -> std::io::Result<()> {
     yy_final(&file_parts, &mut file)?;
     create_yy_search_final(file_parts.actions(), &mut file)?;
 
-    write_yylex(&mut file)?;
+    write_yylex(file_parts.in_yylex(), &mut file)?;
 
     // Write user routine
     write_user_routine(file_parts.user_routine(), &mut file)?;
