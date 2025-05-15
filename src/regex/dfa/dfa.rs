@@ -59,7 +59,7 @@ pub fn construct_dfa(nfa: NFA) -> DFA {
     let mut dfa = DFA::new();
 
     // All ASCII characters
-    let alphabet = (0..=127u8)
+    let alphabet = (0..=255u8)
         .filter_map(|c| char::from_u32(c as u32))
         .collect::<Vec<char>>();
 

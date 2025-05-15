@@ -58,6 +58,7 @@ pub fn regex_tokenizer(regex: &str) -> Vec<Token> {
             }
         }
     }
+    dbg!(&token_list);
     token_list = add_concatenation_token(token_list);
     token_list = to_postfix(token_list);
     return token_list;

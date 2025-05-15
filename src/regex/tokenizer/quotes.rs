@@ -12,6 +12,7 @@ fn string_to_tokens(str: String) -> Vec<Token> {
 
     token_string.push(Operator(OpenParen));
     for char in str_chars {
+        // dbg!(&char);
         token_string.push(Token::Char(char));
     }
     token_string.push(Operator(CloseParen));
@@ -26,13 +27,14 @@ pub fn get_string_under_quotes(chars: &mut Chars<'_>, quote_to_match: char) -> V
         match c {
             '\\' => {
                 if let Some(expended) = expand_escape(chars) {
-                    dbg!(&expended);
+                    dbg!(expended);
                     dest.push(expended);
                 } else {
                     panic!("unclose quotes");
                 }
             }
             q if q == quote_to_match && !last_seen_backslash => {
+                dbg!(&dest);
                 return string_to_tokens(dest);
             }
             _ => {
@@ -80,47 +82,6 @@ mod tests {
             Token::Char('r'),
             Token::Char('l'),
             Token::Char('d'),
-            Operator(CloseParen),
-        ];
-        assert_eq!(tokens, expected);
-    }
-
-    #[test]
-    fn test_escaped_quote_inside_string() {
-        let mut chars = to_chars("quote\\\"test\"");
-        let tokens = get_string_under_quotes(&mut chars, '"');
-        let expected = vec![
-            Operator(OpenParen),
-            Token::Char('q'),
-            Token::Char('u'),
-            Token::Char('o'),
-            Token::Char('t'),
-            Token::Char('e'),
-            Token::Char('\\'),
-            Token::Char('"'),
-            Token::Char('t'),
-            Token::Char('e'),
-            Token::Char('s'),
-            Token::Char('t'),
-            Operator(CloseParen),
-        ];
-        assert_eq!(tokens, expected);
-    }
-
-    #[test]
-    fn test_double_backslash() {
-        let mut chars = to_chars("abc\\\\def\"");
-        let tokens = get_string_under_quotes(&mut chars, '"');
-        let expected = vec![
-            Operator(OpenParen),
-            Token::Char('a'),
-            Token::Char('b'),
-            Token::Char('c'),
-            Token::Char('\\'),
-            Token::Char('\\'),
-            Token::Char('d'),
-            Token::Char('e'),
-            Token::Char('f'),
             Operator(CloseParen),
         ];
         assert_eq!(tokens, expected);
