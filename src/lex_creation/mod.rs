@@ -5,6 +5,7 @@ mod write;
 
 const LEX_FILE: &str = "ft_lex.yy.c";
 const INCLUDES: &str = "src/lex_creation/templates/includes.c";
+const YYMORE: &str = "src/lex_creation/templates/yymore.c";
 const DEFINES: &str = "src/lex_creation/templates/defines.c";
 const VARIABLES: &str = "src/lex_creation/templates/variables.c";
 const YY_ADD_BUFFER: &str = "src/lex_creation/templates/yy_add_buffer.c";

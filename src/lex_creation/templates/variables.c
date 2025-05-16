@@ -10,6 +10,7 @@ static int yy_start = -1;	/* start state number */
 char *yytext;
 int yyleng;
 static int clean_flag = 0;
+static int yymore_flag = 0;
 
 typedef struct accept_elem {
 	int state;

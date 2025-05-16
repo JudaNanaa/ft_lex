@@ -1,22 +1,14 @@
 %{
 #include <stdio.h>
-int line_num = 1;
 %}
-%s test
-%s comment
-	// okoo
-DIGIT [0-9]
 
 %%
-[A-Za-z_][A-Za-z_0-9]* printf("word\n");
-"|" printf("pipe\n");
-"<"|"<<"|">>"|">" printf("redirection\n");
-"&&" printf("and\n");
-"||" printf("or\n");
-[ \t] ;
-
+test        { yymore(); }               // préparer à ajouter le suivant
+ok          { printf("ok [%s]\n", yytext); } // imprimera "testok"
+.|\n        ;   // ignorer le reste
 %%
 
 int main(void) {
-	yylex();
+    yylex();
+    return 0;
 }
