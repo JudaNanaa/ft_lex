@@ -22,5 +22,6 @@ const YY_POP_ACCEPTING_STATE: &str = "src/lex_creation/templates/yy_pop_acceptin
 const YY_PUSH_ACCEPTING_STATE: &str = "src/lex_creation/templates/yy_push_accepting_state.c";
 const YY_REJECT: &str = "src/lex_creation/templates/yy_reject.c";
 const YY_SET_YYTEXT: &str = "src/lex_creation/templates/yy_set_yytext.c";
+const YYLESS: &str = "src/lex_creation/templates/yyless.c";
 
 const SPACE: &str = "    ";

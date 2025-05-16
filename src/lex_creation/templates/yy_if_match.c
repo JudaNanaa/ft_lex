@@ -1,10 +1,10 @@
 void yy_if_match() {
 	a_elem matching_state = yy_pop_accepting_state();
 
-	char *after_match = buffer.str + matching_state.len_match;
-
+	
 	yy_set_yytext(matching_state);
 	yy_action(matching_state.state);
+	char *after_match = buffer.str + yyleng;
 	if (clean_flag == 1)
 		return;
 	memmove(buffer.str, after_match, (&buffer.str[buffer.len]) - (after_match));

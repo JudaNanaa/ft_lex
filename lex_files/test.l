@@ -3,9 +3,8 @@
 %}
 
 %%
-test        { yymore(); }               // préparer à ajouter le suivant
+test        { yyless(0); printf("ok [%s]\n", yytext); }               // préparer à ajouter le suivant
 ok          { printf("ok [%s]\n", yytext); } // imprimera "testok"
-.|\n        ;   // ignorer le reste
 %%
 
 int main(void) {
