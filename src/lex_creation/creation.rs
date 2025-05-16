@@ -43,7 +43,6 @@ pub fn lex_creation(file_parts: FilePart) -> std::io::Result<()> {
     write_yyless(&mut file)?;
     write_input(&mut file)?;
 
-
     yy_action(&file_parts, &mut file)?;
     write_yy_if_match(&mut file)?;
     write_yy_reject(&mut file)?;

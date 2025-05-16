@@ -1,5 +1,4 @@
 char *yy_add_buffer(char c) {
-	printf("okoko\n");
 	if (buffer.len == buffer.capacity) {
 		buffer.str = realloc(buffer.str, buffer.capacity * 2 + 1);
 		if (buffer.str == NULL)
@@ -9,6 +8,7 @@ char *yy_add_buffer(char c) {
 	}
 	buffer.str[buffer.len] = c;
 	buffer.len++;
+	buffer.str[buffer.len] = '\0';
 	buffer.index++;
 	return &buffer.str[buffer.len - 1];
 }
