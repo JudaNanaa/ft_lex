@@ -3,7 +3,7 @@
 %}
 
 %%
-test        { yyless(0); printf("ok [%s]\n", yytext); }               // préparer à ajouter le suivant
+test        { yyless(1); int c = input(); printf("ok [%c]\n", c); }               // préparer à ajouter le suivant
 ok          { printf("ok [%s]\n", yytext); } // imprimera "testok"
 %%
 

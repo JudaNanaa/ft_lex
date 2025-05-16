@@ -1,4 +1,4 @@
-void yyless(int n) {
+int yyless(int n) {
 	char *dest;
 
 	if (n > yyleng) {
@@ -13,4 +13,5 @@ void yyless(int n) {
 	free(yytext);
 	yytext = dest;
 	yyleng = n;
+	return 1;
 }
