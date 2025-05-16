@@ -28,12 +28,19 @@ int yylex(void) {
 	current_state = yy_start;
 	last_accepting_state = yy_start;
 
-	change_me_in_yylex!
+	
 
 	while (1) {
 		char *pos = yy_next_char();
 		if (pos == NULL)
+		{
+			if (last_accepting_state == 0) {
+				yy_if_no_match(last_accepting_cpos);
+			}
+			else
+				yy_if_match();
 			break;
+		}
 		c = *pos;
 		len_match++;
 		unsigned char yy_c = yy_ec[YY_CHAR_TO_INT(c)];
@@ -62,7 +69,8 @@ int yylex(void) {
 		current_state = next_state;
 	}
 
+	free(stack.t);
+	free(yytext);
 	free(buffer.str);
-	printf("chef\n");
 	return 0;
 }
