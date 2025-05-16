@@ -17,9 +17,6 @@ DIGIT [0-9]
 
 %%
 
-int main(int argc, char **argv) {
-	if (argc == 2)
-		yyin = fopen(argv[1], "r");
+int main(void) {
 	yylex();
-	fclose(yyin);
 }
