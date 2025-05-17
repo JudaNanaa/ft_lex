@@ -6,10 +6,10 @@ use std::{
 use crate::file_parsing::Definition;
 
 use super::{
-    DEFINES, INCLUDES, INPUT, VARIABLES, YYLESS, YYLEX, YYMORE, YY_ADD_BUFFER, YY_FATAL_ERROR,
-    YY_IF_MATCH, YY_IF_NO_MATCH, YY_INCREASE_ACCEPTING_STACK_LEN, YY_INIT_ACCEPTING_STACK,
-    YY_INIT_BUFFER, YY_NEXT_CHAR, YY_POP_ACCEPTING_STATE, YY_PUSH_ACCEPTING_STATE, YY_REJECT,
-    YY_SET_YYTEXT,
+    DEFINES, INCLUDES, INPUT, UNPUT, VARIABLES, YYLESS, YYLEX, YYMORE, YY_ADD_BUFFER,
+    YY_FATAL_ERROR, YY_IF_MATCH, YY_IF_NO_MATCH, YY_INCREASE_ACCEPTING_STACK_LEN,
+    YY_INIT_ACCEPTING_STACK, YY_INIT_BUFFER, YY_NEXT_CHAR, YY_POP_ACCEPTING_STATE,
+    YY_PUSH_ACCEPTING_STATE, YY_REJECT, YY_SET_YYTEXT,
 };
 
 fn open_template_file(file_path: &str) -> std::io::Result<String> {
@@ -152,6 +152,12 @@ pub fn write_yyless(file: &mut File) -> std::io::Result<()> {
 
 pub fn write_input(file: &mut File) -> std::io::Result<()> {
     let file_content = open_template_file(INPUT)?;
+    file.write_all(file_content.as_bytes())?;
+    return Ok(());
+}
+
+pub fn write_unput(file: &mut File) -> std::io::Result<()> {
+    let file_content = open_template_file(UNPUT)?;
     file.write_all(file_content.as_bytes())?;
     return Ok(());
 }

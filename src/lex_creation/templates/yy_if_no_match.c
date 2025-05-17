@@ -5,9 +5,12 @@ void yy_if_no_match(char *last_pos) {
 	if (last_pos == NULL)
 		last_pos = buffer.str;
 	fwrite(buffer.str, sizeof(char), last_pos + 1 - buffer.str, yyout);
-	memmove(buffer.str, last_pos + 1, (&buffer.str[buffer.len]) - (last_pos + 1));
-	bzero(&buffer.str[(&buffer.str[buffer.len]) - (last_pos + 1)], buffer.len - ((&buffer.str[buffer.len]) - (last_pos + 1)));
-	buffer.len = (&buffer.str[buffer.len]) - (last_pos + 1);
+	int n = (&buffer.str[buffer.len]) - (last_pos + 1);
+	if (n < 0)
+		n = 0;
+	memmove(buffer.str, last_pos + 1, n);
+	bzero(&buffer.str[n], buffer.len - (n));
+	buffer.len = n;
 	buffer.str[buffer.len] = '\0';
 	buffer.index = 0;
 	// printf("remaining if_no_match = [%s]\n", buffer.str);

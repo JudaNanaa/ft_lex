@@ -18,7 +18,7 @@ use crate::{
     },
 };
 
-use super::write::{write_input, write_yyless, write_yymore};
+use super::write::{write_input, write_unput, write_yyless, write_yymore};
 
 pub fn lex_creation(file_parts: FilePart) -> std::io::Result<()> {
     let mut file = File::create(LEX_FILE)?;
@@ -42,6 +42,7 @@ pub fn lex_creation(file_parts: FilePart) -> std::io::Result<()> {
     write_yymore(&mut file)?;
     write_yyless(&mut file)?;
     write_input(&mut file)?;
+    write_unput(&mut file)?;
 
     yy_action(&file_parts, &mut file)?;
     write_yy_if_match(&mut file)?;

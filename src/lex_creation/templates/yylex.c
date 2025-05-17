@@ -49,7 +49,6 @@ int yylex(void) {
 		if ( yy_accept[next_state] )
 		{
 			yy_search_final(next_state, len_match);
-			// push_accepting_state(next_state, len_match);
 			last_accepting_state = next_state;
 			last_accepting_cpos = pos;
 		}
