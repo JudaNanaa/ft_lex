@@ -39,6 +39,8 @@ int yylex(void) {
 			}
 			else
 				yy_if_match();
+			if (yywrap() == 0)
+				yylex();
 			break;
 		}
 		c = *pos;
@@ -69,7 +71,10 @@ int yylex(void) {
 	}
 
 	free(stack.t);
+	stack.t = NULL;
 	free(yytext);
+	yytext = NULL;
 	free(buffer.str);
+	buffer.str = NULL;
 	return 0;
 }

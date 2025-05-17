@@ -5,7 +5,7 @@ use crate::{lex_creation::SPACE, regex::dfa::DFA};
 fn write_yy_nxt(transition_table: &Vec<Vec<usize>>, file: &mut File) -> std::io::Result<()> {
     writeln!(
         file,
-        "\nstatic const unsigned int yy_nxt[{}][{}] =",
+        "\nconst unsigned int yy_nxt[{}][{}] =",
         transition_table.len(),
         transition_table[0].len()
     )?;
@@ -51,7 +51,7 @@ pub fn create_yy_nxt(
 
     for i in 0..nb_states {
         let transitions = dfa.new_transitions().get(&i).unwrap();
-        let mut tab = vec![0; nb_possibilities];
+        let mut tab = vec![0; 256];
         for t in transitions {
             if let Some(index) = hash.get(t.input()) {
                 tab[*index] = *t.target_state();

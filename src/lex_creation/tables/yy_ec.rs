@@ -13,7 +13,7 @@ pub fn create_yy_ec(
     let mut hash = HashMap::new();
     let mut eq_index = 1;
 
-    writeln!(file, "\nstatic const unsigned char yy_ec[256] =")?;
+    writeln!(file, "\nconst unsigned char yy_ec[256] =")?;
     writeln!(file, "{}{{ 0,", SPACE)?;
     write!(file, "{}", SPACE.repeat(2))?;
 

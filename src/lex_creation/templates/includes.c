@@ -8,3 +8,12 @@
 #include <unistd.h>
 
 /* end standard C headers. */
+
+void yy_fatal_error (const char* msg );
+int yymore(void);
+int yyless(int n);
+int input(void);
+int unput(int c);
+int yywrap(void);
+int yylex(void);
+void yy_push_accepting_state(int state, int len_match);

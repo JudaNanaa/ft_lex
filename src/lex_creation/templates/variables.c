@@ -1,16 +1,8 @@
-
-FILE *yyin = NULL, *yyout = NULL;
-
 extern int yylineno;
-int yylineno = 1;
 
-static int yy_init = 0;		/* whether we need to initialize */
-static int yy_start = -1;	/* start state number */
-
-char *yytext;
-int yyleng;
-static int clean_flag = 0;
-static int yymore_flag = 0;
+extern FILE *yyin, *yyout;
+extern char *yytext;
+extern int yyleng;
 
 typedef struct accept_elem {
 	int state;

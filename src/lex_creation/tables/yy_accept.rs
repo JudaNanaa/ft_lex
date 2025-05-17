@@ -21,7 +21,7 @@ pub fn yy_accept(dfa: &DFA, file: &mut File) -> std::io::Result<Vec<u8>> {
 
     let accept_tab = generate_accept_tab(dfa);
 
-    writeln!(file, "\nstatic const int yy_accept[{}] =", nb_state)?;
+    writeln!(file, "\nconst int yy_accept[{}] =", nb_state)?;
     writeln!(file, "{}{{", SPACE)?;
     write!(file, "{}", SPACE.repeat(2))?;
 

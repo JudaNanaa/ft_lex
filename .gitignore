@@ -4,3 +4,5 @@ lex.yy.c
 ft_lex.yy.c
 dfa.dot
 dfa.png
+/.vscode
+libl_functions.o

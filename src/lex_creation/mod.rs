@@ -25,5 +25,6 @@ const YY_SET_YYTEXT: &str = "src/lex_creation/templates/yy_set_yytext.c";
 const YYLESS: &str = "src/lex_creation/templates/yyless.c";
 const INPUT: &str = "src/lex_creation/templates/input.c";
 const UNPUT: &str = "src/lex_creation/templates/unput.c";
+const YYWRAP: &str = "src/lex_creation/templates/yywrap.c";
 
 const SPACE: &str = "    ";
