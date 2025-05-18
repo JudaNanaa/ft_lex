@@ -1,5 +1,3 @@
-extern int yylineno;
-
 extern FILE *yyin, *yyout;
 extern char *yytext;
 extern int yyleng;

@@ -12,7 +12,6 @@ fn string_to_tokens(str: String) -> Vec<Token> {
 
     token_string.push(Operator(OpenParen));
     for char in str_chars {
-        // dbg!(&char);
         token_string.push(Token::Char(char));
     }
     token_string.push(Operator(CloseParen));
@@ -27,14 +26,12 @@ pub fn get_string_under_quotes(chars: &mut Chars<'_>, quote_to_match: char) -> V
         match c {
             '\\' => {
                 if let Some(expended) = expand_escape(chars) {
-                    dbg!(expended);
                     dest.push(expended);
                 } else {
                     panic!("unclose quotes");
                 }
             }
             q if q == quote_to_match && !last_seen_backslash => {
-                dbg!(&dest);
                 return string_to_tokens(dest);
             }
             _ => {

@@ -47,7 +47,6 @@ char *yytext;
 int yyleng;
 static int clean_flag = 0;
 static int yymore_flag = 0;
-int yylineno = 1;
 
 static t_buffer buffer;
 

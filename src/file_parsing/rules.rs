@@ -98,16 +98,52 @@ fn extract_braced_definition(
 /// Extrait un ensemble de caractères entre crochets.
 fn extract_character_class(rule: &mut String, file: &mut FileInfo) -> Result<(), &'static str> {
     rule.push('[');
-    for ch in file.it.by_ref() {
+	
+	let mut test = String::new();
+	let mut inside_posix = false;
+    while let Some(ch) = file.it.next() {
         match ch {
             '\n' => {
                 file.line_nb += 1;
                 return Err("missing ]");
-            }
+            },
+			'[' => {
+				test.push('[');
+				inside_posix = true;
+			},
+			']' if inside_posix == true => {
+				test.push(']');
+				let class_expansion = match test.as_str() {
+					"[:alnum:]" => "A-Za-z0-9",
+                    "[:alpha:]" => "A-Za-z",
+                    "[:digit:]" => "0-9",
+                    "[:lower:]" => "a-z",
+                    "[:upper:]" => "A-Z",
+                    "[:xdigit:]" => "A-Fa-f0-9",
+                    "[:space:]" => r" \t\r\n\v\f",
+                    "[:blank:]" => " \t",
+                    "[:cntrl:]" => "\x00-\x1F\x7F",
+                    "[:punct:]" => "!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~",
+                    "[:print:]" => " -~",
+                    "[:graph:]" => "!-~",
+                    _ => {
+						if test.find(":]").is_some() && test.find("[:").is_some() {
+							return Err("unknown POSIX class");
+						}
+						test.as_str()
+					},
+				};
+				rule.push_str(class_expansion);
+				inside_posix = false;
+			},
             ']' => {
                 rule.push(']');
+				dbg!(&rule);
                 return Ok(());
-            }
+            },
+			_ if inside_posix == true => {
+				test.push(ch);
+			},
             _ => rule.push(ch),
         }
     }

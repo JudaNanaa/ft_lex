@@ -23,7 +23,6 @@ pub fn generate_dot_file(dfa: &DFA) -> std::io::Result<()> {
     writeln!(file, "  node [shape=circle];")?;
 
     // États finaux avec double cercle
-    dbg!(&dfa);
     for state in &dfa.new_final_states {
         writeln!(file, "  {} [shape=doublecircle];", state)?;
     }

@@ -103,8 +103,6 @@ pub fn write_yylex(in_yylex: &[String], file: &mut File) -> std::io::Result<()> 
         to_add.push_str(&elem);
     }
 
-    dbg!(&to_add);
-
     file_content = file_content.replace("change_me_in_yylex!", &to_add);
 
     file.write_all(file_content.as_bytes())?;
