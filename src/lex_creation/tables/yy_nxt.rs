@@ -47,8 +47,6 @@ pub fn create_yy_nxt(
 
     let mut transition_table: Vec<Vec<usize>> = Vec::with_capacity(nb_states);
 
-    let nb_possibilities = hash.len() + 1;
-
     for i in 0..nb_states {
         let transitions = dfa.new_transitions().get(&i).unwrap();
         let mut tab = vec![0; 256];

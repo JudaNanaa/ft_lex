@@ -1,11 +1,35 @@
+%{
+#include <stdio.h>
+%}
+
+%s COMMENT
+%x STRING
+
 %%
-[0-9]+ printf("NUMBER: %s\n", yytext);
-"+" |
-"-" |
-"*" |
-"/" printf("OPERATOR: %s\n", yytext);
-"(" printf("OPEN PARENTHESIS\n");
-")" printf("CLOSED PARENTHESIS\n");
-"\n" printf("NEWLINE\n");
-[[:blank:]] // ignore whitespaces
-. printf("Invalid character: %c\n", *yytext);
+
+"/*"            BEGIN(COMMENT);
+<COMMENT>{
+    "*/"        BEGIN(INITIAL);
+    .|\n        ;  // ignore le contenu du commentaire
+}
+
+\"              BEGIN(STRING);
+<STRING>{
+    \"          { BEGIN(INITIAL); printf("End of string\n"); }
+    [^\"\n]+    { printf("String content: %s\n", yytext); }
+    \n          { printf("Unterminated string\n"); BEGIN(INITIAL); }
+}
+
+<INITIAL>"hello"    { printf("Hello detected\n"); }
+<INITIAL>"bye"      { printf("Bye detected\n"); }
+
+<*>[ \t\n]+     ; // ignore whitespace in all states
+
+.               { printf("Other: %s\n", yytext); }
+
+%%
+
+int main(void) {
+    yylex();
+    return 0;
+}
