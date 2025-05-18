@@ -9,12 +9,42 @@ mod rules;
 mod user_routine;
 
 #[derive(Debug)]
+enum DefinitionState {
+    Inclusive,
+    Exclusive,
+}
+
+#[derive(Debug)]
 pub enum Definition {
     Bloc { content: String },
     LineWithSpace { content: String },
     Definition { name: String, value: String },
     InclusiveState { names: Vec<String> },
     ExclusiveState { names: Vec<String> },
+}
+
+pub fn get_inclusive_state(definitions: &[Definition]) -> Option<&Vec<String>> {
+	for elem in definitions {
+		match elem {
+			Definition::InclusiveState { names } => {
+				return Some(names)
+			}
+			_ => {},
+		}
+	}
+	return None;
+}
+
+pub fn get_exclusive_state(definitions: &[Definition]) -> Option<&Vec<String>> {
+	for elem in definitions {
+		match elem {
+			Definition::ExclusiveState { names } => {
+				return Some(names)
+			}
+			_ => {},
+		}
+	}
+	return None;
 }
 
 #[derive(Debug, Clone)]

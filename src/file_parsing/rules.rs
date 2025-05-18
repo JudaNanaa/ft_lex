@@ -2,7 +2,7 @@ use std::{char, collections::HashMap};
 
 use crate::regex::{nfa::nfa::construct_nfa, regex_tokenizer};
 
-use super::{Definition, FileInfo, RuleAction};
+use super::{get_exclusive_state, get_inclusive_state, Definition, DefinitionState, FileInfo, RuleAction};
 
 pub fn action_hash(rules: &Vec<RuleAction>) -> HashMap<String, usize> {
     let mut hash = HashMap::new();
@@ -257,6 +257,62 @@ fn parse_rule_and_action(
     return Ok((rule, action));
 }
 
+fn extract_state(file: &mut FileInfo, definitions: &[Definition]) -> Result<(String, DefinitionState), &'static str> {
+
+	let mut state_name = String::new();
+
+	let inclusives_states = get_inclusive_state(definitions).unwrap();
+	dbg!(inclusives_states);
+	let exclusives_states = get_exclusive_state(definitions).unwrap();
+	dbg!(exclusives_states);
+	
+	while let Some(ch) = file.it.next() {
+		match ch {
+			'\n' => {
+				file.line_nb += 1;
+				break;
+			}
+			'*' => {
+				if !state_name.is_empty() {
+					break;
+				}
+				state_name.push('*');
+			}
+			'0'..'9' => {
+				if state_name.is_empty() {
+					break;
+				}
+				state_name.push(ch);
+			}
+			'a'..'z' | 'A'..'Z' | '_' => {
+				state_name.push(ch);
+			}
+			'>' => {
+				if inclusives_states.iter().find(|s| **s == state_name).is_some() {
+					return Ok((state_name, DefinitionState::Inclusive));
+				}
+				else if exclusives_states.iter().find(|s| **s == state_name).is_some() {
+					return Ok((state_name, DefinitionState::Exclusive));
+				}
+				else if state_name == "INITIAL" {
+					return Ok((state_name, DefinitionState::Inclusive));
+				}
+				else if state_name == "*" {
+					return Ok((state_name, DefinitionState::Inclusive));
+				}
+				else {
+					return Err("undeclared start condition");
+				}
+			}
+			_ => {
+				break;
+			}
+		}
+	}
+
+	return Err("bad <start condition>");
+}
+
 /// Parse la section des règles d'un fichier.
 pub fn parse_rules_section(
     file: &mut FileInfo,
@@ -265,6 +321,7 @@ pub fn parse_rules_section(
     let mut texts = Vec::new();
     let mut rules = Vec::new();
     let mut next_state_id = 1;
+	let mut state = "INITIAL";
 
     while let Some(ch) = file.it.next() {
         match ch {
@@ -289,6 +346,9 @@ pub fn parse_rules_section(
                 }
                 texts.push(text);
             }
+			'<' => {
+				let tets = extract_state(file, definitions)?;
+			}
             _ => {
                 let (rule_expr, action) = parse_rule_and_action(file, ch, definitions)?;
                 let tokens = regex_tokenizer(&rule_expr);

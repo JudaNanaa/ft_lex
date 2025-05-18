@@ -1,14 +1,10 @@
 use std::char;
 
-use super::{Definition, FileInfo};
+use super::{Definition, DefinitionState, FileInfo};
 
 const WHITESPACE: &str = " \r\t";
 
-#[derive(Debug)]
-enum DefinitionState {
-    Inclusive,
-    Exclusive,
-}
+
 
 fn get_content_under_brace(file: &mut FileInfo) -> Result<String, String> {
     let mut content = String::new();
