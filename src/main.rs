@@ -15,7 +15,6 @@ fn main() {
         Ok(elems) => elems,
     };
 
-
     match lex_creation(file_parts) {
         Ok(()) => {}
         Err(error) => eprintln!("Error: {}", error),

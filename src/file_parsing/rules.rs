@@ -98,23 +98,23 @@ fn extract_braced_definition(
 /// Extrait un ensemble de caractères entre crochets.
 fn extract_character_class(rule: &mut String, file: &mut FileInfo) -> Result<(), &'static str> {
     rule.push('[');
-	
-	let mut test = String::new();
-	let mut inside_posix = false;
-    while let Some(ch) = file.it.next() {
-        match ch {
+
+    let mut posix_buffer = String::new();
+    let mut is_in_posix = false;
+    while let Some(current_char) = file.it.next() {
+        match current_char {
             '\n' => {
                 file.line_nb += 1;
                 return Err("missing ]");
-            },
-			'[' => {
-				test.push('[');
-				inside_posix = true;
-			},
-			']' if inside_posix == true => {
-				test.push(']');
-				let class_expansion = match test.as_str() {
-					"[:alnum:]" => "A-Za-z0-9",
+            }
+            '[' => {
+                posix_buffer.push('[');
+                is_in_posix = true;
+            }
+            ']' if is_in_posix => {
+                posix_buffer.push(']');
+                let class_expansion = match posix_buffer.as_str() {
+                    "[:alnum:]" => "A-Za-z0-9",
                     "[:alpha:]" => "A-Za-z",
                     "[:digit:]" => "0-9",
                     "[:lower:]" => "a-z",
@@ -127,24 +127,23 @@ fn extract_character_class(rule: &mut String, file: &mut FileInfo) -> Result<(),
                     "[:print:]" => " -~",
                     "[:graph:]" => "!-~",
                     _ => {
-						if test.find(":]").is_some() && test.find("[:").is_some() {
-							return Err("unknown POSIX class");
-						}
-						test.as_str()
-					},
-				};
-				rule.push_str(class_expansion);
-				inside_posix = false;
-			},
+                        if posix_buffer.contains("[:") && posix_buffer.contains(":]") {
+                            return Err("unknown POSIX class");
+                        }
+                        posix_buffer.as_str()
+                    }
+                };
+                rule.push_str(class_expansion);
+                is_in_posix = false;
+            }
             ']' => {
                 rule.push(']');
-				dbg!(&rule);
                 return Ok(());
-            },
-			_ if inside_posix == true => {
-				test.push(ch);
-			},
-            _ => rule.push(ch),
+            }
+            _ if is_in_posix => {
+                posix_buffer.push(current_char);
+            }
+            _ => rule.push(current_char),
         }
     }
     return Err("unterminated character class");
