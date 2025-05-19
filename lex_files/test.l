@@ -8,7 +8,13 @@
 %%
 
 "/*"            BEGIN(COMMENT);
-<COMMENT>{
+s< printf("yesbb\n");
+<COMMENT>
+
+
+
+
+{
     "*/"        BEGIN(INITIAL);
     .|\n        ;  // ignore le contenu du commentaire
 }

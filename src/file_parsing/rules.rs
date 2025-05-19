@@ -288,6 +288,7 @@ fn extract_state(file: &mut FileInfo, definitions: &[Definition]) -> Result<(Str
 				state_name.push(ch);
 			}
 			'>' => {
+				dbg!(&state_name);
 				if inclusives_states.iter().find(|s| **s == state_name).is_some() {
 					return Ok((state_name, DefinitionState::Inclusive));
 				}
@@ -347,7 +348,13 @@ pub fn parse_rules_section(
                 texts.push(text);
             }
 			'<' => {
-				let tets = extract_state(file, definitions)?;
+				let (tets) = extract_state(file, definitions)?;
+				if let Some(c) = file.it.peek() {
+					// TODO: faut continuer ici pour les states
+				}
+				else {
+					return Err("unrecognized rule".to_string()); 
+				}
 			}
             _ => {
                 let (rule_expr, action) = parse_rule_and_action(file, ch, definitions)?;

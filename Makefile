@@ -18,4 +18,4 @@ fmt:
 clean:
 	cargo clean
 
-.PHONY: all run test fmt
+.PHONY: all run test fmt clean
