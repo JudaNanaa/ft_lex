@@ -1,12 +1,9 @@
 use std::{fs::File, io::Read, process::exit};
 
-use crate::file_parsing::FilePart;
+use crate::file_parsing::{definitions::definitions::parse_definitions_part, rules::rules::{action_hash, parse_rules_section}, user_routine::user_routine::parse_user_routine_part, FilePart};
 
 use super::{
     combine::process_and_combine_rules,
-    definitions::parse_definitions_part,
-    rules::{action_hash, parse_rules_section},
-    user_routine::parse_user_routine_part,
     FileInfo,
 };
 

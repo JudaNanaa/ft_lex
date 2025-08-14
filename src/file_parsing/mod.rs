@@ -1,59 +1,14 @@
 use std::{collections::HashMap, iter::Peekable, str::Chars};
 
-use crate::regex::{dfa::DFA, NFA};
+use crate::{file_parsing::definitions::Definition, regex::dfa::DFA};
 
 mod combine;
-mod definitions;
+pub mod definitions;
 pub mod parsing;
 mod rules;
 mod user_routine;
 
-#[derive(Debug)]
-enum DefinitionState {
-    Inclusive,
-    Exclusive,
-}
-
-#[derive(Debug)]
-pub enum Definition {
-    Bloc { content: String },
-    LineWithSpace { content: String },
-    Definition { name: String, value: String },
-    InclusiveState { names: Vec<String> },
-    ExclusiveState { names: Vec<String> },
-}
-
-pub fn get_inclusive_state(definitions: &[Definition]) -> Option<&Vec<String>> {
-	for elem in definitions {
-		match elem {
-			Definition::InclusiveState { names } => {
-				return Some(names)
-			}
-			_ => {},
-		}
-	}
-	return None;
-}
-
-pub fn get_exclusive_state(definitions: &[Definition]) -> Option<&Vec<String>> {
-	for elem in definitions {
-		match elem {
-			Definition::ExclusiveState { names } => {
-				return Some(names)
-			}
-			_ => {},
-		}
-	}
-	return None;
-}
-
-#[derive(Debug, Clone)]
-struct RuleAction {
-    nfa: NFA,
-    action: String,
-}
-
-struct FileInfo<'a> {
+pub struct FileInfo<'a> {
     it: Peekable<Chars<'a>>,
     line_nb: usize,
     name: &'a str,

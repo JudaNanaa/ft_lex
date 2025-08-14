@@ -1,23 +1,21 @@
 use std::collections::HashMap;
 
-use crate::regex::{
+use crate::{file_parsing::rules::RuleAction, regex::{
     combine_nfa::combine_nfa,
     dfa::{dfa::construct_dfa, rule_actions::assiociate_rule_actions, DFA},
     NFA,
-};
-
-use super::RuleAction;
+}};
 
 fn map_final_states_to_actions(rules: &[RuleAction]) -> HashMap<usize, Vec<String>> {
     let mut final_state_actions = HashMap::new();
     let mut initial_state_actions = Vec::new();
 
     for rule in rules {
-        for &final_state in &rule.nfa.final_states {
+        for &final_state in &rule.nfa().final_states {
             if final_state == 0 {
-                initial_state_actions.push(rule.action.clone());
+                initial_state_actions.push(rule.action().clone());
             } else {
-                final_state_actions.insert(final_state, vec![rule.action.clone()]);
+                final_state_actions.insert(final_state, vec![rule.action().clone()]);
             }
         }
     }
@@ -30,7 +28,7 @@ fn map_final_states_to_actions(rules: &[RuleAction]) -> HashMap<usize, Vec<Strin
 }
 
 fn extract_all_nfas(rules: &[RuleAction]) -> Vec<NFA> {
-    return rules.iter().map(|rule| rule.nfa.clone()).collect();
+    return rules.iter().map(|rule| rule.nfa().clone()).collect();
 }
 
 pub fn process_and_combine_rules(
@@ -40,11 +38,11 @@ pub fn process_and_combine_rules(
     let mut processed_rules = Vec::new();
 
     for rule in rules {
-        if rule.action == "|" {
+        if rule.action() == "|" {
             pipe_buffer.push(rule.clone());
         } else {
             while let Some(mut pending_rule) = pipe_buffer.pop() {
-                pending_rule.action = rule.action.clone();
+                *pending_rule.action_mut() = rule.action().clone();
                 processed_rules.push(pending_rule);
             }
             processed_rules.push(rule);

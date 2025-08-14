@@ -9,13 +9,11 @@
 
 "/*"            BEGIN(COMMENT);
 s< printf("yesbb\n");
-<COMMENT>
 
+<COMMENT,COMMENT,INITIAL,sss>ok printf("test\n");
 
-
-
-{
-    "*/"        BEGIN(INITIAL);
+<COMMENT>{
+    "*/"        printf("end of comment\n"); BEGIN(INITIAL);
     .|\n        ;  // ignore le contenu du commentaire
 }
 

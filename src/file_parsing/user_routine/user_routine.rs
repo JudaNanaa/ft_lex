@@ -1,4 +1,4 @@
-use super::FileInfo;
+use crate::file_parsing::FileInfo;
 
 pub fn parse_user_routine_part(file: &mut FileInfo) -> String {
     let mut user_routine = String::new();

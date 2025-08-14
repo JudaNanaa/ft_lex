@@ -1,10 +1,8 @@
 use std::char;
 
-use super::{Definition, DefinitionState, FileInfo};
+use crate::file_parsing::{definitions::{Definition, DefinitionState}, FileInfo};
 
 const WHITESPACE: &str = " \r\t";
-
-
 
 fn get_content_under_brace(file: &mut FileInfo) -> Result<String, String> {
     let mut content = String::new();
@@ -180,4 +178,29 @@ pub fn parse_definitions_part(file: &mut FileInfo) -> Result<Vec<Definition>, St
         }
     }
     return Err("premature EOF".to_string());
+}
+
+
+pub fn get_inclusive_state(definitions: &[Definition]) -> Option<&Vec<String>> {
+	for elem in definitions {
+		match elem {
+			Definition::InclusiveState { names } => {
+				return Some(names)
+			}
+			_ => {},
+		}
+	}
+	return None;
+}
+
+pub fn get_exclusive_state(definitions: &[Definition]) -> Option<&Vec<String>> {
+	for elem in definitions {
+		match elem {
+			Definition::ExclusiveState { names } => {
+				return Some(names)
+			}
+			_ => {},
+		}
+	}
+	return None;
 }
