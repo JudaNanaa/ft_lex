@@ -1,7 +1,9 @@
-use crate::{file_parsing::{definitions::{definitions::{get_exclusive_state, get_inclusive_state}, DefState, Definition, DefinitionState}, FileInfo}, regex::dfa::State};
+use std::collections::HashSet;
+
+use crate::file_parsing::{definitions::{definitions::{get_exclusive_state, get_inclusive_state}, DefState, Definition, DefinitionState}, FileInfo};
 
 
-fn extract_state_from_line(file: &mut FileInfo) -> Result<String, &'static str> {
+fn extract_state_from_line(file: &mut FileInfo) -> Result<String, String> {
 
 	let mut states_from_line = String::new();
 
@@ -15,17 +17,24 @@ fn extract_state_from_line(file: &mut FileInfo) -> Result<String, &'static str> 
 				states_from_line.push(char);
 			},
 			'>' => {
+				if states_from_line.len() > 1 && states_from_line.find('*').is_some() {
+					return Err("bad start condition list".to_string());
+				}
+				if states_from_line.is_empty() {
+					return Err("bad start condition list".to_string());
+					
+				}
 				return Ok(states_from_line);
 			}
 			_ => {
-				break;
+				return Err(format!("bad <start condition>: {}", char));
 			}
 		}
 	}
-	return Err("bad <start condition>");
+	return Err(format!("bad <start condition>"));
 }
 
-fn split_state_form_line(states: &String) -> Result<Vec<String>, &'static str> {
+fn split_state_form_line(states: &String) -> Result<Vec<String>, String> {
 	let mut all_states = Vec::new();
 	let mut current_state_name = String::new();
 	
@@ -33,13 +42,13 @@ fn split_state_form_line(states: &String) -> Result<Vec<String>, &'static str> {
 		match char {
 			'0'..'9' => {
 				if current_state_name.is_empty() {
-					return Err("bad <start condition>");
+					return Err("bad <start condition>".to_string());
 				}
 				current_state_name.push(char);
 			},
 			',' => {
 				if current_state_name.is_empty() {
-					return Err("bad start condition list");
+					return Err("bad start condition list".to_string());
 				}
 				all_states.push(current_state_name.clone());
 				current_state_name.clear();
@@ -50,7 +59,7 @@ fn split_state_form_line(states: &String) -> Result<Vec<String>, &'static str> {
 		}
 	}
 	if current_state_name.is_empty() {
-		return Err("bad start condition list");
+		return Err("bad start condition list".to_string());
 	}
 	all_states.push(current_state_name.clone());
 	return Ok(all_states);
@@ -86,6 +95,10 @@ fn is_inclusive_or_exclusive_state(state_name: &String, definitions: &[Definitio
 	let exclusive_states = get_exclusive_state(definitions);
 	let inclusive_states = get_inclusive_state(definitions);
 
+	if state_name == "INITIAL" {
+		return Ok(DefinitionState::Inclusive);
+	}
+
 	if exclusive_states.is_some() {
 		if let Some(_) = exclusive_states.unwrap().iter().find(|&x| x == state_name) {
 			return Ok(DefinitionState::Exclusive);
@@ -96,7 +109,21 @@ fn is_inclusive_or_exclusive_state(state_name: &String, definitions: &[Definitio
 			return Ok(DefinitionState::Inclusive);
 		}
 	}
+
 	return Err(format!("undeclared start condition {}", state_name));
+}
+
+fn warning_duplicate_state_for_line(file: &mut FileInfo, state_list: &[DefState]) {
+	let mut set = HashSet::with_capacity(state_list.len());
+
+	for state in state_list {
+		if set.contains(state) {
+			eprintln!("{}:{}: warning, <{}> specified twice", file.name, file.line_nb, state.name());
+		}
+		else {
+			set.insert(state);
+		}
+	}
 }
 
 fn find_states(all_states: &[String], definitions: &[Definition]) -> Result<Vec<DefState>, String> {
@@ -120,12 +147,17 @@ fn find_states(all_states: &[String], definitions: &[Definition]) -> Result<Vec<
 	return Ok(state_list);
 }
 
-pub fn extract_state_for_rule(file: &mut FileInfo, definitions: &[Definition]) -> Result<(String, DefinitionState), &'static str> {
+pub fn extract_state_for_rule(file: &mut FileInfo, definitions: &[Definition]) -> Result<(String, DefinitionState), String> {
 	let states = extract_state_from_line(file)?;
 
 	let split_states = split_state_form_line(&states)?;
 
-	dbg!(split_states);
-	// TODO mettre la fonction find state et changer le type des Result
+	dbg!(&split_states);
+
+	let all_states_for_rule = find_states(&split_states, definitions)?;
+
+	dbg!(&all_states_for_rule);
+
+	warning_duplicate_state_for_line(file, &all_states_for_rule);
 	todo!();
 }

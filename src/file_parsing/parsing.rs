@@ -16,10 +16,10 @@ fn get_file_content(file_path: &str) -> Result<String, Box<dyn std::error::Error
     return Ok(file_content);
 }
 
-pub fn parsing_lex_file(file_path: &str) -> Result<FilePart, &'static str> {
+pub fn parsing_lex_file(file_path: &str) -> Result<FilePart, String> {
     let file_content = match get_file_content(file_path) {
         Ok(content) => content,
-        Err(_) => return Err("Cannot open file"),
+        Err(_) => return Err("Cannot open file".to_string()),
     };
     let mut file = FileInfo {
         it: file_content.chars().peekable(),

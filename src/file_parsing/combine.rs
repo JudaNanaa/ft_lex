@@ -33,7 +33,7 @@ fn extract_all_nfas(rules: &[RuleAction]) -> Vec<NFA> {
 
 pub fn process_and_combine_rules(
     rules: Vec<RuleAction>,
-) -> Result<(DFA, HashMap<usize, Vec<String>>), &'static str> {
+) -> Result<(DFA, HashMap<usize, Vec<String>>), String> {
     let mut pipe_buffer = Vec::new();
     let mut processed_rules = Vec::new();
 
@@ -50,7 +50,7 @@ pub fn process_and_combine_rules(
     }
 
     if !pipe_buffer.is_empty() {
-        return Err("Un symbole '|' n'a pas été suivi d'une action.");
+        return Err("Un symbole '|' n'a pas été suivi d'une action.".to_string());
     }
 
     let final_state_map = map_final_states_to_actions(&processed_rules);

@@ -18,24 +18,24 @@ pub fn action_hash(rules: &Vec<RuleAction>) -> HashMap<String, usize> {
 }
 
 /// Ajoute tout le contenu entre guillemets dans `rule`.
-fn append_quoted_string(rule: &mut String, file: &mut FileInfo) -> Result<(), &'static str> {
+fn append_quoted_string(rule: &mut String, file: &mut FileInfo) -> Result<(), String> {
     rule.push('"');
     while let Some(ch) = file.it.next() {
         match ch {
             '\n' => {
                 file.line_nb += 1;
-                return Err("missing quote");
+                return Err("missing quote".to_string());
             }
             '\\' => {
                 if let Some(escaped) = file.it.next() {
                     if escaped == '\n' {
                         file.line_nb += 1;
-                        return Err("missing quote");
+                        return Err("missing quote".to_string());
                     }
                     rule.push('\\');
                     rule.push(escaped);
                 } else {
-                    return Err("missing quote");
+                    return Err("missing quote".to_string());
                 }
             }
             '"' => {
@@ -49,7 +49,7 @@ fn append_quoted_string(rule: &mut String, file: &mut FileInfo) -> Result<(), &'
 }
 
 /// Remplace une référence à une définition par sa valeur.
-fn resolve_definition(name: &str, definitions: &[Definition]) -> Result<String, &'static str> {
+fn resolve_definition(name: &str, definitions: &[Definition]) -> Result<String, String> {
     if name.chars().next().is_some_and(|c| c.is_ascii_digit()) {
         return Ok(format!("{{{}}}", name));
     }
@@ -65,7 +65,7 @@ fn resolve_definition(name: &str, definitions: &[Definition]) -> Result<String, 
             }
         }
     }
-    return Err("Definition not found");
+    return Err("Definition not found".to_string());
 }
 
 /// Extrait le contenu entre accolades dans une règle.
@@ -73,14 +73,14 @@ fn extract_braced_definition(
     rule: &mut String,
     file: &mut FileInfo,
     defs: &[Definition],
-) -> Result<(), &'static str> {
+) -> Result<(), String> {
     let mut def_name = String::new();
 
     for ch in file.it.by_ref() {
         match ch {
             '\n' => {
                 file.line_nb += 1;
-                return Err("missing }");
+                return Err("missing }".to_string());
             }
             '}' => {
                 let replacement = resolve_definition(&def_name, defs)?;
@@ -90,11 +90,11 @@ fn extract_braced_definition(
             _ => def_name.push(ch),
         }
     }
-    return Err("unterminated brace block");
+    return Err("unterminated brace block".to_string());
 }
 
 /// Extrait un ensemble de caractères entre crochets.
-fn extract_character_class(rule: &mut String, file: &mut FileInfo) -> Result<(), &'static str> {
+fn extract_character_class(rule: &mut String, file: &mut FileInfo) -> Result<(), String> {
     rule.push('[');
 
     let mut posix_buffer = String::new();
@@ -103,7 +103,7 @@ fn extract_character_class(rule: &mut String, file: &mut FileInfo) -> Result<(),
         match current_char {
             '\n' => {
                 file.line_nb += 1;
-                return Err("missing ]");
+                return Err("missing ]".to_string());
             }
             '[' => {
                 posix_buffer.push('[');
@@ -126,7 +126,7 @@ fn extract_character_class(rule: &mut String, file: &mut FileInfo) -> Result<(),
                     "[:graph:]" => "!-~",
                     _ => {
                         if posix_buffer.contains("[:") && posix_buffer.contains(":]") {
-                            return Err("unknown POSIX class");
+                            return Err("unknown POSIX class".to_string());
                         }
                         posix_buffer.as_str()
                     }
@@ -144,11 +144,11 @@ fn extract_character_class(rule: &mut String, file: &mut FileInfo) -> Result<(),
             _ => rule.push(current_char),
         }
     }
-    return Err("unterminated character class");
+    return Err("unterminated character class".to_string());
 }
 
 /// Extrait une action entre guillemets, en tenant compte des échappements.
-fn read_quoted_action(file: &mut FileInfo, quote: char) -> Result<String, &'static str> {
+fn read_quoted_action(file: &mut FileInfo, quote: char) -> Result<String, String> {
     let mut result = String::new();
     result.push(quote);
 
@@ -160,7 +160,7 @@ fn read_quoted_action(file: &mut FileInfo, quote: char) -> Result<String, &'stat
                     result.push(escaped);
                 }
             }
-            '\n' => return Err("missing quote"),
+            '\n' => return Err("missing quote".to_string()),
             c if c == quote => {
                 result.push(quote);
                 return Ok(result);
@@ -169,11 +169,11 @@ fn read_quoted_action(file: &mut FileInfo, quote: char) -> Result<String, &'stat
         }
     }
 
-    return Err("unterminated quoted action");
+    return Err("unterminated quoted action".to_string());
 }
 
 /// Extrait une action encadrée par des `{}` (avec support de guillemets imbriqués).
-fn read_braced_action(file: &mut FileInfo) -> Result<String, &'static str> {
+fn read_braced_action(file: &mut FileInfo) -> Result<String, String> {
     let mut result = String::new();
     result.push('{');
 
@@ -189,11 +189,11 @@ fn read_braced_action(file: &mut FileInfo) -> Result<String, &'static str> {
         }
     }
 
-    return Err("unclosed brace in action");
+    return Err("unclosed brace in action".to_string());
 }
 
 /// Extrait le contenu complet d'une action après une règle.
-fn parse_action(file: &mut FileInfo) -> Result<String, &'static str> {
+fn parse_action(file: &mut FileInfo) -> Result<String, String> {
     let mut action = String::new();
 
     while let Some(ch) = file.it.next() {
@@ -206,7 +206,7 @@ fn parse_action(file: &mut FileInfo) -> Result<String, &'static str> {
         }
     }
 
-    return Err("unexpected EOF while reading action");
+    return Err("unexpected EOF while reading action".to_string());
 }
 
 /// Coupe une ligne contenant une règle en deux : expression et action.
@@ -214,14 +214,14 @@ fn parse_rule_and_action(
     file: &mut FileInfo,
     first_char: char,
     defs: &[Definition],
-) -> Result<(String, String), &'static str> {
+) -> Result<(String, String), String> {
     let mut rule = String::new();
 
     match first_char {
         '"' => append_quoted_string(&mut rule, file)?,
         '{' => extract_braced_definition(&mut rule, file, defs)?,
         '[' => extract_character_class(&mut rule, file)?,
-        '}' | ']' => return Err("unexpected closing character"),
+        '}' | ']' => return Err("unexpected closing character".to_string()),
         _ => rule.push(first_char),
     }
 
@@ -243,7 +243,7 @@ fn parse_rule_and_action(
                 file.it.next();
                 extract_character_class(&mut rule, file)?;
             }
-            '}' | ']' => return Err("unexpected closing character"),
+            '}' | ']' => return Err("unexpected closing character".to_string()),
             _ => {
                 file.it.next();
                 rule.push(ch);

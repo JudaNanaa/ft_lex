@@ -1,12 +1,12 @@
 pub mod definitions;
 
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub struct DefState {
 	name: String,
 	state_type: DefinitionState
 }
 
-#[derive(Debug)]
+#[derive(Debug, Hash, PartialEq, Eq)]
 pub enum DefinitionState {
     Inclusive,
     Exclusive,
@@ -27,5 +27,9 @@ impl DefState {
 			name,
 			state_type
 		};
+	}
+
+	pub fn name(&self) -> &String {
+		return &self.name;
 	}
 }

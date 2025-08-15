@@ -10,7 +10,7 @@
 "/*"            BEGIN(COMMENT);
 s< printf("yesbb\n");
 
-<COMMENT,COMMENT,INITIAL,sss>ok printf("test\n");
+<COMMENT,INITIAL,INITIAL>ok printf("test\n");
 
 <COMMENT>{
     "*/"        printf("end of comment\n"); BEGIN(INITIAL);
