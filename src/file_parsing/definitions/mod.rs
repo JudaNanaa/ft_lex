@@ -1,12 +1,12 @@
 pub mod definitions;
 
-#[derive(Debug, Hash, PartialEq, Eq)]
-pub struct DefState {
+#[derive(Debug, Hash, PartialEq, Eq, Clone)]
+pub struct ConditionState {
     name: String,
     state_type: DefinitionState,
 }
 
-#[derive(Debug, Hash, PartialEq, Eq)]
+#[derive(Debug, Hash, PartialEq, Eq, Clone, Copy)]
 pub enum DefinitionState {
     Inclusive,
     Exclusive,
@@ -21,9 +21,16 @@ pub enum Definition {
     ExclusiveState { names: Vec<String> },
 }
 
-impl DefState {
-    pub fn new(name: String, state_type: DefinitionState) -> DefState {
-        return DefState { name, state_type };
+impl ConditionState {
+    pub fn new(name: String, state_type: DefinitionState) -> ConditionState {
+        return ConditionState { name, state_type };
+    }
+
+    pub fn initial() -> ConditionState {
+        return ConditionState {
+            name: String::from("INITIAL"),
+            state_type: DefinitionState::Inclusive,
+        };
     }
 
     pub fn name(&self) -> &String {

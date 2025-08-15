@@ -1,5 +1,6 @@
-use crate::regex::NFA;
+use crate::{file_parsing::definitions::ConditionState, regex::NFA};
 
+mod condition_state;
 pub mod rules;
 mod rules_states;
 
@@ -7,6 +8,7 @@ mod rules_states;
 pub struct RuleAction {
     nfa: NFA,
     action: String,
+    condition_state: Vec<ConditionState>,
 }
 
 impl RuleAction {

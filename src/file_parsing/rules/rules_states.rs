@@ -3,7 +3,7 @@ use std::collections::HashSet;
 use crate::file_parsing::{
     definitions::{
         definitions::{get_exclusive_state, get_inclusive_state},
-        DefState, Definition, DefinitionState,
+        ConditionState, Definition, DefinitionState,
     },
     FileInfo,
 };
@@ -68,27 +68,27 @@ fn split_state_form_line(states: &String) -> Result<Vec<String>, String> {
     return Ok(all_states);
 }
 
-fn expand_star_for_state(definitions: &[Definition]) -> Vec<DefState> {
+fn expand_star_for_state(definitions: &[Definition]) -> Vec<ConditionState> {
     let exclusive_states = get_exclusive_state(definitions);
     let inclusive_states = get_inclusive_state(definitions);
 
     let mut all_states = Vec::new();
 
-    all_states.push(DefState::new(
+    all_states.push(ConditionState::new(
         "INITIAL".to_string(),
         DefinitionState::Exclusive,
     ));
 
     if exclusive_states.is_some() {
         for state in exclusive_states.unwrap() {
-            let new_def_state = DefState::new(state.clone(), DefinitionState::Exclusive);
+            let new_def_state = ConditionState::new(state.clone(), DefinitionState::Exclusive);
             all_states.push(new_def_state);
         }
     }
 
     if inclusive_states.is_some() {
         for state in inclusive_states.unwrap() {
-            let new_def_state = DefState::new(state.clone(), DefinitionState::Inclusive);
+            let new_def_state = ConditionState::new(state.clone(), DefinitionState::Inclusive);
             all_states.push(new_def_state);
         }
     }
@@ -120,7 +120,7 @@ fn is_inclusive_or_exclusive_state(
     return Err(format!("undeclared start condition {}", state_name));
 }
 
-fn warning_duplicate_condition_state_for_line(file: &mut FileInfo, state_list: &[DefState]) {
+fn warning_duplicate_condition_state_for_line(file: &mut FileInfo, state_list: &[ConditionState]) {
     let mut set = HashSet::with_capacity(state_list.len());
 
     for state in state_list {
@@ -137,8 +137,11 @@ fn warning_duplicate_condition_state_for_line(file: &mut FileInfo, state_list: &
     }
 }
 
-fn find_states(all_states: &[String], definitions: &[Definition]) -> Result<Vec<DefState>, String> {
-    let mut state_list: Vec<DefState> = Vec::new();
+fn find_states(
+    all_states: &[String],
+    definitions: &[Definition],
+) -> Result<Vec<ConditionState>, String> {
+    let mut state_list: Vec<ConditionState> = Vec::new();
 
     for state_name in all_states {
         match state_name.as_str() {
@@ -149,7 +152,7 @@ fn find_states(all_states: &[String], definitions: &[Definition]) -> Result<Vec<
             }
             _ => {
                 let state_type = is_inclusive_or_exclusive_state(state_name, definitions)?;
-                let new_def_state = DefState::new(state_name.clone(), state_type);
+                let new_def_state = ConditionState::new(state_name.clone(), state_type);
                 state_list.push(new_def_state);
             }
         }
@@ -160,7 +163,7 @@ fn find_states(all_states: &[String], definitions: &[Definition]) -> Result<Vec<
 pub fn extract_state_for_rule(
     file: &mut FileInfo,
     definitions: &[Definition],
-) -> Result<(String, DefinitionState), String> {
+) -> Result<Vec<ConditionState>, String> {
     let states = extract_state_from_line(file)?;
 
     let split_states = split_state_form_line(&states)?;
@@ -172,5 +175,6 @@ pub fn extract_state_for_rule(
     dbg!(&all_states_for_rule);
 
     warning_duplicate_condition_state_for_line(file, &all_states_for_rule);
-    todo!();
+
+    return Ok(all_states_for_rule);
 }

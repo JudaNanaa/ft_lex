@@ -2,11 +2,14 @@ use std::{char, collections::HashMap};
 
 use crate::{
     file_parsing::{
-        definitions::Definition,
-        rules::{rules_states::extract_state_for_rule, RuleAction},
+        definitions::{ConditionState, Definition},
+        rules::{
+            condition_state::parse_condition_state, rules_states::extract_state_for_rule,
+            RuleAction,
+        },
         FileInfo,
     },
-    regex::{nfa::nfa::construct_nfa, regex_tokenizer},
+    regex::{nfa::nfa::construct_nfa, regex_tokenizer, NFA},
 };
 
 pub fn action_hash(rules: &Vec<RuleAction>) -> HashMap<String, usize> {
@@ -219,42 +222,18 @@ fn parse_action(file: &mut FileInfo) -> Result<String, String> {
 /// Coupe une ligne contenant une règle en deux : expression et action.
 fn parse_rule_and_action(
     file: &mut FileInfo,
-    first_char: char,
     defs: &[Definition],
 ) -> Result<(String, String), String> {
     let mut rule = String::new();
 
-    match first_char {
-        '"' => append_quoted_string(&mut rule, file)?,
-        '{' => extract_braced_definition(&mut rule, file, defs)?,
-        '[' => extract_character_class(&mut rule, file)?,
-        '}' | ']' => return Err("unexpected closing character".to_string()),
-        _ => rule.push(first_char),
-    }
-
-    while let Some(ch) = file.it.peek().cloned() {
-        match ch {
-            '"' => {
-                file.it.next();
-                append_quoted_string(&mut rule, file)?;
-            }
-            ' ' | '\t' => {
-                file.it.next();
-                break;
-            }
-            '{' => {
-                file.it.next();
-                extract_braced_definition(&mut rule, file, defs)?;
-            }
-            '[' => {
-                file.it.next();
-                extract_character_class(&mut rule, file)?;
-            }
+    while let Some(char) = file.it.next() {
+        match char {
+            '"' => append_quoted_string(&mut rule, file)?,
+            ' ' | '\t' => break,
+            '{' => extract_braced_definition(&mut rule, file, defs)?,
+            '[' => extract_character_class(&mut rule, file)?,
             '}' | ']' => return Err("unexpected closing character".to_string()),
-            _ => {
-                file.it.next();
-                rule.push(ch);
-            }
+            _ => rule.push(char),
         }
     }
 
@@ -262,29 +241,43 @@ fn parse_rule_and_action(
     return Ok((rule, action));
 }
 
+pub fn process_rule_and_action(
+    file: &mut FileInfo,
+    next_state_id: &mut usize,
+    definitions: &[Definition],
+) -> Result<(NFA, String), String> {
+    let (rule_expr, action) = parse_rule_and_action(file, definitions)?;
+    let tokens = regex_tokenizer(&rule_expr);
+    let nfa = construct_nfa(&tokens, *next_state_id);
+    return Ok((nfa, action));
+}
+
 /// Parse la section des règles d'un fichier.
 pub fn parse_rules_section(
     file: &mut FileInfo,
     definitions: &[Definition],
 ) -> Result<(Vec<RuleAction>, Vec<String>), String> {
-    let mut texts = Vec::new();
+    let mut in_yylex = Vec::new();
     let mut rules = Vec::new();
     let mut next_state_id = 1;
     let mut state = "INITIAL";
 
-    while let Some(ch) = file.it.next() {
+    while let Some(ch) = file.it.peek() {
         match ch {
             '\n' => {
                 file.line_nb += 1;
+                file.it.next();
                 continue;
             }
             '%' => {
+                file.it.next();
                 if let Some('%') = file.it.peek().cloned() {
                     file.it.next();
-                    return Ok((rules, texts));
+                    return Ok((rules, in_yylex));
                 }
             }
             ' ' | '\t' => {
+                file.it.next();
                 let mut text = String::new();
                 for ch in file.it.by_ref() {
                     if ch == '\n' {
@@ -293,26 +286,24 @@ pub fn parse_rules_section(
                     }
                     text.push(ch);
                 }
-                texts.push(text);
+                in_yylex.push(text);
             }
             '<' => {
-                let test = extract_state_for_rule(file, definitions)?;
-                dbg!(&test);
-                if let Some(c) = file.it.peek() {
-                    // TODO: faut continuer ici pour les states
-                } else {
-                    return Err("unrecognized rule".to_string());
-                }
+                file.it.next();
+                let state_list = extract_state_for_rule(file, definitions)?;
+                dbg!(&state_list);
+                let test = parse_condition_state(file, &mut next_state_id, definitions)?;
             }
             _ => {
-                let (rule_expr, action) = parse_rule_and_action(file, ch, definitions)?;
-                let tokens = regex_tokenizer(&rule_expr);
-                let (nfa, new_state_id) = construct_nfa(&tokens, next_state_id);
-                next_state_id = new_state_id;
-                rules.push(RuleAction { nfa, action });
+                let (nfa, action) = process_rule_and_action(file, &mut next_state_id, definitions)?;
+                rules.push(RuleAction {
+                    nfa,
+                    action,
+                    condition_state: vec![ConditionState::initial()],
+                });
             }
         }
     }
 
-    return Ok((rules, texts));
+    return Ok((rules, in_yylex));
 }

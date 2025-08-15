@@ -24,7 +24,7 @@ s< printf("yesbb\n");
     \n          { printf("Unterminated string\n"); BEGIN(INITIAL); }
 }
 
-<INITIAL>"hello"    { printf("Hello detected\n"); }
+"hello"    { printf("Hello detected\n"); }
 <INITIAL>"bye"      { printf("Bye detected\n"); }
 
 <*>[ \t\n]+     ; // ignore whitespace in all states
