@@ -1,11 +1,13 @@
 use std::{fs::File, io::Read, process::exit};
 
-use crate::file_parsing::{definitions::definitions::parse_definitions_part, rules::rules::{action_hash, parse_rules_section}, user_routine::user_routine::parse_user_routine_part, FilePart};
-
-use super::{
-    combine::process_and_combine_rules,
-    FileInfo,
+use crate::file_parsing::{
+    definitions::definitions::parse_definitions_part,
+    rules::rules::{action_hash, parse_rules_section},
+    user_routine::user_routine::parse_user_routine_part,
+    FilePart,
 };
+
+use super::{combine::process_and_combine_rules, FileInfo};
 
 fn get_file_content(file_path: &str) -> Result<String, Box<dyn std::error::Error>> {
     let mut file = File::open(file_path)?;

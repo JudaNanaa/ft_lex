@@ -1,6 +1,13 @@
 use std::{char, collections::HashMap};
 
-use crate::{file_parsing::{definitions::{definitions::{get_exclusive_state, get_inclusive_state}, Definition, DefinitionState}, rules::{rules_states::extract_state_for_rule, RuleAction}, FileInfo}, regex::{nfa::nfa::construct_nfa, regex_tokenizer}};
+use crate::{
+    file_parsing::{
+        definitions::Definition,
+        rules::{rules_states::extract_state_for_rule, RuleAction},
+        FileInfo,
+    },
+    regex::{nfa::nfa::construct_nfa, regex_tokenizer},
+};
 
 pub fn action_hash(rules: &Vec<RuleAction>) -> HashMap<String, usize> {
     let mut hash = HashMap::new();
@@ -255,8 +262,6 @@ fn parse_rule_and_action(
     return Ok((rule, action));
 }
 
-
-
 /// Parse la section des règles d'un fichier.
 pub fn parse_rules_section(
     file: &mut FileInfo,
@@ -265,7 +270,7 @@ pub fn parse_rules_section(
     let mut texts = Vec::new();
     let mut rules = Vec::new();
     let mut next_state_id = 1;
-	let mut state = "INITIAL";
+    let mut state = "INITIAL";
 
     while let Some(ch) = file.it.next() {
         match ch {
@@ -290,16 +295,15 @@ pub fn parse_rules_section(
                 }
                 texts.push(text);
             }
-			'<' => {
-				let test = extract_state_for_rule(file, definitions)?;
-				dbg!(&test);
-				if let Some(c) = file.it.peek() {
-					// TODO: faut continuer ici pour les states
-				}
-				else {
-					return Err("unrecognized rule".to_string()); 
-				}
-			}
+            '<' => {
+                let test = extract_state_for_rule(file, definitions)?;
+                dbg!(&test);
+                if let Some(c) = file.it.peek() {
+                    // TODO: faut continuer ici pour les states
+                } else {
+                    return Err("unrecognized rule".to_string());
+                }
+            }
             _ => {
                 let (rule_expr, action) = parse_rule_and_action(file, ch, definitions)?;
                 let tokens = regex_tokenizer(&rule_expr);

@@ -10,16 +10,15 @@ pub struct RuleAction {
 }
 
 impl RuleAction {
-	pub fn nfa(&self) -> &NFA {
-		return &self.nfa;
-	}
+    pub fn nfa(&self) -> &NFA {
+        return &self.nfa;
+    }
 
-	pub fn action(&self) -> &String {
-		return &self.action;
-	}
-	
-	pub fn action_mut(&mut self) -> &mut String {
-		return &mut self.action;
-	}
+    pub fn action(&self) -> &String {
+        return &self.action;
+    }
 
+    pub fn action_mut(&mut self) -> &mut String {
+        return &mut self.action;
+    }
 }

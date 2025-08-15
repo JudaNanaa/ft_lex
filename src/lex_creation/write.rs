@@ -5,9 +5,7 @@ use std::{
 
 use crate::file_parsing::definitions::Definition;
 
-use super::{
-    DEFINES, INCLUDES, VARIABLES,
-};
+use super::{DEFINES, INCLUDES, VARIABLES};
 
 fn open_template_file(file_path: &str) -> std::io::Result<String> {
     let mut file = File::open(file_path)?;

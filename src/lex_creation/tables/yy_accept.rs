@@ -35,7 +35,7 @@ pub fn yy_accept(dfa: &DFA, file: &mut File) -> std::io::Result<Vec<u8>> {
         } else if index != accept_tab.len() - 1 {
             write!(file, ",{}", SPACE)?;
         } else {
-            writeln!(file, "")?;
+            writeln!(file)?;
         }
     }
     writeln!(file, "{}}} ;\n", SPACE)?;

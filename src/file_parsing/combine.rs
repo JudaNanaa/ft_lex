@@ -1,10 +1,13 @@
 use std::collections::HashMap;
 
-use crate::{file_parsing::rules::RuleAction, regex::{
-    combine_nfa::combine_nfa,
-    dfa::{dfa::construct_dfa, rule_actions::assiociate_rule_actions, DFA},
-    NFA,
-}};
+use crate::{
+    file_parsing::rules::RuleAction,
+    regex::{
+        combine_nfa::combine_nfa,
+        dfa::{dfa::construct_dfa, rule_actions::assiociate_rule_actions, DFA},
+        NFA,
+    },
+};
 
 fn map_final_states_to_actions(rules: &[RuleAction]) -> HashMap<usize, Vec<String>> {
     let mut final_state_actions = HashMap::new();

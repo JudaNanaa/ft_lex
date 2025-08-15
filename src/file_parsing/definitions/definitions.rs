@@ -1,6 +1,9 @@
 use std::char;
 
-use crate::file_parsing::{definitions::{Definition, DefinitionState}, FileInfo};
+use crate::file_parsing::{
+    definitions::{Definition, DefinitionState},
+    FileInfo,
+};
 
 const WHITESPACE: &str = " \r\t";
 
@@ -180,27 +183,22 @@ pub fn parse_definitions_part(file: &mut FileInfo) -> Result<Vec<Definition>, St
     return Err("premature EOF".to_string());
 }
 
-
 pub fn get_inclusive_state(definitions: &[Definition]) -> Option<&Vec<String>> {
-	for elem in definitions {
-		match elem {
-			Definition::InclusiveState { names } => {
-				return Some(names)
-			}
-			_ => {},
-		}
-	}
-	return None;
+    for elem in definitions {
+        match elem {
+            Definition::InclusiveState { names } => return Some(names),
+            _ => {}
+        }
+    }
+    return None;
 }
 
 pub fn get_exclusive_state(definitions: &[Definition]) -> Option<&Vec<String>> {
-	for elem in definitions {
-		match elem {
-			Definition::ExclusiveState { names } => {
-				return Some(names)
-			}
-			_ => {},
-		}
-	}
-	return None;
+    for elem in definitions {
+        match elem {
+            Definition::ExclusiveState { names } => return Some(names),
+            _ => {}
+        }
+    }
+    return None;
 }

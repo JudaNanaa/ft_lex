@@ -2,8 +2,8 @@ pub mod definitions;
 
 #[derive(Debug, Hash, PartialEq, Eq)]
 pub struct DefState {
-	name: String,
-	state_type: DefinitionState
+    name: String,
+    state_type: DefinitionState,
 }
 
 #[derive(Debug, Hash, PartialEq, Eq)]
@@ -22,14 +22,11 @@ pub enum Definition {
 }
 
 impl DefState {
-	pub fn new(name: String, state_type: DefinitionState) -> DefState {
-		return DefState{ 
-			name,
-			state_type
-		};
-	}
+    pub fn new(name: String, state_type: DefinitionState) -> DefState {
+        return DefState { name, state_type };
+    }
 
-	pub fn name(&self) -> &String {
-		return &self.name;
-	}
+    pub fn name(&self) -> &String {
+        return &self.name;
+    }
 }

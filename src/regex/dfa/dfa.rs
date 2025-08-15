@@ -12,7 +12,7 @@ fn new_final_states(dfa: &DFA) -> HashSet<usize> {
     let mut new_final_state = HashSet::new();
 
     for state in &dfa.final_states {
-        if let Some(nb) = dfa.test.get(&state) {
+        if let Some(nb) = dfa.test.get(state) {
             new_final_state.insert(*nb);
         }
     }

@@ -20,7 +20,7 @@ pub fn yy_final(file_parts: &FilePart, file: &mut File) -> std::io::Result<()> {
         }
         writeln!(file, "}}")?;
     }
-    write!(file, "\n")?;
+    writeln!(file)?;
 
     Ok(())
 }

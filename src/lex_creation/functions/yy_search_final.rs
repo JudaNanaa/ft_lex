@@ -9,7 +9,7 @@ pub fn create_yy_search_final(
     writeln!(file, "void yy_search_final(int state, int len_match) {{")?;
     writeln!(file, "{}switch (state) {{", SPACE)?;
 
-    for (nb, _) in actions {
+    for nb in actions.keys() {
         writeln!(file, "{}case {}:", SPACE.repeat(2), nb)?;
         writeln!(file, "{}final{}(len_match);", SPACE.repeat(3), nb)?;
         writeln!(file, "{}break;", SPACE.repeat(3))?;

@@ -7,9 +7,7 @@ use crate::{
             yy_action::yy_action, yy_final::yy_final, yy_search_final::create_yy_search_final,
         },
         tables::table::tables_creation,
-        write::{
-            write_defines, write_includes, write_user_routine, write_variables,
-        },
+        write::{write_defines, write_includes, write_user_routine, write_variables},
         LEX_FILE,
     },
 };

@@ -31,12 +31,12 @@ pub fn create_yy_ec(
             write!(file, ",")?;
             if (i + 1) % 10 == 0 {
                 writeln!(file)?;
-                write!(file, "{}{}", SPACE.repeat(2), "")?;
+                write!(file, "{}", SPACE.repeat(2))?;
             } else {
                 write!(file, "{}", SPACE)?;
             }
         } else {
-            writeln!(file, "\n{}}} ;\n", SPACE.repeat(1))?;
+            writeln!(file, "\n{}}} ;\n", SPACE.to_string())?;
         }
     }
 
