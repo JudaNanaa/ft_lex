@@ -10,14 +10,17 @@
 "/*"            BEGIN(COMMENT);
 s< printf("yesbb\n");
 
-<COMMENT,INITIAL,INITIAL>ok printf("test\n");
+
 
 <COMMENT>{
     "*/"        printf("end of comment\n"); BEGIN(INITIAL);
     .|\n        ;  // ignore le contenu du commentaire
 }
 
-\"              BEGIN(STRING);
+
+<COMMENT,INITIAL,INITIAL>ok printf("test\n");
+
+\"              BEGIN(STRING); // TODO: un probleme ici
 <STRING>{
     \"          { BEGIN(INITIAL); printf("End of string\n"); }
     [^\"\n]+    { printf("String content: %s\n", yytext); }

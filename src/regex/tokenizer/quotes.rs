@@ -20,7 +20,6 @@ fn string_to_tokens(str: String) -> Vec<Token> {
 
 pub fn get_string_under_quotes(chars: &mut Chars<'_>, quote_to_match: char) -> Vec<Token> {
     let mut dest: String = String::new();
-    let mut last_seen_backslash: bool = false;
 
     while let Some(c) = chars.next() {
         match c {
@@ -31,12 +30,11 @@ pub fn get_string_under_quotes(chars: &mut Chars<'_>, quote_to_match: char) -> V
                     panic!("unclose quotes");
                 }
             }
-            q if q == quote_to_match && !last_seen_backslash => {
+            q if q == quote_to_match => {
                 return string_to_tokens(dest);
             }
             _ => {
                 dest.push(c);
-                last_seen_backslash = false;
             }
         }
     }
@@ -77,6 +75,23 @@ mod tests {
             Token::Char('w'),
             Token::Char('o'),
             Token::Char('r'),
+            Token::Char('l'),
+            Token::Char('d'),
+            Operator(CloseParen),
+        ];
+        assert_eq!(tokens, expected);
+    }
+
+    #[test]
+    fn test_hard_double_quotes() {
+        let mut chars = to_chars("wor\\\"ld\"");
+        let tokens = get_string_under_quotes(&mut chars, '"');
+        let expected = vec![
+            Operator(OpenParen),
+            Token::Char('w'),
+            Token::Char('o'),
+            Token::Char('r'),
+            Token::Char('"'),
             Token::Char('l'),
             Token::Char('d'),
             Operator(CloseParen),
