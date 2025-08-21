@@ -17,12 +17,11 @@ s< printf("yesbb\n");
     .|\n        ;  // ignore le contenu du commentaire
 }
 
-
 <COMMENT,INITIAL,INITIAL>ok printf("test\n");
 
-\"              BEGIN(STRING); // TODO: un probleme ici
+\"              BEGIN(STRING);
 <STRING>{
-    \"          { BEGIN(INITIAL); printf("End of string\n"); }
+    \"          { BEGIN(INITIAL); printf("End of string\n"); }  // TODO: un probleme ici
     [^\"\n]+    { printf("String content: %s\n", yytext); }
     \n          { printf("Unterminated string\n"); BEGIN(INITIAL); }
 }

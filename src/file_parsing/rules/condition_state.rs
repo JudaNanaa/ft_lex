@@ -37,6 +37,13 @@ fn extract_state_block(file: &mut FileInfo) -> Result<String, String> {
                 state_block += skip_until_find(file, char)?.as_str();
             }
             _ => {
+                if char == '\\' {
+                    if let Some(c) = file.it.next() {
+                        state_block.push(c);
+                    } else {
+                        return Err("unrecognized rule".to_string());
+                    }
+                }
                 if char == '}' {
                     return Ok(state_block);
                 }
@@ -60,6 +67,9 @@ pub fn parse_condition_state(
                 dbg!(&in_state_block);
             }
             ' ' | '\r' | '\t' | '\n' => {
+                if *char == '\n' {
+                    file.line_nb += 1;
+                }
                 return Err("unrecognized rule".to_string());
             }
             _ => {

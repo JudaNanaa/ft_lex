@@ -170,7 +170,10 @@ fn read_quoted_action(file: &mut FileInfo, quote: char) -> Result<String, String
                     result.push(escaped);
                 }
             }
-            '\n' => return Err("missing quote".to_string()),
+            '\n' => {
+                file.line_nb += 1;
+                return Err("missing quote".to_string());
+            }
             c if c == quote => {
                 result.push(quote);
                 return Ok(result);
@@ -208,7 +211,10 @@ fn parse_action(file: &mut FileInfo) -> Result<String, String> {
 
     while let Some(ch) = file.it.next() {
         match ch {
-            '\n' => return Ok(action),
+            '\n' => {
+                file.line_nb += 1;
+                return Ok(action);
+            }
             '{' => action.push_str(&read_braced_action(file)?),
             '}' => todo!("error: unbalanced closing brace"),
             '\'' | '"' => action.push_str(&read_quoted_action(file, ch)?),
@@ -233,6 +239,14 @@ fn parse_rule_and_action(
             '{' => extract_braced_definition(&mut rule, file, defs)?,
             '[' => extract_character_class(&mut rule, file)?,
             '}' | ']' => return Err("unexpected closing character".to_string()),
+            '\\' => {
+                rule.push('\\');
+                if let Some(c) = file.it.next() {
+                    rule.push(c);
+                } else {
+                    return Err("unrecognized rule".to_string());
+                }
+            }
             _ => rule.push(char),
         }
     }
