@@ -1,6 +1,6 @@
 use crate::file_parsing::{
     definitions::{ConditionState, Definition},
-    rules::rules::process_rule_and_action,
+    rules::{rules::process_rule_and_action, RuleAction},
     FileInfo,
 };
 
@@ -28,26 +28,57 @@ fn skip_until_find(file: &mut FileInfo, to_find: char) -> Result<String, String>
     return Err(String::from("ERROR: end of file in string"));
 }
 
-fn extract_state_block(file: &mut FileInfo) -> Result<String, String> {
-    let mut state_block = String::new();
-    while let Some(char) = file.it.next() {
+fn skip_until_newline_state_block(file: &mut FileInfo) -> Result<(), String> {
+    while let Some(char) = file.it.peek() {
         match char {
-            '"' | '\'' => {
-                state_block.push(char);
-                state_block += skip_until_find(file, char)?.as_str();
+            '\n' => {
+                file.it.next();
+                file.line_nb += 1;
+                break;
             }
+            ' ' | '\t' => {
+                file.it.next();
+                continue;
+            }
+            _ => return Err("unrecognized rule".to_string()),
+        }
+    }
+    return Ok(());
+}
+
+fn extract_state_block(
+    file: &mut FileInfo,
+    next_state_id: &mut usize,
+    definitions: &[Definition],
+    state_list: &[ConditionState],
+) -> Result<Vec<RuleAction>, String> {
+    let mut rules_from_state_block = Vec::new();
+
+    if let Some('}') = file.it.peek() {
+        file.it.next();
+        return Ok(rules_from_state_block);
+    }
+
+    skip_until_newline_state_block(file)?;
+
+    while let Some(char) = file.it.peek() {
+        match char {
+            '\n' | ' ' | '\t' => {
+                file.it.next();
+            }
+
             _ => {
-                if char == '\\' {
-                    if let Some(c) = file.it.next() {
-                        state_block.push(c);
-                    } else {
-                        return Err("unrecognized rule".to_string());
-                    }
+                if *char == '}' {
+                    file.it.next();
+                    return Ok(rules_from_state_block);
                 }
-                if char == '}' {
-                    return Ok(state_block);
-                }
-                state_block.push(char);
+
+                let (nfa, action) = process_rule_and_action(file, next_state_id, definitions)?;
+                rules_from_state_block.push(RuleAction {
+                    nfa,
+                    action,
+                    condition_state: state_list.to_vec(),
+                });
             }
         }
     }
@@ -58,13 +89,16 @@ pub fn parse_condition_state(
     file: &mut FileInfo,
     next_state_id: &mut usize,
     definitions: &[Definition],
-) -> Result<(), String> {
+    state_list: &[ConditionState],
+) -> Result<Vec<RuleAction>, String> {
     if let Some(char) = file.it.peek() {
         match char {
             '{' => {
                 file.it.next();
-                let in_state_block = extract_state_block(file)?;
-                dbg!(&in_state_block);
+                let rules_from_state_block =
+                    extract_state_block(file, next_state_id, definitions, state_list)?;
+                dbg!(&rules_from_state_block);
+                return Ok(rules_from_state_block);
             }
             ' ' | '\r' | '\t' | '\n' => {
                 if *char == '\n' {
@@ -74,14 +108,16 @@ pub fn parse_condition_state(
             }
             _ => {
                 let (nfa, action) = process_rule_and_action(file, next_state_id, definitions)?;
-
                 dbg!(&nfa);
                 dbg!(&action);
+
+                return Ok(vec![RuleAction {
+                    nfa,
+                    action,
+                    condition_state: state_list.to_vec(),
+                }]);
             }
         }
-    } else {
-        return Err("unrecognized rule".to_string());
     }
-    return Ok(());
-    // todo!();
+    return Err("unrecognized rule".to_string());
 }

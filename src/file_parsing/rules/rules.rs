@@ -306,7 +306,10 @@ pub fn parse_rules_section(
                 file.it.next();
                 let state_list = extract_state_for_rule(file, definitions)?;
                 dbg!(&state_list);
-                let test = parse_condition_state(file, &mut next_state_id, definitions)?;
+                let mut rules_from_state =
+                    parse_condition_state(file, &mut next_state_id, definitions, &state_list)?;
+                dbg!(&rules_from_state);
+                rules.append(&mut rules_from_state);
             }
             _ => {
                 let (nfa, action) = process_rule_and_action(file, &mut next_state_id, definitions)?;
