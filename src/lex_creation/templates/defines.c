@@ -16,4 +16,5 @@ void yy_reject(void);
 #define YY_EXIT_FAILURE 2
 #endif
 
+// Condition state
 #define INITIAL 0

@@ -208,16 +208,10 @@ pub fn get_all_condition_state(definitions: &[Definition]) -> Vec<(&String, Defi
 
     for elem in definitions {
         match elem {
-            Definition::InclusiveState {
-                name: name,
-                state_nb: _,
-            } => {
-                dest.push((name, DefinitionState::Inclusive)); // clone le String
+            Definition::InclusiveState { name, state_nb: _ } => {
+                dest.push((name, DefinitionState::Inclusive));
             }
-            Definition::ExclusiveState {
-                name: name,
-                state_nb: _,
-            } => {
+            Definition::ExclusiveState { name, state_nb: _ } => {
                 dest.push((name, DefinitionState::Exclusive));
             }
             _ => {}

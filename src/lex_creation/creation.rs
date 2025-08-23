@@ -16,7 +16,7 @@ pub fn lex_creation(file_parts: FilePart) -> std::io::Result<()> {
     let mut file = File::create(LEX_FILE)?;
 
     write_includes(&mut file)?;
-    write_defines(&mut file)?;
+    write_defines(&mut file, file_parts.definitions())?;
     write_variables(file_parts.definitions(), &mut file)?;
 
     tables_creation(&file_parts, &mut file)?;

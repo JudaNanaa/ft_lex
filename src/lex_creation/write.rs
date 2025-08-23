@@ -3,7 +3,7 @@ use std::{
     io::{Read, Write},
 };
 
-use crate::file_parsing::definitions::Definition;
+use crate::file_parsing::definitions::{definitions::get_all_condition_state, Definition};
 
 use super::{DEFINES, INCLUDES, VARIABLES};
 
@@ -23,9 +23,27 @@ pub fn write_includes(file: &mut File) -> std::io::Result<()> {
     return Ok(());
 }
 
-pub fn write_defines(file: &mut File) -> std::io::Result<()> {
+pub fn write_defines(file: &mut File, definitions: &[Definition]) -> std::io::Result<()> {
     let file_content = open_template_file(DEFINES)?;
     file.write_all(file_content.as_bytes())?;
+
+    for elem in definitions {
+        match elem {
+            Definition::ExclusiveState {
+                name: state_name,
+                state_nb,
+            }
+            | Definition::InclusiveState {
+                name: state_name,
+                state_nb,
+            } => {
+                writeln!(file, "#define {} {}", state_name, state_nb)?;
+            }
+            _ => continue,
+        }
+    }
+    writeln!(file, "")?;
+
     return Ok(());
 }
 
