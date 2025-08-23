@@ -18,4 +18,10 @@ fmt:
 clean:
 	cargo clean
 
-.PHONY: all run test fmt clean
+fclean: clean
+	rm -rf ft_lex.yy.c lex.yy.c libl_functions.o libl.a a.out
+	rm -rf target
+
+re: fclean all
+
+.PHONY: all run test fmt clean fclean re

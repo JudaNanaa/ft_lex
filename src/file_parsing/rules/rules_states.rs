@@ -17,7 +17,7 @@ fn extract_state_from_line(file: &mut FileInfo) -> Result<String, String> {
                 file.line_nb += 1;
                 break;
             }
-            'a'..'z' | 'A'..'Z' | '_' | ',' | '0'..'9' => {
+            'a'..'z' | 'A'..'Z' | '_' | ',' | '0'..'9' | '*' => {
                 states_from_line.push(char);
             }
             '>' => {
