@@ -63,10 +63,10 @@ fn extract_state_block(
 
     while let Some(char) = file.it.peek() {
         match char {
-			'\n' | ' ' | '\t' => {
-				if *char == '\n' {
-					file.line_nb += 1;
-				}
+            '\n' | ' ' | '\t' => {
+                if *char == '\n' {
+                    file.line_nb += 1;
+                }
                 file.it.next();
             }
 
