@@ -17,8 +17,8 @@ pub enum Definition {
     Bloc { content: String },
     LineWithSpace { content: String },
     Definition { name: String, value: String },
-    InclusiveState { names: Vec<String> },
-    ExclusiveState { names: Vec<String> },
+    InclusiveState { name: String, state_nb: usize },
+    ExclusiveState { name: String, state_nb: usize },
 }
 
 impl ConditionState {

@@ -274,7 +274,6 @@ pub fn parse_rules_section(
     let mut in_yylex = Vec::new();
     let mut rules = Vec::new();
     let mut next_state_id = 1;
-    let mut state = "INITIAL";
 
     while let Some(ch) = file.it.peek() {
         match ch {
