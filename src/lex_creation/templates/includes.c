@@ -17,3 +17,8 @@ int unput(int c);
 int yywrap(void);
 int yylex(void);
 void yy_push_accepting_state(int state, int len_match);
+void yy_init_buffer(void);
+void yy_init_accepting_stack(void);
+void yy_if_no_match(char *last_pos);
+char *yy_next_char(void);
+void yy_if_match();

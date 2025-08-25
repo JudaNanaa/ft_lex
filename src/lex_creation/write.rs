@@ -3,7 +3,7 @@ use std::{
     io::{Read, Write},
 };
 
-use crate::file_parsing::definitions::{definitions::get_all_condition_state, Definition};
+use crate::{file_parsing::definitions::Definition, lex_creation::YYLEX};
 
 use super::{DEFINES, INCLUDES, VARIABLES};
 
@@ -71,4 +71,16 @@ pub fn write_variables(definitions: &[Definition], file: &mut File) -> std::io::
 pub fn write_user_routine(user_routine: &str, file: &mut File) -> std::io::Result<()> {
     file.write_all(user_routine.as_bytes())?;
     return Ok(());
+}
+
+pub fn write_yylex(file: &mut File, in_yylex: &[String]) -> std::io::Result<()> {
+    let file_content = open_template_file(YYLEX)?;
+	let mut in_yylex_content = String::new();
+
+	for elem in in_yylex {
+		in_yylex_content += elem;
+	}
+	let replaced = file_content.replace("#write_in_yylex", &in_yylex_content);
+
+    file.write_all(replaced.as_bytes())
 }

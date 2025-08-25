@@ -25,4 +25,9 @@ typedef struct s_buffer {
 
 static t_buffer buffer;
 
+static int yy_init = 0;		/* whether we need to initialize */
+static int yy_start = -1;	/* start state number */
+static int clean_flag = 0;
+
+
 change_me_in_variables!

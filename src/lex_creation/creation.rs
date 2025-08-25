@@ -7,7 +7,7 @@ use crate::{
             yy_action::yy_action, yy_final::yy_final, yy_search_final::create_yy_search_final,
         },
         tables::table::tables_creation,
-        write::{write_defines, write_includes, write_user_routine, write_variables},
+        write::{write_defines, write_includes, write_user_routine, write_variables, write_yylex},
         LEX_FILE,
     },
 };
@@ -25,6 +25,9 @@ pub fn lex_creation(file_parts: FilePart) -> std::io::Result<()> {
 
     yy_final(&file_parts, &mut file)?;
     create_yy_search_final(file_parts.actions(), &mut file)?;
+
+	// Write yylex function
+	write_yylex(&mut file, file_parts.in_yylex())?;
 
     // Write user routine
     write_user_routine(file_parts.user_routine(), &mut file)?;

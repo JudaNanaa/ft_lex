@@ -4,7 +4,8 @@ int yylex(void) {
 	char *last_accepting_cpos = NULL;
 	int c;
 	int len_match;
-	int yy_act;
+
+	#write_in_yylex
 
 	if (!yy_init)
 	{
