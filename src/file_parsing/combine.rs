@@ -60,7 +60,9 @@ pub fn process_and_combine_rules(
     let nfa_list = extract_all_nfas(&processed_rules);
 
     let combined_nfa = combine_nfa(nfa_list);
+    // dbg!(&combined_nfa);
     let dfa = construct_dfa(combined_nfa);
+    dbg!(&dfa);
 
     let action_mapping = assiociate_rule_actions(&dfa, final_state_map.clone());
 

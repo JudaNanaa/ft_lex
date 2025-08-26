@@ -262,7 +262,7 @@ pub fn process_rule_and_action(
 ) -> Result<(NFA, String), String> {
     let (rule_expr, action) = parse_rule_and_action(file, definitions)?;
     let tokens = regex_tokenizer(&rule_expr);
-    let nfa = construct_nfa(&tokens, *next_state_id);
+    let nfa = construct_nfa(&tokens, next_state_id);
     return Ok((nfa, action));
 }
 

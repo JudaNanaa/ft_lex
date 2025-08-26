@@ -21,7 +21,7 @@ s< printf("yesbb\n");
 
 \"              BEGIN(STRING);
 <STRING>{
-    \"          { BEGIN(INITIAL); printf("End of string\n"); }  // TODO: un probleme ici
+    \"          { BEGIN(INITIAL); printf("End of string\n"); }
     [^\"\n]+    { printf("String content: %s\n", yytext); }
     \n          { printf("Unterminated string\n"); BEGIN(INITIAL); }
 }

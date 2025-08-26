@@ -46,14 +46,14 @@ typedef struct s_buffer {
 
 char *yytext;
 int yyleng;
-static int clean_flag = 0;
-static int yymore_flag = 0;
 
-static t_buffer buffer;
+int clean_flag = 0;
+int yymore_flag = 0;
 
+t_buffer buffer;
 
-static int yy_init = 0;		/* whether we need to initialize */
-static int yy_start = -1;	/* start state number */
+int yy_init = 0;		/* whether we need to initialize */
+int yy_start = -1;	/* start state number */
 
 void yy_fatal_error (const char* msg )
 {
@@ -232,10 +232,10 @@ void yy_if_match() {
 	char *after_match = buffer.str + yyleng;
 	if (clean_flag == 1)
 		return;
-	memmove(buffer.str, after_match, (&buffer.str[buffer.len]) - (after_match));
-	bzero(&buffer.str[(&buffer.str[buffer.len]) - (after_match)], buffer.len - ((&buffer.str[buffer.len]) - (after_match)));
-	buffer.len = &buffer.str[buffer.len] - (after_match);
-	buffer.str[buffer.len] = '\0';
+	int remaining_len = buffer.len - yyleng; 
+	memmove(buffer.str, after_match, remaining_len);
+	bzero(&buffer.str[remaining_len], buffer.len - remaining_len);
+	buffer.len = remaining_len;
 	buffer.index = 0;
 	stack.len = 0;
 	clean_flag = 1;
