@@ -249,6 +249,18 @@ void yy_reject(void)
 	yy_if_match();
 }
 
+int yy_finish_state(int next_state) {
+	int i = 0;
+
+	while (i < UINT8_MAX) {
+		if (yy_nxt[next_state][i] != 0) {
+			return 1;
+		}
+		i++;
+	}
+	return 0;
+}
+
 // default_main.c
 __attribute__((weak))
 int main(void) {

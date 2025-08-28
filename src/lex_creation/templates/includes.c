@@ -22,3 +22,4 @@ void yy_init_accepting_stack(void);
 void yy_if_no_match(char *last_pos);
 char *yy_next_char(void);
 void yy_if_match();
+int yy_finish_state(int next_state);

@@ -82,5 +82,6 @@ pub fn write_yylex(file: &mut File, in_yylex: &[String]) -> std::io::Result<()> 
     }
     let replaced = file_content.replace("#write_in_yylex", &in_yylex_content);
 
-    file.write_all(replaced.as_bytes())
+    file.write_all(replaced.as_bytes())?;
+    return Ok(());
 }
