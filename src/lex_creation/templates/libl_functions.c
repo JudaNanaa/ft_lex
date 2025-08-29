@@ -34,8 +34,6 @@ typedef struct accept_stack {
 	size_t capacity;
 } a_stack;
 
-static a_stack stack = {0};
-
 typedef struct s_buffer {
 	char *str;
 	size_t len;
@@ -50,6 +48,7 @@ int yyleng;
 int clean_flag = 0;
 int yymore_flag = 0;
 
+a_stack stack = {0};
 t_buffer buffer;
 
 int yy_init = 0;		/* whether we need to initialize */
