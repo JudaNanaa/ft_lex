@@ -4,7 +4,7 @@ use super::regex_tokenizer;
 
 #[test]
 fn test_regex_1() {
-    let tokens = regex_tokenizer(&"chef".to_string());
+    let tokens = regex_tokenizer("chef");
 
     assert_eq!(tokens[0], Token::Char('c'));
     assert_eq!(tokens[1], Token::Char('h'));
@@ -21,7 +21,7 @@ fn test_regex_1() {
 
 #[test]
 fn test_regex_2() {
-    let tokens = regex_tokenizer(&"a|b".to_string());
+    let tokens = regex_tokenizer("a|b");
 
     assert_eq!(tokens[0], Token::Char('a'));
     assert_eq!(tokens[1], Token::Char('b'));
@@ -34,7 +34,7 @@ fn test_regex_2() {
 
 #[test]
 fn test_regex_3() {
-    let tokens = regex_tokenizer(&"a*".to_string());
+    let tokens = regex_tokenizer("a*");
 
     assert_eq!(tokens[0], Token::Char('a'));
     assert_eq!(
@@ -50,7 +50,7 @@ fn test_regex_3() {
 
 #[test]
 fn test_regex_group_concatenation() {
-    let tokens = regex_tokenizer(&"(ab)c".to_string());
+    let tokens = regex_tokenizer("(ab)c");
 
     assert_eq!(tokens[0], Token::Char('a'));
     assert_eq!(tokens[1], Token::Char('b'));
@@ -65,7 +65,7 @@ fn test_regex_group_concatenation() {
 
 #[test]
 fn test_regex_simple_or_multiple_chars() {
-    let tokens = regex_tokenizer(&"ab|cd".to_string());
+    let tokens = regex_tokenizer("ab|cd");
 
     // ab -> a concat b, cd -> c concat d, puis | entre les deux
     let nfa = construct_nfa(&tokens, &mut 1);
@@ -76,7 +76,7 @@ fn test_regex_simple_or_multiple_chars() {
 
 #[test]
 fn test_regex_nested_or() {
-    let tokens = regex_tokenizer(&"a|(b|c)".to_string());
+    let tokens = regex_tokenizer("a|(b|c)");
 
     let nfa = construct_nfa(&tokens, &mut 1);
 
@@ -90,7 +90,7 @@ fn test_regex_nested_or() {
 
 #[test]
 fn test_regex_with_question_mark() {
-    let tokens = regex_tokenizer(&"a?".to_string());
+    let tokens = regex_tokenizer("a?");
 
     let nfa = construct_nfa(&tokens, &mut 1);
 
@@ -99,7 +99,7 @@ fn test_regex_with_question_mark() {
 
 #[test]
 fn test_regex_plus_quantifier() {
-    let tokens = regex_tokenizer(&"a+".to_string());
+    let tokens = regex_tokenizer("a+");
 
     let nfa = construct_nfa(&tokens, &mut 1);
 
@@ -110,7 +110,7 @@ fn test_regex_plus_quantifier() {
 
 #[test]
 fn test_regex_star_with_or() {
-    let tokens = regex_tokenizer(&"(a|b)*".to_string());
+    let tokens = regex_tokenizer("(a|b)*");
 
     let nfa = construct_nfa(&tokens, &mut 1);
 
@@ -121,7 +121,7 @@ fn test_regex_star_with_or() {
 
 #[test]
 fn test_regex_char_class_equivalent() {
-    let tokens = regex_tokenizer(&"[abc]".to_string());
+    let tokens = regex_tokenizer("[abc]");
 
     // Supposons que ton tokenizer transforme [abc] en a|b|c
     let nfa = construct_nfa(&tokens, &mut 1);
@@ -131,7 +131,7 @@ fn test_regex_char_class_equivalent() {
 
 #[test]
 fn test_regex_long_concat_with_kleene() {
-    let tokens = regex_tokenizer(&"abc*".to_string());
+    let tokens = regex_tokenizer("abc*");
 
     let nfa = construct_nfa(&tokens, &mut 1);
 
