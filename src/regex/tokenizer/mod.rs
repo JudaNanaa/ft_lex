@@ -11,7 +11,7 @@ pub use tokenizer::*;
 #[derive(Debug, PartialEq, Clone, Copy)]
 pub enum Operator {
     Or,
-    TrailingContent,
+    TrailingContext,
     OpenParen,
     CloseParen,
     Quantifier(Quantifier),

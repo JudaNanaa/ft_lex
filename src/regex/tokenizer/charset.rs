@@ -152,9 +152,9 @@ pub fn extract_charset(chars: &mut Chars<'_>) -> Vec<Token> {
 
 pub fn expand_dot() -> Vec<Token> {
     let mut dest = Vec::new();
-    let mut all_chars = (0..=255u8)
+    let mut all_chars: Vec<char> = (0..=255u8)
         .filter_map(|c| char::from_u32(c as u32))
-        .collect::<Vec<char>>();
+        .collect();
 
     all_chars.remove('\n' as usize);
 

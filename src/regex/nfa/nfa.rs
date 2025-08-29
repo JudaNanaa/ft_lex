@@ -49,7 +49,7 @@ pub fn construct_nfa(tokens: &Vec<Token>, start_id: &mut usize) -> NFA {
                         new_nfa
                     }
                 },
-                Operator::Concatenation | Operator::TrailingContent => {
+                Operator::Concatenation | Operator::TrailingContext => {
                     let (left, right) = pop_last_two(&mut stack);
                     concatenate(left, right)
                 }
