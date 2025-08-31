@@ -129,11 +129,7 @@ pub fn extract_state_for_rule(
 
     let split_states = split_state_form_line(&states)?;
 
-    dbg!(&split_states);
-
     let all_states_for_rule = find_states(&split_states, definitions)?;
-
-    dbg!(&all_states_for_rule);
 
     warning_duplicate_condition_state_for_line(file, &all_states_for_rule);
 

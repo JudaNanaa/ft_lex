@@ -68,7 +68,6 @@ fn write_condition_state(
 
 pub fn yy_action(file_parts: &FilePart, file: &mut File) -> std::io::Result<()> {
     let action_hash = file_parts.action_hash();
-    dbg!(&action_hash);
 
     writeln!(file, "void yy_action(int action) {{")?;
     writeln!(file, "{}switch (action) {{", SPACE)?;

@@ -68,17 +68,13 @@ pub fn process_and_combine_rules(
         return Err("Un symbole '|' n'a pas été suivi d'une action.".to_string());
     }
 
-    dbg!(&processed_rules);
     let final_state_map = map_final_states_to_actions(&processed_rules);
     let nfa_list = extract_all_nfas(&processed_rules);
 
     let combined_nfa = combine_nfa(nfa_list);
     let dfa = construct_dfa(combined_nfa);
-    dbg!(&dfa);
 
     let action_mapping = assiociate_rule_actions(&dfa, final_state_map.clone());
-
-    dbg!(&action_mapping);
 
     return Ok((dfa, action_mapping, processed_rules));
 }

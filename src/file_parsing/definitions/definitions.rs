@@ -127,8 +127,7 @@ fn skip_to_newline(file: &mut FileInfo) {
 pub fn parse_definitions_part(file: &mut FileInfo) -> Result<Vec<Definition>, String> {
     let mut definition_list = Vec::new();
     let mut state_nb = 1;
-    // let mut inclusive_states = Vec::new();
-    // let mut exclusive_states = Vec::new();
+
     while let Some(char) = file.it.next() {
         match char {
             '%' => {
