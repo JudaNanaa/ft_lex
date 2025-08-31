@@ -4,30 +4,6 @@ use crate::file_parsing::{
     FileInfo,
 };
 
-fn skip_until_find(file: &mut FileInfo, to_find: char) -> Result<String, String> {
-    let mut dest: String = String::new();
-
-    while let Some(char) = file.it.next() {
-        match char {
-            '\\' => {
-                dest.push('\\');
-                if let Some(c) = file.it.next() {
-                    dest.push(c);
-                } else {
-                    return Err(String::from("ERROR: end of file in string"));
-                }
-            }
-            _ => {
-                dest.push(char);
-                if char == to_find {
-                    return Ok(dest);
-                }
-            }
-        }
-    }
-    return Err(String::from("ERROR: end of file in string"));
-}
-
 fn skip_until_newline_state_block(file: &mut FileInfo) -> Result<(), String> {
     while let Some(char) = file.it.peek() {
         match char {
@@ -100,7 +76,6 @@ pub fn parse_condition_state(
                 file.it.next();
                 let rules_from_state_block =
                     extract_state_block(file, next_state_id, definitions, state_list)?;
-                dbg!(&rules_from_state_block);
                 return Ok(rules_from_state_block);
             }
             ' ' | '\r' | '\t' | '\n' => {
@@ -111,8 +86,6 @@ pub fn parse_condition_state(
             }
             _ => {
                 let (nfa, action) = process_rule_and_action(file, next_state_id, definitions)?;
-                dbg!(&nfa);
-                dbg!(&action);
 
                 return Ok(vec![RuleAction {
                     nfa,

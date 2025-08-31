@@ -5,6 +5,7 @@ run:
 	cargo r -- lex_files/test.l
 	cc -c src/lex_creation/templates/libl_functions.c -g3
 	ar -rcs libl.a libl_functions.o
+	cc -Wall -Wextra -Werror ft_lex.yy.c -L. -ll -g3
 
 dotfile:
 	cargo run --features dotfile -- lex_files/test.l
@@ -22,6 +23,9 @@ fclean: clean
 	rm -rf ft_lex.yy.c lex.yy.c libl_functions.o libl.a a.out
 	rm -rf target
 
+push: fmt test fclean
+	@echo now you can push the code
+
 re: fclean all
 
-.PHONY: all run test fmt clean fclean re
+.PHONY: all run test fmt clean fclean re push

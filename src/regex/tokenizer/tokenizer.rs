@@ -42,7 +42,7 @@ pub fn regex_tokenizer(regex: &str) -> Vec<Token> {
                 token_list.push(Operator(CloseParen));
             }
             '|' => token_list.push(Operator(Or)),
-            '/' => token_list.push(Operator(TrailingContent)),
+            '/' => token_list.push(Operator(TrailingContext)),
             '?' => token_list.push(Operator(Quantifier(Range(0, 1)))),
             '*' => token_list.push(Operator(Quantifier(AtLeast(0)))),
             '+' => token_list.push(Operator(Quantifier(AtLeast(1)))),
@@ -179,7 +179,7 @@ mod tests {
                 Operator(Concatenation),
                 Char('c'),
                 Operator(Concatenation),
-                Operator(TrailingContent),
+                Operator(TrailingContext),
             ]
         );
     }

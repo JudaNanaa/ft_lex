@@ -4,7 +4,8 @@ int yylex(void) {
 	char *last_accepting_cpos = NULL;
 	int c;
 	int len_match;
-	int yy_act;
+
+	#write_in_yylex
 
 	if (!yy_init)
 	{
@@ -54,7 +55,7 @@ int yylex(void) {
 			last_accepting_state = next_state;
 			last_accepting_cpos = pos;
 		}
-		if (next_state == 0)
+		if (next_state == 0 || !yy_finish_state(next_state))
 		{
 			if (last_accepting_state == 0) {
 				yy_if_no_match(last_accepting_cpos);
@@ -64,6 +65,7 @@ int yylex(void) {
 			last_accepting_cpos = 0;
 			last_accepting_state = 0;
 			current_state = 0;
+			next_state = 0;
 			len_match = 0;
 			clean_flag = 0;
 		}

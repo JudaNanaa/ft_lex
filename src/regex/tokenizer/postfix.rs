@@ -9,7 +9,7 @@ fn precedence(op: &Operators) -> u8 {
         Quantifier(_) => 4,
         Concatenation => 3,
         Or => 2,
-        TrailingContent => 1,
+        TrailingContext => 1,
         OpenParen => 0,
         _ => panic!("Opérateur non reconnu"),
     }

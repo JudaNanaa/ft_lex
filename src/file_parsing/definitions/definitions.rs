@@ -126,8 +126,8 @@ fn skip_to_newline(file: &mut FileInfo) {
 
 pub fn parse_definitions_part(file: &mut FileInfo) -> Result<Vec<Definition>, String> {
     let mut definition_list = Vec::new();
-    let mut inclusive_states = Vec::new();
-    let mut exclusive_states = Vec::new();
+    let mut state_nb = 1;
+
     while let Some(char) = file.it.next() {
         match char {
             '%' => {
@@ -137,12 +137,6 @@ pub fn parse_definitions_part(file: &mut FileInfo) -> Result<Vec<Definition>, St
                         let content = get_content_under_brace(file)?;
                         definition_list.push(Definition::Bloc { content });
                     } else if *char_next == '%' {
-                        definition_list.push(Definition::InclusiveState {
-                            names: inclusive_states,
-                        });
-                        definition_list.push(Definition::ExclusiveState {
-                            names: exclusive_states,
-                        });
                         skip_to_newline(file);
                         return Ok(definition_list);
                     } else if *char_next == 's' || *char_next == 'x' {
@@ -151,20 +145,30 @@ pub fn parse_definitions_part(file: &mut FileInfo) -> Result<Vec<Definition>, St
                             'x' => DefinitionState::Exclusive,
                             _ => panic!("Not normal"),
                         };
-                        let inclusive_tokens = get_state(file)?;
-                        for elem in inclusive_tokens {
-                            if inclusive_states.contains(&elem) || exclusive_states.contains(&elem)
-                            {
+                        let conditions_state = get_state(file)?;
+                        for name in conditions_state {
+                            if find_condition_state(&definition_list, &name) {
                                 eprintln!(
                                     "{}:{}: start condition {} declared twice",
-                                    file.name, file.line_nb, elem
+                                    file.name, file.line_nb, name
                                 );
                             }
                             match state {
-                                DefinitionState::Inclusive => inclusive_states.push(elem),
-                                DefinitionState::Exclusive => exclusive_states.push(elem),
+                                DefinitionState::Inclusive => {
+                                    definition_list.push(Definition::InclusiveState {
+                                        name: name,
+                                        state_nb,
+                                    })
+                                }
+                                DefinitionState::Exclusive => {
+                                    definition_list.push(Definition::ExclusiveState {
+                                        name: name,
+                                        state_nb,
+                                    })
+                                }
                             }
                         }
+                        state_nb += 1;
                     }
                 }
             }
@@ -183,22 +187,50 @@ pub fn parse_definitions_part(file: &mut FileInfo) -> Result<Vec<Definition>, St
     return Err("premature EOF".to_string());
 }
 
-pub fn get_inclusive_state(definitions: &[Definition]) -> Option<&Vec<String>> {
+fn find_condition_state(definitions: &[Definition], to_find: &String) -> bool {
     for elem in definitions {
         match elem {
-            Definition::InclusiveState { names } => return Some(names),
-            _ => {}
+            Definition::ExclusiveState { name, state_nb: _ }
+            | Definition::InclusiveState { name, state_nb: _ } => {
+                if name == to_find {
+                    return true;
+                }
+            }
+            _ => continue,
         }
     }
-    return None;
+    return false;
 }
 
-pub fn get_exclusive_state(definitions: &[Definition]) -> Option<&Vec<String>> {
+pub fn get_all_condition_state(definitions: &[Definition]) -> Vec<(&String, DefinitionState)> {
+    let mut dest = Vec::new();
+
     for elem in definitions {
         match elem {
-            Definition::ExclusiveState { names } => return Some(names),
+            Definition::InclusiveState { name, state_nb: _ } => {
+                dest.push((name, DefinitionState::Inclusive));
+            }
+            Definition::ExclusiveState { name, state_nb: _ } => {
+                dest.push((name, DefinitionState::Exclusive));
+            }
             _ => {}
         }
     }
-    return None;
+    return dest;
+}
+
+pub fn is_inclusive_or_exclusive_state(
+    definitions: &[Definition],
+    state_name: &String,
+) -> Result<DefinitionState, String> {
+    let all_condition_state = get_all_condition_state(definitions);
+
+    if state_name == "INITIAL" {
+        return Ok(DefinitionState::Inclusive);
+    }
+
+    if let Some((_, state_type)) = all_condition_state.iter().find(|x| x.0 == state_name) {
+        return Ok(*state_type);
+    }
+    return Err(format!("undeclared start condition {}", state_name));
 }

@@ -2,8 +2,8 @@ use std::collections::HashSet;
 
 use crate::file_parsing::{
     definitions::{
-        definitions::{get_exclusive_state, get_inclusive_state},
-        ConditionState, Definition, DefinitionState,
+        definitions::{get_all_condition_state, is_inclusive_or_exclusive_state},
+        ConditionState, Definition,
     },
     FileInfo,
 };
@@ -69,55 +69,16 @@ fn split_state_form_line(states: &String) -> Result<Vec<String>, String> {
 }
 
 fn expand_star_for_state(definitions: &[Definition]) -> Vec<ConditionState> {
-    let exclusive_states = get_exclusive_state(definitions);
-    let inclusive_states = get_inclusive_state(definitions);
+    let all_condition_states = get_all_condition_state(definitions);
 
     let mut all_states = Vec::new();
 
-    all_states.push(ConditionState::new(
-        "INITIAL".to_string(),
-        DefinitionState::Exclusive,
-    ));
+    all_states.push(ConditionState::initial());
 
-    if exclusive_states.is_some() {
-        for state in exclusive_states.unwrap() {
-            let new_def_state = ConditionState::new(state.clone(), DefinitionState::Exclusive);
-            all_states.push(new_def_state);
-        }
-    }
-
-    if inclusive_states.is_some() {
-        for state in inclusive_states.unwrap() {
-            let new_def_state = ConditionState::new(state.clone(), DefinitionState::Inclusive);
-            all_states.push(new_def_state);
-        }
+    for (name, state_type) in all_condition_states {
+        all_states.push(ConditionState::new(name.clone(), state_type));
     }
     return all_states;
-}
-
-fn is_inclusive_or_exclusive_state(
-    state_name: &String,
-    definitions: &[Definition],
-) -> Result<DefinitionState, String> {
-    let exclusive_states = get_exclusive_state(definitions);
-    let inclusive_states = get_inclusive_state(definitions);
-
-    if state_name == "INITIAL" {
-        return Ok(DefinitionState::Inclusive);
-    }
-
-    if exclusive_states.is_some() {
-        if let Some(_) = exclusive_states.unwrap().iter().find(|&x| x == state_name) {
-            return Ok(DefinitionState::Exclusive);
-        }
-    }
-    if inclusive_states.is_some() {
-        if let Some(_) = inclusive_states.unwrap().iter().find(|&x| x == state_name) {
-            return Ok(DefinitionState::Inclusive);
-        }
-    }
-
-    return Err(format!("undeclared start condition {}", state_name));
 }
 
 fn warning_duplicate_condition_state_for_line(file: &mut FileInfo, state_list: &[ConditionState]) {
@@ -151,7 +112,7 @@ fn find_states(
                 state_list.append(&mut star_states);
             }
             _ => {
-                let state_type = is_inclusive_or_exclusive_state(state_name, definitions)?;
+                let state_type = is_inclusive_or_exclusive_state(definitions, state_name)?;
                 let new_def_state = ConditionState::new(state_name.clone(), state_type);
                 state_list.push(new_def_state);
             }
@@ -168,11 +129,7 @@ pub fn extract_state_for_rule(
 
     let split_states = split_state_form_line(&states)?;
 
-    dbg!(&split_states);
-
     let all_states_for_rule = find_states(&split_states, definitions)?;
-
-    dbg!(&all_states_for_rule);
 
     warning_duplicate_condition_state_for_line(file, &all_states_for_rule);
 

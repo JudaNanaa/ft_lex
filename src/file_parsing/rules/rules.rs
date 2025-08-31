@@ -262,7 +262,7 @@ pub fn process_rule_and_action(
 ) -> Result<(NFA, String), String> {
     let (rule_expr, action) = parse_rule_and_action(file, definitions)?;
     let tokens = regex_tokenizer(&rule_expr);
-    let nfa = construct_nfa(&tokens, *next_state_id);
+    let nfa = construct_nfa(&tokens, next_state_id);
     return Ok((nfa, action));
 }
 
@@ -274,7 +274,6 @@ pub fn parse_rules_section(
     let mut in_yylex = Vec::new();
     let mut rules = Vec::new();
     let mut next_state_id = 1;
-    let mut state = "INITIAL";
 
     while let Some(ch) = file.it.peek() {
         match ch {
@@ -305,10 +304,8 @@ pub fn parse_rules_section(
             '<' => {
                 file.it.next();
                 let state_list = extract_state_for_rule(file, definitions)?;
-                dbg!(&state_list);
                 let mut rules_from_state =
                     parse_condition_state(file, &mut next_state_id, definitions, &state_list)?;
-                dbg!(&rules_from_state);
                 rules.append(&mut rules_from_state);
             }
             _ => {

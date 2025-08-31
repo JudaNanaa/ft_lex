@@ -13,7 +13,6 @@ typedef struct accept_stack {
 	size_t capacity;
 } a_stack;
 
-static a_stack stack = {0};
 
 typedef struct s_buffer {
 	char *str;
@@ -23,6 +22,12 @@ typedef struct s_buffer {
 	uint8_t is_init;
 } t_buffer;
 
-static t_buffer buffer;
+extern a_stack stack;
+extern t_buffer buffer;
+
+extern int yy_init;		/* whether we need to initialize */
+extern int yy_start;	/* start state number */
+extern int clean_flag;
+
 
 change_me_in_variables!

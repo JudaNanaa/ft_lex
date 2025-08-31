@@ -17,6 +17,7 @@ void yy_search_final(int state, int len);
 void yy_if_match(void);
 void yy_if_no_match(char *cpos);
 void yy_action(int state);
+int yylex(void);
 
 #define MIN_CAPACITY 1024
 
@@ -33,8 +34,6 @@ typedef struct accept_stack {
 	size_t capacity;
 } a_stack;
 
-static a_stack stack = {0};
-
 typedef struct s_buffer {
 	char *str;
 	size_t len;
@@ -45,14 +44,15 @@ typedef struct s_buffer {
 
 char *yytext;
 int yyleng;
-static int clean_flag = 0;
-static int yymore_flag = 0;
 
-static t_buffer buffer;
+int clean_flag = 0;
+int yymore_flag = 0;
 
+a_stack stack = {0};
+t_buffer buffer;
 
-static int yy_init = 0;		/* whether we need to initialize */
-static int yy_start = -1;	/* start state number */
+int yy_init = 0;		/* whether we need to initialize */
+int yy_start = -1;	/* start state number */
 
 void yy_fatal_error (const char* msg )
 {
@@ -231,10 +231,10 @@ void yy_if_match() {
 	char *after_match = buffer.str + yyleng;
 	if (clean_flag == 1)
 		return;
-	memmove(buffer.str, after_match, (&buffer.str[buffer.len]) - (after_match));
-	bzero(&buffer.str[(&buffer.str[buffer.len]) - (after_match)], buffer.len - ((&buffer.str[buffer.len]) - (after_match)));
-	buffer.len = &buffer.str[buffer.len] - (after_match);
-	buffer.str[buffer.len] = '\0';
+	int remaining_len = buffer.len - yyleng; 
+	memmove(buffer.str, after_match, remaining_len);
+	bzero(&buffer.str[remaining_len], buffer.len - remaining_len);
+	buffer.len = remaining_len;
 	buffer.index = 0;
 	stack.len = 0;
 	clean_flag = 1;
@@ -248,83 +248,15 @@ void yy_reject(void)
 	yy_if_match();
 }
 
-int yylex(void) {
-	int current_state;
-	int last_accepting_state;
-	char *last_accepting_cpos = NULL;
-	int c;
-	int len_match;
+int yy_finish_state(int next_state) {
+	int i = 0;
 
-	if (!yy_init)
-	{
-		yy_init = 1;
-
-		if (yy_start == -1)
-			yy_start = 0;
-
-		if (!yyin)
-			yyin = stdin;
-
-		if (!yyout)
-			yyout = stdout;
-
-		if (!buffer.is_init)
-			yy_init_buffer();
-		yy_init_accepting_stack();
+	while (i < UINT8_MAX) {
+		if (yy_nxt[next_state][i] != 0) {
+			return 1;
+		}
+		i++;
 	}
-
-	len_match = 0;
-	current_state = yy_start;
-	last_accepting_state = yy_start;
-
-	
-
-	while (1) {
-		char *pos = yy_next_char();
-		if (pos == NULL)
-		{
-			if (last_accepting_state == 0) {
-				yy_if_no_match(last_accepting_cpos);
-			}
-			else
-				yy_if_match();
-			if (yywrap() == 0)
-				yylex();
-			break;
-		}
-		c = *pos;
-		len_match++;
-		unsigned char yy_c = yy_ec[YY_CHAR_TO_INT(c)];
-		
-		int next_state = yy_nxt[current_state][yy_c];
-		if ( yy_accept[next_state] )
-		{
-			yy_search_final(next_state, len_match);
-			last_accepting_state = next_state;
-			last_accepting_cpos = pos;
-		}
-		if (next_state == 0)
-		{
-			if (last_accepting_state == 0) {
-				yy_if_no_match(last_accepting_cpos);
-			}
-			else
-				yy_if_match();
-			last_accepting_cpos = 0;
-			last_accepting_state = 0;
-			current_state = 0;
-			len_match = 0;
-			clean_flag = 0;
-		}
-		current_state = next_state;
-	}
-
-	free(stack.t);
-	stack.t = NULL;
-	free(yytext);
-	yytext = NULL;
-	free(buffer.str);
-	buffer.str = NULL;
 	return 0;
 }
 

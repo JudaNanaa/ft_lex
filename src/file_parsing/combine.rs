@@ -36,19 +36,31 @@ fn extract_all_nfas(rules: &[RuleAction]) -> Vec<NFA> {
 
 pub fn process_and_combine_rules(
     rules: Vec<RuleAction>,
-) -> Result<(DFA, HashMap<usize, Vec<String>>), String> {
+) -> Result<(DFA, HashMap<usize, Vec<String>>, Vec<RuleAction>), String> {
     let mut pipe_buffer = Vec::new();
+    let mut nfa_buffer = Vec::new();
     let mut processed_rules = Vec::new();
 
     for rule in rules {
         if rule.action() == "|" {
             pipe_buffer.push(rule.clone());
+            nfa_buffer.push(rule.nfa().clone());
         } else {
+            nfa_buffer.push(rule.nfa().clone());
+            let mut condition_state_list = Vec::new();
             while let Some(mut pending_rule) = pipe_buffer.pop() {
-                *pending_rule.action_mut() = rule.action().clone();
-                processed_rules.push(pending_rule);
+                condition_state_list.append(pending_rule.condition_state());
             }
-            processed_rules.push(rule);
+            condition_state_list.append(rule.clone().condition_state());
+            let mut seen = std::collections::HashSet::new();
+            condition_state_list.retain(|x| seen.insert(x.clone()));
+            while let Some(nfa) = nfa_buffer.pop() {
+                processed_rules.push(RuleAction {
+                    nfa,
+                    action: rule.action().clone(),
+                    condition_state: condition_state_list.clone(),
+                });
+            }
         }
     }
 
@@ -64,5 +76,5 @@ pub fn process_and_combine_rules(
 
     let action_mapping = assiociate_rule_actions(&dfa, final_state_map.clone());
 
-    return Ok((dfa, action_mapping));
+    return Ok((dfa, action_mapping, processed_rules));
 }
