@@ -6,9 +6,9 @@ mod rules_states;
 
 #[derive(Debug, Clone)]
 pub struct RuleAction {
-    nfa: NFA,
-    action: String,
-    condition_state: Vec<ConditionState>,
+    pub nfa: NFA,
+    pub action: String,
+    pub condition_state: Vec<ConditionState>,
 }
 
 impl RuleAction {
@@ -19,8 +19,7 @@ impl RuleAction {
     pub fn action(&self) -> &String {
         return &self.action;
     }
-
-    pub fn action_mut(&mut self) -> &mut String {
-        return &mut self.action;
+    pub fn condition_state(&mut self) -> &mut Vec<ConditionState> {
+        return &mut self.condition_state;
     }
 }

@@ -47,7 +47,7 @@ pub fn parsing_lex_file(file_path: &str) -> Result<FilePart, String> {
 
     let action_hash = action_hash(&rules);
 
-    let (dfa, actions) = process_and_combine_rules(rules)?;
+    let (dfa, actions, rule_action) = process_and_combine_rules(rules)?;
 
     let user_routine = parse_user_routine_part(&mut file);
 
@@ -55,6 +55,7 @@ pub fn parsing_lex_file(file_path: &str) -> Result<FilePart, String> {
         definitions,
         in_yylex,
         dfa,
+        rule_action,
         actions,
         action_hash,
         user_routine,

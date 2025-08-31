@@ -4,7 +4,9 @@ use crate::{
     file_parsing::FilePart,
     lex_creation::{
         functions::{
-            yy_action::yy_action, yy_final::yy_final, yy_search_final::create_yy_search_final,
+            yy_action::yy_action, yy_final::yy_final,
+            yy_is_exclusive_state::write_yy_is_exclusive_state,
+            yy_search_final::create_yy_search_final,
         },
         tables::table::tables_creation,
         write::{write_defines, write_includes, write_user_routine, write_variables, write_yylex},
@@ -20,6 +22,8 @@ pub fn lex_creation(file_parts: FilePart) -> std::io::Result<()> {
     write_variables(file_parts.definitions(), &mut file)?;
 
     tables_creation(&file_parts, &mut file)?;
+
+    write_yy_is_exclusive_state(&file_parts, &mut file)?;
 
     yy_action(&file_parts, &mut file)?;
 
