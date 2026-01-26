@@ -2,7 +2,7 @@ use std::collections::HashSet;
 
 use crate::file_parsing::{
     definitions::{
-        definitions::{list_all_states, get_state_type},
+        definitions::{get_state_type, list_all_states},
         ConditionState, Definition,
     },
     FileInfo,

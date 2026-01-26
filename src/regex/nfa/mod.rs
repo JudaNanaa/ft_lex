@@ -31,13 +31,13 @@ impl NFA {
         };
     }
 
-	pub fn compute_charset(&self) -> HashSet<char> {
-			let mut charset = HashSet::new();
-			for transitions in self.transitions.values() {
-				for t in transitions {
-					charset.insert(t.input);
-				}
-			}
-			return charset;
-		}
+    pub fn compute_charset(&self) -> HashSet<char> {
+        let mut charset = HashSet::new();
+        for transitions in self.transitions.values() {
+            for t in transitions {
+                charset.insert(t.input);
+            }
+        }
+        return charset;
+    }
 }

@@ -4,9 +4,7 @@ use crate::{
     file_parsing::{
         definitions::{ConditionState, Definition},
         rules::{
-            condition_state::parse_condition_states,
-            rules_states::extract_rule_states,
-            RuleAction,
+            condition_state::parse_condition_states, rules_states::extract_rule_states, RuleAction,
         },
         FileInfo,
     },
@@ -195,10 +193,7 @@ fn parse_action(file: &mut FileInfo) -> Result<String, String> {
     return Err("unexpected EOF while reading action".to_string());
 }
 
-fn parse_rule_action(
-    file: &mut FileInfo,
-    defs: &[Definition],
-) -> Result<(String, String), String> {
+fn parse_rule_action(file: &mut FileInfo, defs: &[Definition]) -> Result<(String, String), String> {
     let mut rule = String::new();
     while let Some(ch) = file.it.next() {
         match ch {
