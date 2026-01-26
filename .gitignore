@@ -2,6 +2,7 @@
 a.out
 lex.yy.c
 ft_lex.yy.c
+ft_lex
 dfa.dot
 dfa.png
 /.vscode

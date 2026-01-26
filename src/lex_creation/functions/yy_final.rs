@@ -4,7 +4,7 @@ use crate::{file_parsing::FilePart, lex_creation::SPACE};
 
 pub fn yy_final(file_parts: &FilePart, file: &mut File) -> std::io::Result<()> {
     let final_state = file_parts.actions();
-    let hash = file_parts.action_hash();
+    let hash = file_parts.map_actions();
 
     for (state, actions) in final_state {
         writeln!(file, "void final{}(int len_match) {{", state)?;

@@ -2,7 +2,7 @@ use std::collections::HashSet;
 
 use crate::file_parsing::{
     definitions::{
-        definitions::{get_all_condition_state, is_inclusive_or_exclusive_state},
+        definitions::{get_state_type, list_all_states},
         ConditionState, Definition,
     },
     FileInfo,
@@ -69,7 +69,7 @@ fn split_state_form_line(states: &String) -> Result<Vec<String>, String> {
 }
 
 fn expand_star_for_state(definitions: &[Definition]) -> Vec<ConditionState> {
-    let all_condition_states = get_all_condition_state(definitions);
+    let all_condition_states = list_all_states(definitions);
 
     let mut all_states = Vec::new();
 
@@ -112,7 +112,7 @@ fn find_states(
                 state_list.append(&mut star_states);
             }
             _ => {
-                let state_type = is_inclusive_or_exclusive_state(definitions, state_name)?;
+                let state_type = get_state_type(definitions, state_name)?;
                 let new_def_state = ConditionState::new(state_name.clone(), state_type);
                 state_list.push(new_def_state);
             }
@@ -121,7 +121,7 @@ fn find_states(
     return Ok(state_list);
 }
 
-pub fn extract_state_for_rule(
+pub fn extract_rule_states(
     file: &mut FileInfo,
     definitions: &[Definition],
 ) -> Result<Vec<ConditionState>, String> {

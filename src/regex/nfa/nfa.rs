@@ -21,7 +21,7 @@ fn sort_final_states(final_states: HashSet<usize>) -> HashSet<usize> {
     return output;
 }
 
-pub fn construct_nfa(tokens: &Vec<Token>, start_id: &mut usize) -> NFA {
+pub fn build_nfa(tokens: &Vec<Token>, start_id: &mut usize) -> NFA {
     let mut stack: Vec<NFA> = Vec::new();
     let mut state_id = *start_id;
 
@@ -76,9 +76,9 @@ mod tests {
 
     // Test pour la construction d'un NFA simple avec un caractère
     #[test]
-    fn test_construct_nfa_single_char() {
+    fn test_build_nfa_single_char() {
         let tokens = vec![Token::Char('a')];
-        let result = construct_nfa(&tokens, &mut 1);
+        let result = build_nfa(&tokens, &mut 1);
 
         // Vérifie que le résultat est un NFA valide (en fonction de l'implémentation de `from_char`)
         assert_eq!(result.final_states, HashSet::from([1]));
@@ -86,13 +86,13 @@ mod tests {
 
     // Test pour la concaténation de deux caractères
     #[test]
-    fn test_construct_nfa_concatenation() {
+    fn test_build_nfa_concatenation() {
         let tokens = vec![
             Token::Char('a'),
             Token::Char('b'),
             Token::Operator(Operator::Concatenation),
         ];
-        let result = construct_nfa(&tokens, &mut 1);
+        let result = build_nfa(&tokens, &mut 1);
 
         // Vérifie la concaténation des deux caractères 'a' et 'b'
         assert_eq!(result.final_states, HashSet::from([2]));
@@ -100,13 +100,13 @@ mod tests {
 
     // Test pour l'opérateur OR entre deux caractères
     #[test]
-    fn test_construct_nfa_or() {
+    fn test_build_nfa_or() {
         let tokens = vec![
             Token::Char('a'),
             Token::Char('b'),
             Token::Operator(Operator::Or),
         ];
-        let result = construct_nfa(&tokens, &mut 1);
+        let result = build_nfa(&tokens, &mut 1);
 
         // Vérifie que l'OR entre 'a' et 'b' a été correctement appliqué
         assert_eq!(result.final_states, HashSet::from([1, 2]));
@@ -114,12 +114,12 @@ mod tests {
 
     // Test pour l'opérateur de répétition exacte
     #[test]
-    fn test_construct_nfa_repeat_exact() {
+    fn test_build_nfa_repeat_exact() {
         let tokens = vec![
             Token::Char('a'),
             Token::Operator(Operator::Quantifier(Quantifier::Equal(3))),
         ];
-        let result = construct_nfa(&tokens, &mut 1);
+        let result = build_nfa(&tokens, &mut 1);
 
         // Vérifie que la répétition exacte de 3 fois de 'a' a été appliquée
         assert_eq!(result.final_states, HashSet::from([3]));
@@ -127,12 +127,12 @@ mod tests {
 
     // Test pour l'opérateur "at least" avec un minimum de répétitions
     #[test]
-    fn test_construct_nfa_at_least() {
+    fn test_build_nfa_at_least() {
         let tokens = vec![
             Token::Char('a'),
             Token::Operator(Operator::Quantifier(Quantifier::AtLeast(2))),
         ];
-        let result = construct_nfa(&tokens, &mut 1);
+        let result = build_nfa(&tokens, &mut 1);
 
         // Vérifie que la répétition "at least" a été correctement appliquée
         assert_eq!(result.transitions.len(), 4); // 4 états au total
@@ -141,12 +141,12 @@ mod tests {
 
     // Test pour l'opérateur de plage de répétitions (min, max)
     #[test]
-    fn test_construct_nfa_range() {
+    fn test_build_nfa_range() {
         let tokens = vec![
             Token::Char('a'),
             Token::Operator(Operator::Quantifier(Quantifier::Range(2, 4))),
         ];
-        let result = construct_nfa(&tokens, &mut 1);
+        let result = build_nfa(&tokens, &mut 1);
 
         // Vérifie que la plage de répétition a été correctement appliquée
         assert_eq!(result.final_states, HashSet::from([2, 3, 4]));
@@ -154,7 +154,7 @@ mod tests {
 
     // Test combiné avec plusieurs opérateurs (Concaténation et OR)
     #[test]
-    fn test_construct_nfa_combined_operators() {
+    fn test_build_nfa_combined_operators() {
         let tokens = vec![
             Token::Char('a'),
             Token::Char('b'),
@@ -162,7 +162,7 @@ mod tests {
             Token::Char('c'),
             Token::Operator(Operator::Or),
         ];
-        let result = construct_nfa(&tokens, &mut 1);
+        let result = build_nfa(&tokens, &mut 1);
 
         // Vérifie que la concaténation a bien eu lieu avant l'OR
         assert_eq!(result.final_states, HashSet::from([2, 3]));
@@ -187,7 +187,7 @@ mod tests {
 
     // Test pour la concaténation de plusieurs caractères et l'OR entre deux parties
     #[test]
-    fn test_construct_nfa_concat_and_or() {
+    fn test_build_nfa_concat_and_or() {
         let tokens = vec![
             Token::Char('a'),
             Token::Char('b'),
@@ -195,7 +195,7 @@ mod tests {
             Token::Char('c'),
             Token::Operator(Operator::Or),
         ];
-        let result = construct_nfa(&tokens, &mut 1);
+        let result = build_nfa(&tokens, &mut 1);
 
         // Vérifie que le NFA contient les bonnes transitions pour a+b|c
         check_transition(&result, 0, 'a', 1);
@@ -207,7 +207,7 @@ mod tests {
 
     // Test pour des répétitions exactes avec plusieurs éléments dans le token
     #[test]
-    fn test_construct_nfa_repeat_exact_complex() {
+    fn test_build_nfa_repeat_exact_complex() {
         let tokens = vec![
             Token::Char('a'),
             Token::Operator(Operator::Quantifier(Quantifier::Equal(2))),
@@ -215,7 +215,7 @@ mod tests {
             Token::Operator(Operator::Quantifier(Quantifier::Equal(3))),
             Token::Operator(Operator::Concatenation),
         ];
-        let result = construct_nfa(&tokens, &mut 1);
+        let result = build_nfa(&tokens, &mut 1);
 
         // Vérifie que le NFA est construit avec 2 répétitions exactes de 'a' et 3 de 'b'
         assert_eq!(result.final_states.len(), 1); // 1 état final
@@ -223,7 +223,7 @@ mod tests {
 
     // Test pour la répétition "at least" avec plusieurs répétitions
     #[test]
-    fn test_construct_nfa_at_least_complex() {
+    fn test_build_nfa_at_least_complex() {
         let tokens = vec![
             Token::Char('a'),
             Token::Operator(Operator::Quantifier(Quantifier::AtLeast(2))),
@@ -231,7 +231,7 @@ mod tests {
             Token::Operator(Operator::Quantifier(Quantifier::AtLeast(1))),
             Token::Operator(Operator::Concatenation),
         ];
-        let result = construct_nfa(&tokens, &mut 1);
+        let result = build_nfa(&tokens, &mut 1);
 
         // Vérifie que le NFA est construit avec au moins 2 'a' et 1 'b'
         assert_eq!(result.transitions.len(), 6); // 6 états au total
@@ -240,7 +240,7 @@ mod tests {
 
     // Test pour l'opérateur "range" avec une plage de répétitions variable
     #[test]
-    fn test_construct_nfa_range_complex() {
+    fn test_build_nfa_range_complex() {
         let tokens = vec![
             Token::Char('a'),
             Token::Operator(Operator::Quantifier(Quantifier::Range(2, 4))),
@@ -248,7 +248,7 @@ mod tests {
             Token::Operator(Operator::Quantifier(Quantifier::Range(1, 3))),
             Token::Operator(Operator::Concatenation),
         ];
-        let result = construct_nfa(&tokens, &mut 1);
+        let result = build_nfa(&tokens, &mut 1);
 
         // Vérifie que le NFA est correctement construit pour 'a{2,4}' et 'b{1,3}'
         assert_eq!(result.final_states.len(), 3); // 3 états finaux
@@ -256,7 +256,7 @@ mod tests {
 
     // Test pour des combinaisons complexes avec concaténation, OR et quantificateurs
     #[test]
-    fn test_construct_nfa_combined_complex() {
+    fn test_build_nfa_combined_complex() {
         let tokens = vec![
             Token::Char('a'),
             Token::Operator(Operator::Quantifier(Quantifier::AtLeast(1))),
@@ -268,7 +268,7 @@ mod tests {
             Token::Char('d'),
             Token::Operator(Operator::Or),
         ];
-        let result = construct_nfa(&tokens, &mut 1);
+        let result = build_nfa(&tokens, &mut 1);
 
         assert_eq!(result.final_states.len(), 2); // 2 états finaux
     }
@@ -276,19 +276,19 @@ mod tests {
     // Test pour des expressions vides et erreurs avec des quantificateurs invalides
     #[test]
     #[should_panic(expected = "unrecognized rule")]
-    fn test_construct_nfa_empty_expression() {
+    fn test_build_nfa_empty_expression() {
         let tokens = vec![
             Token::Operator(Operator::Quantifier(Quantifier::AtLeast(0))), // Quantificateur invalide
         ];
-        construct_nfa(&tokens, &mut 1);
+        build_nfa(&tokens, &mut 1);
     }
 
     // Test pour des expressions contenant seulement des opérateurs et vérification de la gestion des erreurs
     #[test]
     #[should_panic(expected = "Internal error")]
-    fn test_construct_nfa_invalid_operator_sequence() {
+    fn test_build_nfa_invalid_operator_sequence() {
         let tokens = vec![Token::Operator(Operator::Concatenation), Token::Char('a')];
-        let result = construct_nfa(&tokens, &mut 1);
+        let result = build_nfa(&tokens, &mut 1);
 
         // Le résultat devrait avoir un seul état avec une transition vers un état final
         assert_eq!(result.transitions.len(), 1);
@@ -297,7 +297,7 @@ mod tests {
 
     // Test pour la gestion de plusieurs états après application de OR et concaténation
     #[test]
-    fn test_construct_nfa_or_and_concat() {
+    fn test_build_nfa_or_and_concat() {
         let tokens = vec![
             Token::Char('a'),
             Token::Char('b'),
@@ -305,7 +305,7 @@ mod tests {
             Token::Char('c'),
             Token::Operator(Operator::Concatenation),
         ];
-        let result = construct_nfa(&tokens, &mut 1);
+        let result = build_nfa(&tokens, &mut 1);
 
         // Vérifie les transitions entre a|b et c
         check_transition(&result, 0, 'a', 1);
@@ -318,13 +318,13 @@ mod tests {
 
     // Test pour un très grand NFA (pour tester les performances)
     #[test]
-    fn test_construct_nfa_large_input() {
+    fn test_build_nfa_large_input() {
         let tokens: Vec<Token> = vec![
             Token::Char('a'),
             Token::Operator(Operator::Quantifier(Quantifier::AtLeast(1000))),
         ];
 
-        let result = construct_nfa(&tokens, &mut 1);
+        let result = build_nfa(&tokens, &mut 1);
 
         // Teste si le NFA est bien construit avec 1000+ répétitions de 'a'
         assert!(result.transitions.len() >= 1000); // +1000 transitions

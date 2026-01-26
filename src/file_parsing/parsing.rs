@@ -1,15 +1,15 @@
 use std::{fs::File, io::Read, process::exit};
 
 use crate::file_parsing::{
-    definitions::definitions::parse_definitions_part,
-    rules::rules::{action_hash, parse_rules_section},
+    definitions::definitions::parse_definitions,
+    rules::rules::{map_actions, parse_rules},
     user_routine::user_routine::parse_user_routine_part,
     FilePart,
 };
 
 use super::{combine::process_and_combine_rules, FileInfo};
 
-fn get_file_content(file_path: &str) -> Result<String, Box<dyn std::error::Error>> {
+fn get_file_content(file_path: &str) -> std::io::Result<String> {
     let mut file = File::open(file_path)?;
     let mut file_content = String::new();
 
@@ -21,7 +21,7 @@ fn get_file_content(file_path: &str) -> Result<String, Box<dyn std::error::Error
 pub fn parsing_lex_file(file_path: &str) -> Result<FilePart, String> {
     let file_content = match get_file_content(file_path) {
         Ok(content) => content,
-        Err(_) => return Err("Cannot open file".to_string()),
+        Err(_) => return Err(format!("can't open {}", file_path)),
     };
     let mut file = FileInfo {
         it: file_content.chars().peekable(),
@@ -29,23 +29,23 @@ pub fn parsing_lex_file(file_path: &str) -> Result<FilePart, String> {
         name: file_path,
     };
 
-    let definitions = match parse_definitions_part(&mut file) {
+    let definitions = match parse_definitions(&mut file) {
         Ok(value) => value,
         Err(message) => {
             eprintln!("{}:{}: {}", file.name, file.line_nb, message);
-            vec![] // a changer
+            exit(1);
         }
     };
 
-    let (rules, in_yylex) = match parse_rules_section(&mut file, &definitions) {
+    let (rules, in_yylex) = match parse_rules(&mut file, &definitions) {
         Ok(value) => value,
         Err(message) => {
             eprintln!("{}:{}: {}", file.name, file.line_nb, message);
-            exit(1); // TODO a changer
+            exit(1);
         }
     };
 
-    let action_hash = action_hash(&rules);
+    let map_actions = map_actions(&rules);
 
     let (dfa, actions, rule_action) = process_and_combine_rules(rules)?;
 
@@ -57,7 +57,7 @@ pub fn parsing_lex_file(file_path: &str) -> Result<FilePart, String> {
         dfa,
         rule_action,
         actions,
-        action_hash,
+        map_actions,
         user_routine,
     });
 }
