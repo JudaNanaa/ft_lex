@@ -23,7 +23,6 @@ pub fn shift_states(nfa: &NFA, offset: &usize) -> NFA {
         .map(|state| if *state == 0 { 0 } else { state + offset })
         .collect();
 
-    new_nfa.charset = nfa.charset.clone();
     return new_nfa;
 }
 
@@ -45,7 +44,6 @@ mod tests {
         let mut nfa = NFA {
             transitions: HashMap::new(),
             final_states: HashSet::from([2]),
-            charset: HashSet::from(['a', 'b']),
         };
 
         nfa.transitions.insert(

@@ -42,11 +42,10 @@ pub fn at_least(nfa: NFA, count: usize) -> (NFA, usize) {
     let kleene_offset = get_offset_from_nfa(&repeated);
     let shifted_kleene = shift_states(&kleene_part, &kleene_offset);
 
-    let mut result = concatenate(repeated, shifted_kleene);
+    let result = concatenate(repeated, shifted_kleene);
 
     let next_id = result.final_states.iter().max().copied().unwrap_or(0) + 1;
 
-    result.charset = nfa.charset;
     return (result, next_id);
 }
 
@@ -62,7 +61,6 @@ mod tests {
         let mut nfa = NFA {
             transitions: HashMap::new(),
             final_states: HashSet::from([2]),
-            charset: HashSet::from(['a', 'b']),
         };
 
         // Transition de 0 à 1 avec le caractère 'a'
@@ -141,7 +139,6 @@ mod tests {
         let mut nfa = NFA {
             transitions: HashMap::new(),
             final_states: HashSet::from([3]),
-            charset: HashSet::from(['a', 'b']),
         };
 
         // Transitions pour le NFA
@@ -193,7 +190,6 @@ mod tests {
         let mut nfa = NFA {
             transitions: HashMap::new(),
             final_states: HashSet::from([4]),
-            charset: HashSet::from(['a', 'b']),
         };
 
         // Définir plusieurs transitions

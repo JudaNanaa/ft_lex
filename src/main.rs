@@ -9,7 +9,7 @@ fn main() {
     let args: Vec<String> = std::env::args().collect();
     let file_parts = match parsing_lex_file(&args[1]) {
         Err(error) => {
-            println!("Error: {}", error);
+            println!("ft_lex: {}", error);
             return;
         }
         Ok(elems) => elems,

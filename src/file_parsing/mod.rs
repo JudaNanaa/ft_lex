@@ -24,7 +24,7 @@ pub struct FilePart {
     dfa: DFA,
     rule_action: Vec<RuleAction>,
     actions: HashMap<usize, Vec<String>>,
-    action_hash: HashMap<String, usize>,
+    map_actions: HashMap<String, usize>,
     user_routine: String,
 }
 
@@ -38,8 +38,8 @@ impl FilePart {
     pub fn actions(&self) -> &HashMap<usize, Vec<String>> {
         return &self.actions;
     }
-    pub fn action_hash(&self) -> &HashMap<String, usize> {
-        return &self.action_hash;
+    pub fn map_actions(&self) -> &HashMap<String, usize> {
+        return &self.map_actions;
     }
     pub fn in_yylex(&self) -> &[String] {
         return &self.in_yylex;

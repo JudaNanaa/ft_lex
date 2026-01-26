@@ -1,6 +1,6 @@
 use crate::file_parsing::{
     definitions::{ConditionState, Definition},
-    rules::{rules::process_rule_and_action, RuleAction},
+    rules::{rules::build_rule_nfa, RuleAction},
     FileInfo,
 };
 
@@ -52,7 +52,7 @@ fn extract_state_block(
                     return Ok(rules_from_state_block);
                 }
 
-                let (nfa, action) = process_rule_and_action(file, next_state_id, definitions)?;
+                let (nfa, action) = build_rule_nfa(file, next_state_id, definitions)?;
                 rules_from_state_block.push(RuleAction {
                     nfa,
                     action,
@@ -64,7 +64,7 @@ fn extract_state_block(
     return Err(String::from("ERROR: end of file in string"));
 }
 
-pub fn parse_condition_state(
+pub fn parse_condition_states(
     file: &mut FileInfo,
     next_state_id: &mut usize,
     definitions: &[Definition],
@@ -85,7 +85,7 @@ pub fn parse_condition_state(
                 return Err("unrecognized rule".to_string());
             }
             _ => {
-                let (nfa, action) = process_rule_and_action(file, next_state_id, definitions)?;
+                let (nfa, action) = build_rule_nfa(file, next_state_id, definitions)?;
 
                 return Ok(vec![RuleAction {
                     nfa,

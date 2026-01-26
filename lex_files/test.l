@@ -5,6 +5,8 @@
 %s COMMENT
 %x STRING
 
+test [0-9]
+
 %%
 
 "/*"            BEGIN(COMMENT);
@@ -21,10 +23,12 @@ s< printf("yesbb\n");
 
 \"              BEGIN(STRING);
 <STRING>{
-    \"          { BEGIN(INITIAL); printf("End of string\n"); }  // TODO: un probleme ici
+    \"          { BEGIN(INITIAL); printf("End of string\n"); }
     [^\"\n]+    { printf("String content: %s\n", yytext); }
     \n          { printf("Unterminated string\n"); BEGIN(INITIAL); }
 }
+
+{test} printf("je suis entrain de test\n");
 
 "hello"    { printf("Hello detected\n"); }
 <INITIAL>"bye"      { printf("Bye detected\n"); }

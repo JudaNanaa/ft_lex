@@ -1,5 +1,3 @@
-use std::char;
-
 use crate::file_parsing::{
     definitions::{Definition, DefinitionState},
     FileInfo,
@@ -7,230 +5,207 @@ use crate::file_parsing::{
 
 const WHITESPACE: &str = " \r\t";
 
-fn get_content_under_brace(file: &mut FileInfo) -> Result<String, String> {
+fn extract_braced_content(file: &mut FileInfo) -> Result<String, String> {
     let mut content = String::new();
 
-    while let Some(char) = file.it.next() {
-        match char {
-            '%' => {
-                if let Some(char_next) = file.it.peek() {
-                    if *char_next == '}' {
-                        file.it.next();
-                        return Ok(content);
-                    }
-                }
+    while let Some(ch) = file.it.next() {
+        if ch == '%' {
+            if file.it.peek() == Some(&'}') {
+                file.it.next();
+                return Ok(content);
             }
-            c => {
-                if c == '\n' {
-                    file.line_nb += 1;
-                }
-                content.push(c);
+        } else {
+            if ch == '\n' {
+                file.line_nb += 1;
             }
+            content.push(ch);
         }
     }
     return Err("premature EOF".to_string());
 }
 
-fn get_line_with_space(file: &mut FileInfo) -> String {
+fn read_spaced_line(file: &mut FileInfo) -> String {
     let mut content = String::new();
 
-    while let Some(char) = file.it.next() {
-        if char == '\n' {
+    while let Some(ch) = file.it.next() {
+        if ch == '\n' {
             file.line_nb += 1;
             break;
         }
-        content.push(char);
+        content.push(ch);
     }
     return content;
 }
 
-fn get_definition(first_letter: char, file: &mut FileInfo) -> Result<Definition, String> {
+fn parse_definition(file: &mut FileInfo) -> Result<Definition, String> {
     let mut line = String::new();
 
-    line.push(first_letter);
-    while let Some(char) = file.it.next() {
-        if char == '\n' {
+    while let Some(ch) = file.it.next() {
+        if ch == '\n' {
             file.line_nb += 1;
             break;
         }
-        line.push(char);
+        line.push(ch);
     }
 
-    line = line.trim().to_string();
-    match line.find(' ') {
-        Some(index) => {
-            let name = line[0..index].to_string();
-            let value = line[index + 1..].trim().to_string();
-            return Ok(Definition::Definition { name, value });
-        }
-        None => {
-            return Err("incomplete name definition".to_string());
-        }
+    let trimmed = line.trim().to_string();
+    if let Some(idx) = trimmed.find(' ') {
+        let name = trimmed[0..idx].to_string();
+        let value = trimmed[idx + 1..].trim().to_string();
+        return Ok(Definition::Definition { name, value });
+    } else {
+        return Err("incomplete name definition".to_string());
     }
 }
 
-fn split(str: &str, charser: &str) -> Vec<String> {
-    let mut split = Vec::new();
+fn split_by_chars(s: &str, delimiters: &str) -> Vec<String> {
+    let mut result = Vec::new();
+    let mut current = String::new();
+    let mut chars = s.chars();
 
-    let mut str_it = str.chars();
-
-    let mut current_str = String::new();
-
-    while let Some(char) = str_it.next() {
-        if charser.contains(char) {
-            if !current_str.is_empty() {
-                split.push(current_str.clone());
-                current_str.clear();
+    while let Some(ch) = chars.next() {
+        if delimiters.contains(ch) {
+            if !current.is_empty() {
+                result.push(current.clone());
+                current.clear();
             }
         } else {
-            current_str.push(char);
+            current.push(ch);
         }
     }
-    if !current_str.is_empty() {
-        split.push(current_str.clone());
-        current_str.clear();
+    if !current.is_empty() {
+        result.push(current);
     }
-    return split;
+    return result;
 }
 
-fn get_state(file: &mut FileInfo) -> Result<Vec<String>, String> {
+fn parse_state_line(file: &mut FileInfo) -> Result<Vec<String>, String> {
     let mut content = String::new();
 
-    file.it.next();
-    for char in file.it.by_ref() {
-        match char {
-            '\n' => {
-                file.line_nb += 1;
-                let split = split(&content, &" \t".to_string());
-                if split.is_empty() {
-                    return Err("bad start condition list".to_string());
-                }
-                return Ok(split);
+    file.it.next(); // Skip the 's' or 'x'
+    for ch in file.it.by_ref() {
+        if ch == '\n' {
+            file.line_nb += 1;
+            let split = split_by_chars(&content, " \t");
+            if split.is_empty() {
+                return Err("bad start condition list".to_string());
             }
-            c => {
-                content.push(c);
-            }
+            return Ok(split);
         }
+        content.push(ch);
     }
     return Err("Premature EOF".to_string());
 }
 
-fn skip_to_newline(file: &mut FileInfo) {
-    for char in file.it.by_ref() {
-        if char == '\n' {
+fn advance_to_newline(file: &mut FileInfo) {
+    for ch in file.it.by_ref() {
+        if ch == '\n' {
             file.line_nb += 1;
             return;
         }
     }
 }
 
-pub fn parse_definitions_part(file: &mut FileInfo) -> Result<Vec<Definition>, String> {
-    let mut definition_list = Vec::new();
-    let mut state_nb = 1;
+pub fn parse_definitions(file: &mut FileInfo) -> Result<Vec<Definition>, String> {
+    let mut defs = Vec::new();
+    let mut state_id = 1;
 
-    while let Some(char) = file.it.next() {
-        match char {
+    while let Some(ch) = file.it.peek() {
+        match ch {
             '%' => {
-                if let Some(char_next) = file.it.peek() {
-                    if *char_next == '{' {
-                        file.it.next();
-                        let content = get_content_under_brace(file)?;
-                        definition_list.push(Definition::Bloc { content });
-                    } else if *char_next == '%' {
-                        skip_to_newline(file);
-                        return Ok(definition_list);
-                    } else if *char_next == 's' || *char_next == 'x' {
-                        let state = match *char_next {
-                            's' => DefinitionState::Inclusive,
-                            'x' => DefinitionState::Exclusive,
-                            _ => panic!("Not normal"),
-                        };
-                        let conditions_state = get_state(file)?;
-                        for name in conditions_state {
-                            if find_condition_state(&definition_list, &name) {
-                                eprintln!(
-                                    "{}:{}: start condition {} declared twice",
-                                    file.name, file.line_nb, name
-                                );
-                            }
-                            match state {
-                                DefinitionState::Inclusive => {
-                                    definition_list.push(Definition::InclusiveState {
-                                        name: name,
-                                        state_nb,
-                                    })
-                                }
-                                DefinitionState::Exclusive => {
-                                    definition_list.push(Definition::ExclusiveState {
-                                        name: name,
-                                        state_nb,
-                                    })
-                                }
-                            }
+                file.it.next();
+                if let Some(next) = file.it.peek() {
+                    match next {
+                        '{' => {
+                            file.it.next();
+                            let content = extract_braced_content(file)?;
+                            defs.push(Definition::Bloc { content });
                         }
-                        state_nb += 1;
+                        '%' => {
+                            advance_to_newline(file);
+                            return Ok(defs);
+                        }
+                        's' | 'x' => {
+                            let state_type = if *next == 's' {
+                                DefinitionState::Inclusive
+                            } else {
+                                DefinitionState::Exclusive
+                            };
+                            let states = parse_state_line(file)?;
+                            for name in states {
+                                if state_exists(&defs, &name) {
+                                    eprintln!(
+                                        "{}:{}: start condition {} declared twice",
+                                        file.name, file.line_nb, name
+                                    );
+                                }
+                                let def = if matches!(state_type, DefinitionState::Inclusive) {
+                                    Definition::InclusiveState {
+                                        name,
+                                        state_nb: state_id,
+                                    }
+                                } else {
+                                    Definition::ExclusiveState {
+                                        name,
+                                        state_nb: state_id,
+                                    }
+                                };
+                                defs.push(def);
+                            }
+                            state_id += 1;
+                        }
+                        _ => {}
                     }
                 }
             }
-            '\n' => file.line_nb += 1,
-            c => {
-                if WHITESPACE.contains(c) {
-                    let content = get_line_with_space(file);
-                    definition_list.push(Definition::LineWithSpace { content });
-                } else {
-                    let definition_token = get_definition(c, file)?;
-                    definition_list.push(definition_token);
-                }
+            '\n' => {
+                file.it.next();
+                file.line_nb += 1
+            }
+            c if WHITESPACE.contains(*c) => {
+                let content = read_spaced_line(file);
+                defs.push(Definition::LineWithSpace { content });
+            }
+            _ => {
+                let def = parse_definition(file)?;
+                defs.push(def);
             }
         }
     }
     return Err("premature EOF".to_string());
 }
 
-fn find_condition_state(definitions: &[Definition], to_find: &String) -> bool {
-    for elem in definitions {
-        match elem {
-            Definition::ExclusiveState { name, state_nb: _ }
-            | Definition::InclusiveState { name, state_nb: _ } => {
-                if name == to_find {
-                    return true;
-                }
-            }
-            _ => continue,
-        }
-    }
-    return false;
+fn state_exists(defs: &[Definition], target: &str) -> bool {
+    return defs.iter().any(|def| matches!(def, Definition::ExclusiveState { name, .. } | Definition::InclusiveState { name, .. } if name == target));
 }
 
-pub fn get_all_condition_state(definitions: &[Definition]) -> Vec<(&String, DefinitionState)> {
-    let mut dest = Vec::new();
+pub fn list_all_states(defs: &[Definition]) -> Vec<(&String, DefinitionState)> {
+    let mut result = Vec::new();
 
-    for elem in definitions {
-        match elem {
-            Definition::InclusiveState { name, state_nb: _ } => {
-                dest.push((name, DefinitionState::Inclusive));
+    for def in defs {
+        match def {
+            Definition::InclusiveState { name, .. } => {
+                result.push((name, DefinitionState::Inclusive))
             }
-            Definition::ExclusiveState { name, state_nb: _ } => {
-                dest.push((name, DefinitionState::Exclusive));
+            Definition::ExclusiveState { name, .. } => {
+                result.push((name, DefinitionState::Exclusive))
             }
             _ => {}
         }
     }
-    return dest;
+    return result;
 }
 
-pub fn is_inclusive_or_exclusive_state(
-    definitions: &[Definition],
-    state_name: &String,
-) -> Result<DefinitionState, String> {
-    let all_condition_state = get_all_condition_state(definitions);
+pub fn get_state_type(defs: &[Definition], state_name: &str) -> Result<DefinitionState, String> {
+    let states = list_all_states(defs);
 
     if state_name == "INITIAL" {
         return Ok(DefinitionState::Inclusive);
     }
 
-    if let Some((_, state_type)) = all_condition_state.iter().find(|x| x.0 == state_name) {
-        return Ok(*state_type);
-    }
-    return Err(format!("undeclared start condition {}", state_name));
+    return states
+        .iter()
+        .find(|(name, _)| name == &state_name)
+        .map(|&(_, typ)| Ok(typ))
+        .unwrap_or_else(|| Err(format!("undeclared start condition {}", state_name)));
 }
