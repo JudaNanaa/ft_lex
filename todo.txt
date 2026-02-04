@@ -1,5 +1,7 @@
 faire trailing context
 
+1. reflechir a comment faire.
+
 faire ^ et $
 
 array or pointer
