@@ -63,9 +63,15 @@ pub fn to_postfix(tokens: Vec<Token>) -> Vec<Token> {
         output.push(Operator(remaining_op));
     }
 
-	if output.iter().filter(|s| **s == Operator(TrailingContext)).collect::<Vec<&Token>>().len() > 1 {
+    if output
+        .iter()
+        .filter(|s| **s == Operator(TrailingContext))
+        .collect::<Vec<&Token>>()
+        .len()
+        > 1
+    {
         panic!("Too many trailing context");
-	}
+    }
 
     return output;
 }

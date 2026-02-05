@@ -113,6 +113,9 @@ pub fn build_dfa(nfa: NFA) -> DFA {
     dfa.new_final_states = compute_new_final_states(&dfa);
     dfa.charset = nfa.compute_charset();
     dfa.new_final_states.remove(&0);
+	dfa.trailing_context_final_states = nfa.trailing_context_final_states;
+
+	dbg!(&dfa);
 
     #[cfg(feature = "dotfile")]
     match generate_dot_file(&dfa) {

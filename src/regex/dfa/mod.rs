@@ -50,6 +50,7 @@ pub struct DFA {
     new_transitions: HashMap<usize, Vec<NewDfaTransition>>,
     new_final_states: HashSet<usize>,
     charset: HashSet<char>,
+	trailing_context_final_states: Option<HashSet<usize>>,
 }
 
 impl DFA {
@@ -61,6 +62,7 @@ impl DFA {
             new_transitions: HashMap::new(),
             new_final_states: HashSet::new(),
             charset: HashSet::new(),
+            trailing_context_final_states: None,
         };
     }
 
@@ -85,6 +87,7 @@ impl Debug for DFA {
             .field("new_transitions", &self.new_transitions)
             .field("new_final_states", &self.new_final_states)
             .field("charset", &self.charset)
+            .field("trailing_context_final_states", &self.trailing_context_final_states)
             .finish()
     }
 }

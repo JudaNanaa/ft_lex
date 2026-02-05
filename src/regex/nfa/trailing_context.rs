@@ -16,6 +16,8 @@ pub fn trailing_context(mut left: NFA, mut right: NFA) -> NFA {
             .extend(right_initial.clone());
     }
 
+	left.final_states.extend(right.final_states.clone());
+
     left.transitions.extend(right.transitions);
 
     return NFA {
