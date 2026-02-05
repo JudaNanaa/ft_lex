@@ -9,7 +9,7 @@ test [0-9]
 
 %%
 
-ab/cd {printf("je suis en train de test\n");}
+ab/c*c {printf("je suis en train de test\n");}
 
 %%
 

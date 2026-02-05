@@ -3,7 +3,7 @@ use std::collections::HashSet;
 use crate::regex::{
     nfa::{
         at_least::at_least, concatenate::concatenate, from_char::from_char, or::or, range::range,
-        repeat_exact::repeat_exact, utils::pop_last_two,
+        repeat_exact::repeat_exact, trailing_context::trailing_context, utils::pop_last_two,
     },
     Operator, Quantifier, Token, NFA,
 };
@@ -49,9 +49,13 @@ pub fn build_nfa(tokens: &Vec<Token>, start_id: &mut usize) -> NFA {
                         new_nfa
                     }
                 },
-                Operator::Concatenation | Operator::TrailingContext => {
+                Operator::Concatenation => {
                     let (left, right) = pop_last_two(&mut stack);
                     concatenate(left, right)
+                }
+                Operator::TrailingContext => {
+                    let (left, right) = pop_last_two(&mut stack);
+                    trailing_context(left, right)
                 }
                 Operator::Or => {
                     let (left, right) = pop_last_two(&mut stack);

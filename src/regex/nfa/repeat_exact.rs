@@ -38,6 +38,7 @@ mod tests {
         let mut nfa = NFA {
             transitions: HashMap::new(),
             final_states: HashSet::from([2]),
+            trailing_context_final_states: None,
         };
 
         nfa.transitions.insert(

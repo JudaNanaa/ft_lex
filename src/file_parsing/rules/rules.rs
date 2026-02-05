@@ -236,7 +236,7 @@ pub fn parse_rules(
     let mut rules = Vec::new();
     let mut next_state_id = 1;
 
-    while let Some(ch) = file.it.peek().cloned() {
+    while let Some(ch) = file.it.peek() {
         match ch {
             '\n' => {
                 file.line_nb += 1;

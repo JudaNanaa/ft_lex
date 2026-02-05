@@ -7,6 +7,7 @@ mod offset;
 mod or;
 mod range;
 mod repeat_exact;
+mod trailing_context;
 mod utils;
 
 use std::collections::{HashMap, HashSet};
@@ -21,6 +22,7 @@ pub struct Transition {
 pub struct NFA {
     pub transitions: HashMap<usize, Vec<Transition>>,
     pub final_states: HashSet<usize>,
+    pub trailing_context_final_states: Option<HashSet<usize>>,
 }
 
 impl NFA {
@@ -28,6 +30,7 @@ impl NFA {
         return Self {
             transitions: HashMap::new(),
             final_states: HashSet::new(),
+            trailing_context_final_states: None,
         };
     }
 
