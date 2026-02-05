@@ -1,12 +1,10 @@
 faire trailing context
 
-1. reflechir a comment faire.
-
 mettre 2 etats finaux .
 si 1er atteint bah on fait comme d'hab
 si 2eme atteint bah on fait le 1er mais on revert les carracteres.
 
-ne peux pas avoir 2 trailing context dans la meme regle
+pour la prochaine fois il faut mettre le trailing context dans le ficher de sortie
 
 faire ^ et $
 
