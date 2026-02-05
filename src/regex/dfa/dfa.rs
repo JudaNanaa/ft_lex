@@ -11,7 +11,7 @@ fn compute_new_final_states(dfa: &DFA) -> HashSet<usize> {
     let mut final_state_ids = HashSet::new();
 
     for state in &dfa.final_states {
-        if let Some(id) = dfa.test.get(state) {
+        if let Some(id) = dfa.state_to_id.get(state) {
             final_state_ids.insert(*id);
         }
     }
@@ -62,7 +62,7 @@ pub fn build_dfa(nfa: NFA) -> DFA {
         .collect::<Vec<char>>();
 
     let mut pending_states = VecDeque::from(vec![State { state: vec![0] }]);
-    dfa.test.insert(State { state: vec![0] }, 0);
+    dfa.state_to_id.insert(State { state: vec![0] }, 0);
     let mut next_state_id = 1;
 
     while let Some(current_state) = pending_states.pop_front() {
@@ -72,11 +72,11 @@ pub fn build_dfa(nfa: NFA) -> DFA {
         for &input_char in &ascii_chars {
             let target_state = find_target_state(&nfa, &current_state, &input_char);
             if !target_state.is_trap() {
-                let state_id = match dfa.test.get(&target_state) {
+                let state_id = match dfa.state_to_id.get(&target_state) {
                     Some(&id) => id,
                     None => {
                         let id = next_state_id;
-                        dfa.test.insert(target_state.clone(), id);
+                        dfa.state_to_id.insert(target_state.clone(), id);
                         next_state_id += 1;
                         id
                     }
@@ -94,7 +94,7 @@ pub fn build_dfa(nfa: NFA) -> DFA {
             }
         }
 
-        let current_state_id = *dfa.test.get(&current_state).unwrap();
+        let current_state_id = *dfa.state_to_id.get(&current_state).unwrap();
         dfa.new_transitions
             .insert(current_state_id, new_state_transitions.clone());
         dfa.transitions

@@ -46,7 +46,7 @@ impl NewDfaTransition {
 pub struct DFA {
     transitions: HashMap<State, Vec<DfaTransition>>,
     final_states: HashSet<State>,
-    test: HashMap<State, usize>,
+    state_to_id: HashMap<State, usize>,
     new_transitions: HashMap<usize, Vec<NewDfaTransition>>,
     new_final_states: HashSet<usize>,
     charset: HashSet<char>,
@@ -57,7 +57,7 @@ impl DFA {
         return Self {
             transitions: HashMap::new(),
             final_states: HashSet::new(),
-            test: HashMap::new(),
+            state_to_id: HashMap::new(),
             new_transitions: HashMap::new(),
             new_final_states: HashSet::new(),
             charset: HashSet::new(),

@@ -15,7 +15,7 @@ pub fn assiociate_rule_actions(
                 action_for_state.extend(tab.clone());
             }
         }
-        new_hash.insert(*dfa.test.get(state).unwrap(), action_for_state);
+        new_hash.insert(*dfa.state_to_id.get(state).unwrap(), action_for_state);
     }
 
     return new_hash;
