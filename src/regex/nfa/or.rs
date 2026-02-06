@@ -13,10 +13,19 @@ pub fn or(left: NFA, right: NFA) -> NFA {
 
     final_states.extend(right.final_states);
 
+    let trailing_context_final_states = if let Some(mut elem) = left.trailing_context_final_states {
+        if let Some(content) = right.trailing_context_final_states {
+            elem.extend(content)
+        }
+        Some(elem)
+    } else {
+        right.trailing_context_final_states
+    };
+
     return NFA {
         transitions,
         final_states,
-        trailing_context_final_states: None,
+        trailing_context_final_states,
     };
 }
 

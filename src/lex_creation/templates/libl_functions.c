@@ -225,7 +225,6 @@ int yywrap(void) {
 void yy_if_match() {
 	a_elem matching_state = yy_pop_accepting_state();
 
-	
 	yy_set_yytext(matching_state);
 	yy_action(matching_state.state);
 	char *after_match = buffer.str + yyleng;

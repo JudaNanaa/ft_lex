@@ -2,3 +2,4 @@ pub mod table;
 mod yy_accept;
 mod yy_ec;
 mod yy_nxt;
+mod yy_trailing_ctx;
