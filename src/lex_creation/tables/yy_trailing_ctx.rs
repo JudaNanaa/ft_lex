@@ -11,28 +11,33 @@ pub fn yy_trailing_ctx(dfa: &DFA, file: &mut File) -> std::io::Result<()> {
 
     let nb_trailing_context = trailing_ctx.iter().len();
 
-    writeln!(
-        file,
-        "\nconst int yy_trailing_ctx[{}] =",
-        nb_trailing_context
-    )?;
-    writeln!(file, "{}{{", SPACE)?;
-    write!(file, "{}", SPACE.repeat(2))?;
+    dbg!("=================================================================");
+    dbg!(&dfa.transitions);
+    dbg!(dfa.new_transitions());
+    dbg!(&dfa.state_to_id);
+    dbg!(&dfa.trailing_context_final_states);
+    // writeln!(
+    //     file,
+    //     "\nconst int yy_trailing_ctx[{}] =",
+    //     nb_trailing_context
+    // )?;
+    // writeln!(file, "{}{{", SPACE)?;
+    // write!(file, "{}", SPACE.repeat(2))?;
 
-    for (index, value) in trailing_ctx.iter().enumerate() {
-        write!(file, "{}", value)?;
-        if index != 0 && index % 10 == 0 {
-            write!(file, ",")?;
-            if index != nb_trailing_context - 1 {
-                write!(file, "\n{}", SPACE.repeat(2))?;
-            }
-        } else if index != nb_trailing_context - 1 {
-            write!(file, ",{}", SPACE)?;
-        } else {
-            writeln!(file)?;
-        }
-    }
-    writeln!(file, "{}}} ;\n", SPACE)?;
+    // for (index, value) in trailing_ctx.iter().enumerate() {
+    //     write!(file, "{}", value)?;
+    //     if index != 0 && index % 10 == 0 {
+    //         write!(file, ",")?;
+    //         if index != nb_trailing_context - 1 {
+    //             write!(file, "\n{}", SPACE.repeat(2))?;
+    //         }
+    //     } else if index != nb_trailing_context - 1 {
+    //         write!(file, ",{}", SPACE)?;
+    //     } else {
+    //         writeln!(file)?;
+    //     }
+    // }
+    // writeln!(file, "{}}} ;\n", SPACE)?;
 
     return Ok(());
 }

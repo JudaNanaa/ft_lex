@@ -1,6 +1,9 @@
 use super::NFA;
 
 pub fn or(left: NFA, right: NFA) -> NFA {
+    dbg!(&left);
+    dbg!(&right);
+
     let mut transitions = left.transitions;
     let mut final_states = left.final_states;
 

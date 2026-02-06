@@ -3,7 +3,7 @@ all: run
 
 run:
 	cargo r -- lex_files/test.l
-	mv ./target/debug/ft_lex .
+# 	mv ./target/debug/ft_lex .
 	cc -c src/lex_creation/templates/libl_functions.c -g3
 	ar -rcs libl.a libl_functions.o
 	cc -Wall -Wextra -Werror ft_lex.yy.c -L. -ll -g3

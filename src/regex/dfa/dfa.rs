@@ -11,8 +11,8 @@ fn compute_new_final_states(dfa: &DFA) -> HashSet<usize> {
     let mut final_state_ids = HashSet::new();
 
     for state in &dfa.final_states {
-        if let Some(id) = dfa.state_to_id.get(state) {
-            final_state_ids.insert(*id);
+        if let Some(&id) = dfa.state_to_id.get(state) {
+            final_state_ids.insert(id);
         }
     }
 

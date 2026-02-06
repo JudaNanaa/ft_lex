@@ -22,7 +22,7 @@ pub struct Transition {
 pub struct NFA {
     pub transitions: HashMap<usize, Vec<Transition>>,
     pub final_states: HashSet<usize>,
-    pub trailing_context_final_states: Option<HashSet<usize>>,
+    pub trailing_context_final_states: Option<HashMap<usize, HashSet<usize>>>,
 }
 
 impl NFA {

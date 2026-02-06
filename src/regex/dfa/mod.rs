@@ -44,13 +44,13 @@ impl NewDfaTransition {
 
 #[derive(Clone, PartialEq, Eq)]
 pub struct DFA {
-    transitions: HashMap<State, Vec<DfaTransition>>,
+    pub transitions: HashMap<State, Vec<DfaTransition>>,
     final_states: HashSet<State>,
-    state_to_id: HashMap<State, usize>,
+    pub state_to_id: HashMap<State, usize>,
     new_transitions: HashMap<usize, Vec<NewDfaTransition>>,
     new_final_states: HashSet<usize>,
     charset: HashSet<char>,
-    pub trailing_context_final_states: Option<HashSet<usize>>,
+    pub trailing_context_final_states: Option<HashMap<usize, HashSet<usize>>>,
 }
 
 impl DFA {
