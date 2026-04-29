@@ -37,16 +37,16 @@ fn extract_all_nfas(rules: &[RuleAction]) -> Vec<NFA> {
 pub fn process_and_combine_rules(
     rules: Vec<RuleAction>,
 ) -> Result<(DFA, HashMap<usize, Vec<String>>, Vec<RuleAction>), String> {
-    let mut pipe_buffer = Vec::new();
-    let mut nfa_buffer = Vec::new();
+    let mut pipe_buffer: Vec<RuleAction> = Vec::new();
+    let mut rule_buffer: Vec<RuleAction> = Vec::new();
     let mut processed_rules = Vec::new();
 
     for rule in rules {
         if rule.action() == "|" {
             pipe_buffer.push(rule.clone());
-            nfa_buffer.push(rule.nfa().clone());
+            rule_buffer.push(rule.clone());
         } else {
-            nfa_buffer.push(rule.nfa().clone());
+            rule_buffer.push(rule.clone());
             let mut condition_state_list = Vec::new();
             while let Some(mut pending_rule) = pipe_buffer.pop() {
                 condition_state_list.append(pending_rule.condition_state());
@@ -54,11 +54,13 @@ pub fn process_and_combine_rules(
             condition_state_list.append(rule.clone().condition_state());
             let mut seen = std::collections::HashSet::new();
             condition_state_list.retain(|x| seen.insert(x.clone()));
-            while let Some(nfa) = nfa_buffer.pop() {
+            while let Some(orig) = rule_buffer.pop() {
                 processed_rules.push(RuleAction {
-                    nfa,
+                    nfa: orig.nfa,
                     action: rule.action().to_string(),
                     condition_state: condition_state_list.clone(),
+                    is_bol: orig.is_bol,
+                    is_eol: orig.is_eol,
                 });
             }
         }

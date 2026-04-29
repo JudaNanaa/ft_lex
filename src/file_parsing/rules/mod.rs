@@ -9,6 +9,8 @@ pub struct RuleAction {
     pub nfa: NFA,
     pub action: String,
     pub condition_state: Vec<ConditionState>,
+    pub is_bol: bool,
+    pub is_eol: bool,
 }
 
 impl RuleAction {

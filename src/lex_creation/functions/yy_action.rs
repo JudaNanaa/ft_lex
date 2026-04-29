@@ -15,14 +15,30 @@ fn get_key_based_on_value(hash: &HashMap<String, usize>, to_find: usize) -> Opti
 }
 
 fn get_condition_state_for_action(file_parts: &FilePart, action: &str) -> Vec<ConditionState> {
-    let rules_action = file_parts.rule_action();
-
-    for elem in rules_action {
+    for elem in file_parts.rule_action() {
         if elem.action() == action {
             return elem.condition_state.clone();
         }
     }
     vec![]
+}
+
+fn get_bol_for_action(file_parts: &FilePart, action: &str) -> bool {
+    for elem in file_parts.rule_action() {
+        if elem.action() == action {
+            return elem.is_bol;
+        }
+    }
+    false
+}
+
+fn get_eol_for_action(file_parts: &FilePart, action: &str) -> bool {
+    for elem in file_parts.rule_action() {
+        if elem.action() == action {
+            return elem.is_eol;
+        }
+    }
+    false
 }
 
 fn write_inner_condition_state_if(file: &mut File) -> std::io::Result<()> {
@@ -69,6 +85,16 @@ fn write_condition_state(
 pub fn yy_action(file_parts: &FilePart, file: &mut File) -> std::io::Result<()> {
     let action_hash = file_parts.map_actions();
 
+    let has_bol = file_parts.rule_action().iter().any(|r| r.is_bol);
+    let has_eol = file_parts.rule_action().iter().any(|r| r.is_eol);
+
+    if has_bol {
+        writeln!(file, "extern int yy_at_bol;")?;
+    }
+    if has_eol {
+        writeln!(file, "int yy_at_eol(void);")?;
+    }
+
     writeln!(file, "void yy_action(int action) {{")?;
     writeln!(file, "{}switch (action) {{", SPACE)?;
 
@@ -77,6 +103,20 @@ pub fn yy_action(file_parts: &FilePart, file: &mut File) -> std::io::Result<()> 
         let action = get_key_based_on_value(action_hash, nb_action).unwrap();
         let condition_state = get_condition_state_for_action(file_parts, action);
         write_condition_state(file, condition_state)?;
+        if get_bol_for_action(file_parts, action) {
+            writeln!(
+                file,
+                "{}if (!yy_at_bol) {{ REJECT; return; }}",
+                SPACE.repeat(2)
+            )?;
+        }
+        if get_eol_for_action(file_parts, action) {
+            writeln!(
+                file,
+                "{}if (!yy_at_eol()) {{ REJECT; return; }}",
+                SPACE.repeat(2)
+            )?;
+        }
         writeln!(file, "{}", action)?;
         writeln!(file, "{}break;", SPACE.repeat(2))?;
     }

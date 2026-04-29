@@ -64,8 +64,6 @@ impl DFA {
     pub fn final_states(&self) -> &HashSet<usize> {
         &self.final_states
     }
-
-
 }
 
 impl Default for DFA {

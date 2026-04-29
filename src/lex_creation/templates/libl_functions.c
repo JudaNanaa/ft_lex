@@ -53,6 +53,7 @@ t_buffer buffer;
 
 int yy_init = 0;		/* whether we need to initialize */
 int yy_start = -1;	/* start state number */
+int yy_at_bol = 1;	/* 1 if current position is at beginning of line */
 
 void yy_fatal_error (const char* msg )
 {
@@ -119,9 +120,10 @@ char *yy_add_buffer(char c) {
 void yy_if_no_match(char *last_pos) {
 
 	// printf("not match [%s]\n", buffer.str);
-	
+
 	if (last_pos == NULL)
 		last_pos = buffer.str;
+	yy_at_bol = (*last_pos == '\n') ? 1 : 0;
 	fwrite(buffer.str, sizeof(char), last_pos + 1 - buffer.str, yyout);
 	int n = (&buffer.str[buffer.len]) - (last_pos + 1);
 	if (n < 0)
@@ -222,12 +224,23 @@ int yywrap(void) {
 	return 1;
 }
 
+int yy_at_eol(void) {
+	if (buffer.str[yyleng] != '\0')
+		return buffer.str[yyleng] == '\n';
+	int c = getc(yyin);
+	if (c == EOF)
+		return 1;
+	ungetc(c, yyin);
+	return c == '\n';
+}
+
 void yy_if_match() {
 	a_elem matching_state = yy_pop_accepting_state();
 
 	
 	yy_set_yytext(matching_state);
 	yy_action(matching_state.state);
+	yy_at_bol = (yyleng > 0 && yytext[yyleng - 1] == '\n') ? 1 : 0;
 	char *after_match = buffer.str + yyleng;
 	if (clean_flag == 1)
 		return;

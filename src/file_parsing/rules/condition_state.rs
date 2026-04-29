@@ -52,11 +52,14 @@ fn extract_state_block(
                     return Ok(rules_from_state_block);
                 }
 
-                let (nfa, action) = build_rule_nfa(file, next_state_id, definitions)?;
+                let (nfa, action, is_bol, is_eol) =
+                    build_rule_nfa(file, next_state_id, definitions)?;
                 rules_from_state_block.push(RuleAction {
                     nfa,
                     action,
                     condition_state: state_list.to_vec(),
+                    is_bol,
+                    is_eol,
                 });
             }
         }
@@ -85,12 +88,15 @@ pub fn parse_condition_states(
                 return Err("unrecognized rule".to_string());
             }
             _ => {
-                let (nfa, action) = build_rule_nfa(file, next_state_id, definitions)?;
+                let (nfa, action, is_bol, is_eol) =
+                    build_rule_nfa(file, next_state_id, definitions)?;
 
                 return Ok(vec![RuleAction {
                     nfa,
                     action,
                     condition_state: state_list.to_vec(),
+                    is_bol,
+                    is_eol,
                 }]);
             }
         }

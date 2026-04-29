@@ -221,11 +221,18 @@ pub fn build_rule_nfa(
     file: &mut FileInfo,
     next_state_id: &mut usize,
     defs: &[Definition],
-) -> Result<(NFA, String), String> {
+) -> Result<(NFA, String, bool, bool), String> {
     let (rule, action) = parse_rule_action(file, defs)?;
-    let tokens = regex_tokenizer(&rule);
+
+    let is_bol = rule.starts_with('^');
+    let is_eol = rule.ends_with('$') && !rule.ends_with("\\$");
+
+    let rule = if is_bol { &rule[1..] } else { &rule[..] };
+    let rule = if is_eol { &rule[..rule.len() - 1] } else { rule };
+
+    let tokens = regex_tokenizer(rule);
     let nfa = build_nfa(&tokens, next_state_id);
-    Ok((nfa, action))
+    Ok((nfa, action, is_bol, is_eol))
 }
 
 pub fn parse_rules(
@@ -269,11 +276,14 @@ pub fn parse_rules(
                 rules.append(&mut state_rules);
             }
             _ => {
-                let (nfa, action) = build_rule_nfa(file, &mut next_state_id, defs)?;
+                let (nfa, action, is_bol, is_eol) =
+                    build_rule_nfa(file, &mut next_state_id, defs)?;
                 rules.push(RuleAction {
                     nfa,
                     action,
                     condition_state: vec![ConditionState::initial()],
+                    is_bol,
+                    is_eol,
                 });
             }
         }
