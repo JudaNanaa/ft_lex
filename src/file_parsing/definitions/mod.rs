@@ -23,17 +23,17 @@ pub enum Definition {
 
 impl ConditionState {
     pub fn new(name: String, state_type: DefinitionState) -> ConditionState {
-        return ConditionState { name, state_type };
+        ConditionState { name, state_type }
     }
 
     pub fn initial() -> ConditionState {
-        return ConditionState {
+        ConditionState {
             name: String::from("INITIAL"),
             state_type: DefinitionState::Inclusive,
-        };
+        }
     }
 
-    pub fn name(&self) -> &String {
-        return &self.name;
+    pub fn name(&self) -> &str {
+        &self.name
     }
 }

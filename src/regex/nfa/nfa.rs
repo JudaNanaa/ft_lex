@@ -1,5 +1,3 @@
-use std::collections::HashSet;
-
 use crate::regex::{
     nfa::{
         at_least::at_least, concatenate::concatenate, from_char::from_char, or::or, range::range,
@@ -8,20 +6,7 @@ use crate::regex::{
     Operator, Quantifier, Token, NFA,
 };
 
-fn sort_final_states(final_states: HashSet<usize>) -> HashSet<usize> {
-    let mut sort_vec: Vec<&usize> = final_states.iter().collect();
-
-    sort_vec.sort_unstable();
-
-    let mut output = HashSet::new();
-
-    for elem in sort_vec {
-        output.insert(*elem);
-    }
-    return output;
-}
-
-pub fn build_nfa(tokens: &Vec<Token>, start_id: &mut usize) -> NFA {
+pub fn build_nfa(tokens: &[Token], start_id: &mut usize) -> NFA {
     let mut stack: Vec<NFA> = Vec::new();
     let mut state_id = *start_id;
 
@@ -63,16 +48,14 @@ pub fn build_nfa(tokens: &Vec<Token>, start_id: &mut usize) -> NFA {
         stack.push(nfa);
     }
     *start_id = state_id;
-    let mut output = stack.pop().unwrap();
-    output.final_states = sort_final_states(output.final_states);
-    println!("nb state nfa == {}", output.transitions.len());
-    return output;
+    stack.pop().unwrap()
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
     use crate::regex::{Operator, Quantifier, Token};
+    use std::collections::HashSet;
 
     // Test pour la construction d'un NFA simple avec un caractère
     #[test]

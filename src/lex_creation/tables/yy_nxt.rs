@@ -2,7 +2,7 @@ use std::{collections::HashMap, fs::File, io::Write};
 
 use crate::{lex_creation::SPACE, regex::dfa::DFA};
 
-fn write_yy_nxt(transition_table: &Vec<Vec<usize>>, file: &mut File) -> std::io::Result<()> {
+fn write_yy_nxt(transition_table: &[Vec<usize>], file: &mut File) -> std::io::Result<()> {
     writeln!(
         file,
         "\nconst unsigned int yy_nxt[{}][{}] =",
@@ -35,7 +35,7 @@ fn write_yy_nxt(transition_table: &Vec<Vec<usize>>, file: &mut File) -> std::io:
     }
     writeln!(file, "{}}} ;\n", SPACE)?;
 
-    return Ok(());
+    Ok(())
 }
 
 pub fn create_yy_nxt(
@@ -43,12 +43,12 @@ pub fn create_yy_nxt(
     hash: &HashMap<char, usize>,
     file: &mut File,
 ) -> std::io::Result<Vec<Vec<usize>>> {
-    let nb_states = dfa.new_transitions().iter().count();
+    let nb_states = dfa.transitions().iter().count();
 
     let mut transition_table: Vec<Vec<usize>> = Vec::with_capacity(nb_states);
 
     for i in 0..nb_states {
-        let transitions = dfa.new_transitions().get(&i).unwrap();
+        let transitions = dfa.transitions().get(&i).unwrap();
         let mut tab = vec![0; 256];
         for t in transitions {
             if let Some(index) = hash.get(t.input()) {
@@ -59,5 +59,5 @@ pub fn create_yy_nxt(
     }
 
     write_yy_nxt(&transition_table, file)?;
-    return Ok(transition_table);
+    Ok(transition_table)
 }

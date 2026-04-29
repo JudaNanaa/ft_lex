@@ -11,7 +11,7 @@ fn get_key_based_on_value(hash: &HashMap<String, usize>, to_find: usize) -> Opti
             return Some(str);
         }
     }
-    return None;
+    None
 }
 
 fn get_condition_state_for_action(file_parts: &FilePart, action: &str) -> Vec<ConditionState> {
@@ -22,7 +22,7 @@ fn get_condition_state_for_action(file_parts: &FilePart, action: &str) -> Vec<Co
             return elem.condition_state.clone();
         }
     }
-    return vec![];
+    vec![]
 }
 
 fn write_inner_condition_state_if(file: &mut File) -> std::io::Result<()> {
@@ -30,7 +30,7 @@ fn write_inner_condition_state_if(file: &mut File) -> std::io::Result<()> {
     writeln!(file, "{}REJECT;", SPACE.repeat(3))?;
     writeln!(file, "{}return;", SPACE.repeat(3))?;
     writeln!(file, "{}}}", SPACE.repeat(2))?;
-    return Ok(());
+    Ok(())
 }
 
 fn is_only_initial(file: &mut File, condition_state: &[ConditionState]) -> std::io::Result<bool> {
@@ -43,14 +43,14 @@ fn is_only_initial(file: &mut File, condition_state: &[ConditionState]) -> std::
         write_inner_condition_state_if(file)?;
         return Ok(true);
     }
-    return Ok(false);
+    Ok(false)
 }
 
 fn write_condition_state(
     file: &mut File,
     mut condition_state: Vec<ConditionState>,
 ) -> std::io::Result<()> {
-    if is_only_initial(file, &condition_state)? == true {
+    if is_only_initial(file, &condition_state)? {
         return Ok(());
     }
 
@@ -63,7 +63,7 @@ fn write_condition_state(
     }
     writeln!(file, ")")?;
     write_inner_condition_state_if(file)?;
-    return Ok(());
+    Ok(())
 }
 
 pub fn yy_action(file_parts: &FilePart, file: &mut File) -> std::io::Result<()> {
@@ -75,7 +75,7 @@ pub fn yy_action(file_parts: &FilePart, file: &mut File) -> std::io::Result<()> 
     for nb_action in 1..=action_hash.len() {
         writeln!(file, "{}case {}:", SPACE.repeat(2), nb_action)?;
         let action = get_key_based_on_value(action_hash, nb_action).unwrap();
-        let condition_state = get_condition_state_for_action(file_parts, &action);
+        let condition_state = get_condition_state_for_action(file_parts, action);
         write_condition_state(file, condition_state)?;
         writeln!(file, "{}", action)?;
         writeln!(file, "{}break;", SPACE.repeat(2))?;

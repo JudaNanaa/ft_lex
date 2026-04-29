@@ -3,21 +3,21 @@ use std::{fs::File, io::Write};
 use crate::{lex_creation::SPACE, regex::dfa::DFA};
 
 fn generate_accept_tab(dfa: &DFA) -> Vec<u8> {
-    let nb_state = dfa.new_transitions().len();
+    let nb_state = dfa.transitions().len();
 
     let mut tab = vec![0; nb_state];
 
-    for state in dfa.new_transitions().keys() {
-        if dfa.new_final_states().contains(state) {
+    for state in dfa.transitions().keys() {
+        if dfa.final_states().contains(state) {
             tab[*state] = 1;
         }
     }
 
-    return tab;
+    tab
 }
 
 pub fn yy_accept(dfa: &DFA, file: &mut File) -> std::io::Result<Vec<u8>> {
-    let nb_state = dfa.new_transitions().len();
+    let nb_state = dfa.transitions().len();
 
     let accept_tab = generate_accept_tab(dfa);
 
@@ -40,5 +40,5 @@ pub fn yy_accept(dfa: &DFA, file: &mut File) -> std::io::Result<Vec<u8>> {
     }
     writeln!(file, "{}}} ;\n", SPACE)?;
 
-    return Ok(accept_tab);
+    Ok(accept_tab)
 }

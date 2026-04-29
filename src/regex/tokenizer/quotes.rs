@@ -15,7 +15,7 @@ fn string_to_tokens(str: String) -> Vec<Token> {
         token_string.push(Token::Char(char));
     }
     token_string.push(Operator(CloseParen));
-    return token_string;
+    token_string
 }
 
 pub fn get_string_under_quotes(chars: &mut Chars<'_>, quote_to_match: char) -> Vec<Token> {

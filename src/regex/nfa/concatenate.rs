@@ -19,10 +19,10 @@ pub fn concatenate(mut left: NFA, mut right: NFA) -> NFA {
 
     left.transitions.extend(right.transitions);
 
-    return NFA {
+    NFA {
         transitions: left.transitions,
         final_states: right.final_states,
-    };
+    }
 }
 
 #[cfg(test)]
@@ -55,7 +55,7 @@ mod tests {
             }],
         );
 
-        return nfa;
+        nfa
     }
 
     // Fonction de création d'un autre NFA de test
@@ -82,7 +82,7 @@ mod tests {
             }],
         );
 
-        return nfa;
+        nfa
     }
 
     // Test de base de la concaténation

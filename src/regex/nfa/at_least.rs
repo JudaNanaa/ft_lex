@@ -46,7 +46,7 @@ pub fn at_least(nfa: NFA, count: usize) -> (NFA, usize) {
 
     let next_id = result.final_states.iter().max().copied().unwrap_or(0) + 1;
 
-    return (result, next_id);
+    (result, next_id)
 }
 
 #[cfg(test)]
@@ -80,7 +80,7 @@ mod tests {
             }],
         );
 
-        return nfa;
+        nfa
     }
 
     // Test de l'application de Kleene Star
@@ -252,6 +252,6 @@ mod tests {
 
         // Vérifie que l'automate contient le bon nombre d'états et transitions après les répétitions
         assert!(result_nfa.final_states.len() > 1);
-        assert!(result_nfa.transitions.len() > 0);
+        assert!(!result_nfa.transitions.is_empty());
     }
 }

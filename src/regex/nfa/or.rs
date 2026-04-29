@@ -13,10 +13,10 @@ pub fn or(left: NFA, right: NFA) -> NFA {
 
     final_states.extend(right.final_states);
 
-    return NFA {
+    NFA {
         transitions,
         final_states,
-    };
+    }
 }
 
 // ------------------- Tests

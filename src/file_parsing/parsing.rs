@@ -1,4 +1,4 @@
-use std::{fs::File, io::Read, process::exit};
+use std::{fs::File, io::Read};
 
 use crate::file_parsing::{
     definitions::definitions::parse_definitions,
@@ -15,7 +15,7 @@ fn get_file_content(file_path: &str) -> std::io::Result<String> {
 
     file.read_to_string(&mut file_content)?;
 
-    return Ok(file_content);
+    Ok(file_content)
 }
 
 pub fn parsing_lex_file(file_path: &str) -> Result<FilePart, String> {
@@ -31,18 +31,12 @@ pub fn parsing_lex_file(file_path: &str) -> Result<FilePart, String> {
 
     let definitions = match parse_definitions(&mut file) {
         Ok(value) => value,
-        Err(message) => {
-            eprintln!("{}:{}: {}", file.name, file.line_nb, message);
-            exit(1);
-        }
+        Err(message) => return Err(format!("{}:{}: {}", file.name, file.line_nb, message)),
     };
 
     let (rules, in_yylex) = match parse_rules(&mut file, &definitions) {
         Ok(value) => value,
-        Err(message) => {
-            eprintln!("{}:{}: {}", file.name, file.line_nb, message);
-            exit(1);
-        }
+        Err(message) => return Err(format!("{}:{}: {}", file.name, file.line_nb, message)),
     };
 
     let map_actions = map_actions(&rules);
@@ -51,7 +45,7 @@ pub fn parsing_lex_file(file_path: &str) -> Result<FilePart, String> {
 
     let user_routine = parse_user_routine_part(&mut file);
 
-    return Ok(FilePart {
+    Ok(FilePart {
         definitions,
         in_yylex,
         dfa,
@@ -59,5 +53,5 @@ pub fn parsing_lex_file(file_path: &str) -> Result<FilePart, String> {
         actions,
         map_actions,
         user_routine,
-    });
+    })
 }

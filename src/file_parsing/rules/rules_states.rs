@@ -34,10 +34,10 @@ fn extract_state_from_line(file: &mut FileInfo) -> Result<String, String> {
             }
         }
     }
-    return Err(format!("bad <start condition>"));
+    Err(format!("bad <start condition>"))
 }
 
-fn split_state_form_line(states: &String) -> Result<Vec<String>, String> {
+fn split_state_form_line(states: &str) -> Result<Vec<String>, String> {
     let mut all_states = Vec::new();
     let mut current_state_name = String::new();
 
@@ -65,7 +65,7 @@ fn split_state_form_line(states: &String) -> Result<Vec<String>, String> {
         return Err("bad start condition list".to_string());
     }
     all_states.push(current_state_name.clone());
-    return Ok(all_states);
+    Ok(all_states)
 }
 
 fn expand_star_for_state(definitions: &[Definition]) -> Vec<ConditionState> {
@@ -78,7 +78,7 @@ fn expand_star_for_state(definitions: &[Definition]) -> Vec<ConditionState> {
     for (name, state_type) in all_condition_states {
         all_states.push(ConditionState::new(name.clone(), state_type));
     }
-    return all_states;
+    all_states
 }
 
 fn warning_duplicate_condition_state_for_line(file: &mut FileInfo, state_list: &[ConditionState]) {
@@ -118,7 +118,7 @@ fn find_states(
             }
         }
     }
-    return Ok(state_list);
+    Ok(state_list)
 }
 
 pub fn extract_rule_states(
@@ -133,5 +133,5 @@ pub fn extract_rule_states(
 
     warning_duplicate_condition_state_for_line(file, &all_states_for_rule);
 
-    return Ok(all_states_for_rule);
+    Ok(all_states_for_rule)
 }

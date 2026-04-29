@@ -59,8 +59,7 @@ pub fn regex_tokenizer(regex: &str) -> Vec<Token> {
         }
     }
     token_list = add_concatenation_token(token_list);
-    token_list = to_postfix(token_list);
-    return token_list;
+    to_postfix(token_list)
 }
 
 #[cfg(test)]
@@ -70,7 +69,7 @@ mod tests {
 
     fn tok(regex: &str) -> Vec<Token> {
         let token_list = regex_tokenizer(&regex.to_string());
-        return token_list;
+        token_list
     }
 
     #[test]

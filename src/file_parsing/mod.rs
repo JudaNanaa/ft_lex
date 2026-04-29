@@ -30,24 +30,24 @@ pub struct FilePart {
 
 impl FilePart {
     pub fn user_routine(&self) -> &str {
-        return &self.user_routine;
+        &self.user_routine
     }
     pub fn dfa(&self) -> &DFA {
-        return &self.dfa;
+        &self.dfa
     }
     pub fn actions(&self) -> &HashMap<usize, Vec<String>> {
-        return &self.actions;
+        &self.actions
     }
     pub fn map_actions(&self) -> &HashMap<String, usize> {
-        return &self.map_actions;
+        &self.map_actions
     }
     pub fn in_yylex(&self) -> &[String] {
-        return &self.in_yylex;
+        &self.in_yylex
     }
     pub fn definitions(&self) -> &[Definition] {
-        return &self.definitions;
+        &self.definitions
     }
     pub fn rule_action(&self) -> &[RuleAction] {
-        return &self.rule_action;
+        &self.rule_action
     }
 }

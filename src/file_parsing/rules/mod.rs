@@ -13,13 +13,14 @@ pub struct RuleAction {
 
 impl RuleAction {
     pub fn nfa(&self) -> &NFA {
-        return &self.nfa;
+        &self.nfa
     }
 
-    pub fn action(&self) -> &String {
-        return &self.action;
+    pub fn action(&self) -> &str {
+        &self.action
     }
+
     pub fn condition_state(&mut self) -> &mut Vec<ConditionState> {
-        return &mut self.condition_state;
+        &mut self.condition_state
     }
 }

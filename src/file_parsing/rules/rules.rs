@@ -21,7 +21,7 @@ pub fn map_actions(rules: &[RuleAction]) -> HashMap<String, usize> {
             index += 1;
         }
     }
-    return map;
+    map
 }
 
 fn append_quoted(rule: &mut String, file: &mut FileInfo) -> Result<(), String> {
@@ -50,7 +50,7 @@ fn append_quoted(rule: &mut String, file: &mut FileInfo) -> Result<(), String> {
             _ => rule.push(ch),
         }
     }
-    return Err("missing quote".to_string());
+    Err("missing quote".to_string())
 }
 
 fn resolve_def(name: &str, defs: &[Definition]) -> Result<String, String> {
@@ -64,7 +64,7 @@ fn resolve_def(name: &str, defs: &[Definition]) -> Result<String, String> {
             }
         }
     }
-    return Err("Definition not found".to_string());
+    Err("Definition not found".to_string())
 }
 
 fn extract_def(rule: &mut String, file: &mut FileInfo, defs: &[Definition]) -> Result<(), String> {
@@ -82,7 +82,7 @@ fn extract_def(rule: &mut String, file: &mut FileInfo, defs: &[Definition]) -> R
             _ => name.push(ch),
         }
     }
-    return Err("unterminated brace block".to_string());
+    Err("unterminated brace block".to_string())
 }
 
 fn extract_char_class(rule: &mut String, file: &mut FileInfo) -> Result<(), String> {
@@ -90,7 +90,7 @@ fn extract_char_class(rule: &mut String, file: &mut FileInfo) -> Result<(), Stri
     let mut posix_buf = String::new();
     let mut in_posix = false;
 
-    while let Some(ch) = file.it.next() {
+    for ch in file.it.by_ref() {
         match ch {
             '\n' => {
                 file.line_nb += 1;
@@ -133,7 +133,7 @@ fn extract_char_class(rule: &mut String, file: &mut FileInfo) -> Result<(), Stri
             _ => rule.push(ch),
         }
     }
-    return Err("unterminated character class".to_string());
+    Err("unterminated character class".to_string())
 }
 
 fn read_quoted_action(file: &mut FileInfo, quote: char) -> Result<String, String> {
@@ -157,7 +157,7 @@ fn read_quoted_action(file: &mut FileInfo, quote: char) -> Result<String, String
             _ => result.push(ch),
         }
     }
-    return Err("unterminated quoted action".to_string());
+    Err("unterminated quoted action".to_string())
 }
 
 fn read_braced_action(file: &mut FileInfo) -> Result<String, String> {
@@ -173,7 +173,7 @@ fn read_braced_action(file: &mut FileInfo) -> Result<String, String> {
             _ => result.push(ch),
         }
     }
-    return Err("unclosed brace in action".to_string());
+    Err("unclosed brace in action".to_string())
 }
 
 fn parse_action(file: &mut FileInfo) -> Result<String, String> {
@@ -190,7 +190,7 @@ fn parse_action(file: &mut FileInfo) -> Result<String, String> {
             _ => action.push(ch),
         }
     }
-    return Err("unexpected EOF while reading action".to_string());
+    Err("unexpected EOF while reading action".to_string())
 }
 
 fn parse_rule_action(file: &mut FileInfo, defs: &[Definition]) -> Result<(String, String), String> {
@@ -214,7 +214,7 @@ fn parse_rule_action(file: &mut FileInfo, defs: &[Definition]) -> Result<(String
         }
     }
     let action = parse_action(file)?.trim().to_string();
-    return Ok((rule, action));
+    Ok((rule, action))
 }
 
 pub fn build_rule_nfa(
@@ -225,7 +225,7 @@ pub fn build_rule_nfa(
     let (rule, action) = parse_rule_action(file, defs)?;
     let tokens = regex_tokenizer(&rule);
     let nfa = build_nfa(&tokens, next_state_id);
-    return Ok((nfa, action));
+    Ok((nfa, action))
 }
 
 pub fn parse_rules(
@@ -278,5 +278,5 @@ pub fn parse_rules(
             }
         }
     }
-    return Ok((rules, yylex_lines));
+    Ok((rules, yylex_lines))
 }

@@ -15,10 +15,10 @@ pub fn from_char(c: char, state_id: &mut usize) -> NFA {
     transitions.insert(0, vec![transition]);
     transitions.insert(final_state, vec![]);
 
-    return NFA {
+    NFA {
         transitions,
         final_states: HashSet::from([final_state]),
-    };
+    }
 }
 
 #[cfg(test)]

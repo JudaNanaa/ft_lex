@@ -26,5 +26,5 @@ pub fn write_yy_is_exclusive_state(file_parts: &FilePart, file: &mut File) -> st
     writeln!(file, "{}return 0;", SPACE.repeat(3))?;
     writeln!(file, "{}}}", SPACE)?;
     writeln!(file, "}}\n")?;
-    return Ok(());
+    Ok(())
 }

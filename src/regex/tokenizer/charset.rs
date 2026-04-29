@@ -17,7 +17,7 @@ fn create_charset_group(charset: String, is_negative: bool) -> Vec<Token> {
     let mut tokens_charset = Vec::new();
 
     tokens_charset.push(Operator(OpenParen));
-    if is_negative == false {
+    if !is_negative {
         let mut chars_it = charset.chars().peekable();
         while let Some(char) = chars_it.next() {
             tokens_charset.push(Token::Char(char));
@@ -26,12 +26,11 @@ fn create_charset_group(charset: String, is_negative: bool) -> Vec<Token> {
             }
         }
     } else {
-        let all_chars = (0..=255u8) // Using ASCII range for simplicity
+        let all_chars = (0..=255u8)
             .filter_map(|c| char::from_u32(c as u32))
             .collect::<Vec<char>>();
 
         let mut iter = all_chars.iter().peekable();
-
         let charset_chars: Vec<char> = charset.chars().collect();
 
         while let Some(c) = iter.next() {
@@ -44,7 +43,7 @@ fn create_charset_group(charset: String, is_negative: bool) -> Vec<Token> {
         }
     }
     tokens_charset.push(Operator(CloseParen));
-    return tokens_charset;
+    tokens_charset
 }
 
 fn check_if_negative_charset(chars: &mut Chars<'_>, charset: &mut String) -> (bool, CharsetState) {
@@ -64,7 +63,7 @@ fn check_if_negative_charset(chars: &mut Chars<'_>, charset: &mut String) -> (bo
             _ => charset.push(char),
         }
     }
-    return (is_negative, CharsetState::Continue);
+    (is_negative, CharsetState::Continue)
 }
 
 fn expand_minus(mut char_begin: char, char_end: char) -> String {
@@ -83,7 +82,7 @@ fn expand_minus(mut char_begin: char, char_end: char) -> String {
         };
     }
 
-    return range_chars;
+    range_chars
 }
 
 fn minus_gesture(chars: &mut Chars<'_>, charset: &mut String) -> CharsetState {
@@ -114,7 +113,7 @@ fn minus_gesture(chars: &mut Chars<'_>, charset: &mut String) -> CharsetState {
     } else {
         panic!("No Ending bracket");
     }
-    return CharsetState::Continue;
+    CharsetState::Continue
 }
 
 pub fn extract_charset(chars: &mut Chars<'_>) -> Vec<Token> {
@@ -167,7 +166,7 @@ pub fn expand_dot() -> Vec<Token> {
         }
     }
     dest.push(Operator(CloseParen));
-    return dest;
+    dest
 }
 
 // ------------------- tests
@@ -209,7 +208,6 @@ mod tests {
         chars.next();
         let tokens = extract_charset(&mut chars);
 
-        // Just check it’s negative and contains lots of tokens (not x)
         assert!(tokens.contains(&Operator(OpenParen)));
         assert!(tokens.contains(&Operator(CloseParen)));
         assert!(!tokens.contains(&Token::Char('x')));
@@ -263,6 +261,6 @@ mod tests {
         assert!(tokens.contains(&Token::Char('a')));
         assert!(!tokens.contains(&Token::Char('\n')));
         assert!(tokens.contains(&Operator(Or)));
-        assert!(tokens.len() > 50); // should include most printable ASCII chars
+        assert!(tokens.len() > 50);
     }
 }

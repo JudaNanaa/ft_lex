@@ -11,6 +11,5 @@ pub fn combine_nfa(rules: Vec<NFA>) -> NFA {
         }
     }
 
-    let output = last_nfa.expect("Not normal");
-    return output;
+    last_nfa.expect("Not normal")
 }

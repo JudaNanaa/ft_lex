@@ -21,26 +21,26 @@ fn extract_braced_content(file: &mut FileInfo) -> Result<String, String> {
             content.push(ch);
         }
     }
-    return Err("premature EOF".to_string());
+    Err("premature EOF".to_string())
 }
 
 fn read_spaced_line(file: &mut FileInfo) -> String {
     let mut content = String::new();
 
-    while let Some(ch) = file.it.next() {
+    for ch in file.it.by_ref() {
         if ch == '\n' {
             file.line_nb += 1;
             break;
         }
         content.push(ch);
     }
-    return content;
+    content
 }
 
 fn parse_definition(file: &mut FileInfo) -> Result<Definition, String> {
     let mut line = String::new();
 
-    while let Some(ch) = file.it.next() {
+    for ch in file.it.by_ref() {
         if ch == '\n' {
             file.line_nb += 1;
             break;
@@ -52,31 +52,10 @@ fn parse_definition(file: &mut FileInfo) -> Result<Definition, String> {
     if let Some(idx) = trimmed.find(' ') {
         let name = trimmed[0..idx].to_string();
         let value = trimmed[idx + 1..].trim().to_string();
-        return Ok(Definition::Definition { name, value });
+        Ok(Definition::Definition { name, value })
     } else {
-        return Err("incomplete name definition".to_string());
+        Err("incomplete name definition".to_string())
     }
-}
-
-fn split_by_chars(s: &str, delimiters: &str) -> Vec<String> {
-    let mut result = Vec::new();
-    let mut current = String::new();
-    let mut chars = s.chars();
-
-    while let Some(ch) = chars.next() {
-        if delimiters.contains(ch) {
-            if !current.is_empty() {
-                result.push(current.clone());
-                current.clear();
-            }
-        } else {
-            current.push(ch);
-        }
-    }
-    if !current.is_empty() {
-        result.push(current);
-    }
-    return result;
 }
 
 fn parse_state_line(file: &mut FileInfo) -> Result<Vec<String>, String> {
@@ -86,7 +65,11 @@ fn parse_state_line(file: &mut FileInfo) -> Result<Vec<String>, String> {
     for ch in file.it.by_ref() {
         if ch == '\n' {
             file.line_nb += 1;
-            let split = split_by_chars(&content, " \t");
+            let split: Vec<String> = content
+                .split([' ', '\t'])
+                .filter(|s| !s.is_empty())
+                .map(String::from)
+                .collect();
             if split.is_empty() {
                 return Err("bad start condition list".to_string());
             }
@@ -94,7 +77,7 @@ fn parse_state_line(file: &mut FileInfo) -> Result<Vec<String>, String> {
         }
         content.push(ch);
     }
-    return Err("Premature EOF".to_string());
+    Err("Premature EOF".to_string())
 }
 
 fn advance_to_newline(file: &mut FileInfo) {
@@ -172,11 +155,11 @@ pub fn parse_definitions(file: &mut FileInfo) -> Result<Vec<Definition>, String>
             }
         }
     }
-    return Err("premature EOF".to_string());
+    Err("premature EOF".to_string())
 }
 
 fn state_exists(defs: &[Definition], target: &str) -> bool {
-    return defs.iter().any(|def| matches!(def, Definition::ExclusiveState { name, .. } | Definition::InclusiveState { name, .. } if name == target));
+    defs.iter().any(|def| matches!(def, Definition::ExclusiveState { name, .. } | Definition::InclusiveState { name, .. } if name == target))
 }
 
 pub fn list_all_states(defs: &[Definition]) -> Vec<(&String, DefinitionState)> {
@@ -193,7 +176,7 @@ pub fn list_all_states(defs: &[Definition]) -> Vec<(&String, DefinitionState)> {
             _ => {}
         }
     }
-    return result;
+    result
 }
 
 pub fn get_state_type(defs: &[Definition], state_name: &str) -> Result<DefinitionState, String> {
@@ -203,9 +186,9 @@ pub fn get_state_type(defs: &[Definition], state_name: &str) -> Result<Definitio
         return Ok(DefinitionState::Inclusive);
     }
 
-    return states
+    states
         .iter()
         .find(|(name, _)| name == &state_name)
         .map(|&(_, typ)| Ok(typ))
-        .unwrap_or_else(|| Err(format!("undeclared start condition {}", state_name)));
+        .unwrap_or_else(|| Err(format!("undeclared start condition {}", state_name)))
 }

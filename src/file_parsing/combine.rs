@@ -16,9 +16,9 @@ fn map_final_states_to_actions(rules: &[RuleAction]) -> HashMap<usize, Vec<Strin
     for rule in rules {
         for &final_state in &rule.nfa().final_states {
             if final_state == 0 {
-                initial_state_actions.push(rule.action().clone());
+                initial_state_actions.push(rule.action().to_string());
             } else {
-                final_state_actions.insert(final_state, vec![rule.action().clone()]);
+                final_state_actions.insert(final_state, vec![rule.action().to_string()]);
             }
         }
     }
@@ -27,11 +27,11 @@ fn map_final_states_to_actions(rules: &[RuleAction]) -> HashMap<usize, Vec<Strin
         final_state_actions.insert(0, initial_state_actions);
     }
 
-    return final_state_actions;
+    final_state_actions
 }
 
 fn extract_all_nfas(rules: &[RuleAction]) -> Vec<NFA> {
-    return rules.iter().map(|rule| rule.nfa().clone()).collect();
+    rules.iter().map(|rule| rule.nfa().clone()).collect()
 }
 
 pub fn process_and_combine_rules(
@@ -57,7 +57,7 @@ pub fn process_and_combine_rules(
             while let Some(nfa) = nfa_buffer.pop() {
                 processed_rules.push(RuleAction {
                     nfa,
-                    action: rule.action().clone(),
+                    action: rule.action().to_string(),
                     condition_state: condition_state_list.clone(),
                 });
             }
@@ -76,5 +76,5 @@ pub fn process_and_combine_rules(
 
     let action_mapping = assiociate_rule_actions(&dfa, final_state_map.clone());
 
-    return Ok((dfa, action_mapping, processed_rules));
+    Ok((dfa, action_mapping, processed_rules))
 }

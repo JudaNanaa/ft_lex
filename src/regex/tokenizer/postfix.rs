@@ -16,7 +16,7 @@ fn precedence(op: &Operators) -> u8 {
 }
 
 fn has_higher_precedence(current: &Operators, stack_top: &Operators) -> bool {
-    return precedence(current) > precedence(stack_top);
+    precedence(current) > precedence(stack_top)
 }
 
 pub fn to_postfix(tokens: Vec<Token>) -> Vec<Token> {
@@ -63,7 +63,7 @@ pub fn to_postfix(tokens: Vec<Token>) -> Vec<Token> {
         output.push(Operator(remaining_op));
     }
 
-    return output;
+    output
 }
 
 // ------------------- Tests

@@ -22,7 +22,7 @@ pub fn repeat_exact(nfa: &NFA, count: usize) -> (NFA, usize) {
 
     let output = big_nfa.unwrap();
     let next_id = offset + 1;
-    return (output, next_id);
+    (output, next_id)
 }
 
 // ------------- Tests

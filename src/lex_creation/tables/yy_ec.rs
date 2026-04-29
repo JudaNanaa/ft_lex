@@ -40,5 +40,5 @@ pub fn create_yy_ec(
         }
     }
 
-    return Ok(hash);
+    Ok(hash)
 }

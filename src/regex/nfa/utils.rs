@@ -23,13 +23,13 @@ pub fn shift_states(nfa: &NFA, offset: &usize) -> NFA {
         .map(|state| if *state == 0 { 0 } else { state + offset })
         .collect();
 
-    return new_nfa;
+    new_nfa
 }
 
 pub fn pop_last_two(stack: &mut Vec<NFA>) -> (NFA, NFA) {
     let second = stack.pop().expect("Internal error");
     let first = stack.pop().expect("Internal error");
-    return (first, second);
+    (first, second)
 }
 
 // ------------ Tests

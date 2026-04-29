@@ -36,7 +36,7 @@ fn parse_range(range_str: &str) -> Quantifier {
     if min_value > max_value {
         panic!("Invalid range: min cannot be greater than max")
     }
-    return Quantifier::Range(min_value, max_value);
+    Quantifier::Range(min_value, max_value)
 }
 
 pub fn extract_repetition_range(chars: &mut Chars<'_>) -> Quantifier {
@@ -53,7 +53,7 @@ pub fn extract_repetition_range(chars: &mut Chars<'_>) -> Quantifier {
         panic!("Unrecognized rule")
     }
 
-    return parse_range(&range_str);
+    parse_range(&range_str)
 }
 
 // -------------------- Tests

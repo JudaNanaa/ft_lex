@@ -1,43 +1,18 @@
-use std::collections::{HashSet, VecDeque};
+use std::collections::{HashMap, HashSet, VecDeque};
 
 #[cfg(feature = "dotfile")]
 use crate::regex::dfa::dot::generate_dot_file;
 
-use super::{DfaTransition, State, DFA};
-use crate::regex::dfa::NewDfaTransition;
+use super::{NewDfaTransition, State, DFA};
 use crate::regex::NFA;
 
-fn compute_new_final_states(dfa: &DFA) -> HashSet<usize> {
-    let mut final_state_ids = HashSet::new();
-
-    for state in &dfa.final_states {
-        if let Some(id) = dfa.test.get(state) {
-            final_state_ids.insert(*id);
-        }
-    }
-
-    return final_state_ids;
-}
-
-fn map_final_states(dfa: &DFA, nfa_final_states: &HashSet<usize>) -> HashSet<State> {
-    let mut dfa_final_states = HashSet::new();
-
-    for state in dfa.transitions.keys() {
-        if state.state.iter().any(|s| nfa_final_states.contains(s)) {
-            dfa_final_states.insert(state.clone());
-        }
-    }
-
-    return dfa_final_states;
-}
-
-fn find_target_state(nfa: &NFA, current_state: &State, input_char: &char) -> State {
+fn find_target_state(nfa: &NFA, current_state: &State, input_char: char) -> State {
     let mut target_states = HashSet::new();
 
     for nfa_state_id in &current_state.state {
         if let Some(transitions) = nfa.transitions.get(nfa_state_id) {
             for transition in transitions {
-                if transition.input == *input_char {
+                if transition.input == input_char {
                     target_states.insert(transition.target_state);
                 }
             }
@@ -48,77 +23,73 @@ fn find_target_state(nfa: &NFA, current_state: &State, input_char: &char) -> Sta
         return State::trap();
     }
 
-    let mut sorted_states: Vec<usize> = target_states.into_iter().collect();
-    sorted_states.sort_unstable();
-    return State {
-        state: sorted_states,
-    };
+    let mut sorted: Vec<usize> = target_states.into_iter().collect();
+    sorted.sort_unstable();
+    State { state: sorted }
 }
 
 pub fn build_dfa(nfa: NFA) -> DFA {
     let mut dfa = DFA::new();
-    let ascii_chars = (0..=255u8)
-        .filter_map(|c| char::from_u32(c as u32))
-        .collect::<Vec<char>>();
+    let ascii_chars: Vec<char> = (0..=255u8).filter_map(|c| char::from_u32(c as u32)).collect();
 
-    let mut pending_states = VecDeque::from(vec![State { state: vec![0] }]);
-    dfa.test.insert(State { state: vec![0] }, 0);
-    let mut next_state_id = 1;
+    let mut state_map: HashMap<State, usize> = HashMap::new();
+    let mut visited: HashSet<State> = HashSet::new();
+    let mut pending: VecDeque<State> = VecDeque::new();
+    let mut pending_set: HashSet<State> = HashSet::new();
 
-    while let Some(current_state) = pending_states.pop_front() {
-        let mut state_transitions = Vec::with_capacity(ascii_chars.len());
-        let mut new_state_transitions = Vec::with_capacity(ascii_chars.len());
+    let initial = State { state: vec![0] };
+    state_map.insert(initial.clone(), 0);
+    dfa.nfa_states.insert(0, vec![0]);
+    pending.push_back(initial.clone());
+    pending_set.insert(initial);
+    let mut next_id = 1usize;
 
-        for &input_char in &ascii_chars {
-            let target_state = find_target_state(&nfa, &current_state, &input_char);
-            if !target_state.is_trap() {
-                let state_id = match dfa.test.get(&target_state) {
-                    Some(&id) => id,
-                    None => {
-                        let id = next_state_id;
-                        dfa.test.insert(target_state.clone(), id);
-                        next_state_id += 1;
-                        id
+    while let Some(current) = pending.pop_front() {
+        pending_set.remove(&current);
+        visited.insert(current.clone());
+        let current_id = *state_map.get(&current).unwrap();
+
+        let mut new_transitions = Vec::with_capacity(ascii_chars.len());
+
+        for &ch in &ascii_chars {
+            let target = find_target_state(&nfa, &current, ch);
+            if target.is_trap() {
+                continue;
+            }
+
+            let target_id = match state_map.get(&target) {
+                Some(&id) => id,
+                None => {
+                    let id = next_id;
+                    dfa.nfa_states.insert(id, target.state.clone());
+                    state_map.insert(target.clone(), id);
+                    next_id += 1;
+                    if !visited.contains(&target) && !pending_set.contains(&target) {
+                        pending_set.insert(target.clone());
+                        pending.push_back(target.clone());
                     }
-                };
+                    id
+                }
+            };
 
-                state_transitions.push(DfaTransition {
-                    input: input_char,
-                    target_state,
-                });
-
-                new_state_transitions.push(NewDfaTransition {
-                    input: input_char,
-                    target_state: state_id,
-                });
-            }
+            new_transitions.push(NewDfaTransition { input: ch, target_state: target_id });
         }
 
-        let current_state_id = *dfa.test.get(&current_state).unwrap();
-        dfa.new_transitions
-            .insert(current_state_id, new_state_transitions.clone());
-        dfa.transitions
-            .insert(current_state, state_transitions.clone());
-
-        for transition in state_transitions {
-            if !dfa.transitions.contains_key(&transition.target_state)
-                && !pending_states.contains(&transition.target_state)
-            {
-                pending_states.push_back(transition.target_state);
-            }
-        }
+        dfa.transitions.insert(current_id, new_transitions);
     }
 
-    dfa.final_states = map_final_states(&dfa, &nfa.final_states);
-    dfa.new_final_states = compute_new_final_states(&dfa);
+    for (state, &id) in &state_map {
+        if state.state.iter().any(|s| nfa.final_states.contains(s)) {
+            dfa.final_states.insert(id);
+        }
+    }
+    dfa.final_states.remove(&0);
     dfa.charset = nfa.compute_charset();
-    dfa.new_final_states.remove(&0);
 
     #[cfg(feature = "dotfile")]
-    match generate_dot_file(&dfa) {
-        Ok(_) => {}
-        Err(error) => eprintln!("Error generating dfa.dot: {}", error),
+    if let Err(e) = generate_dot_file(&dfa) {
+        eprintln!("Error generating dfa.dot: {}", e);
     }
 
-    return dfa;
+    dfa
 }

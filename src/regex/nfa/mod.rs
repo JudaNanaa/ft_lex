@@ -25,10 +25,10 @@ pub struct NFA {
 
 impl NFA {
     pub fn new() -> Self {
-        return Self {
+        Self {
             transitions: HashMap::new(),
             final_states: HashSet::new(),
-        };
+        }
     }
 
     pub fn compute_charset(&self) -> HashSet<char> {
@@ -38,6 +38,12 @@ impl NFA {
                 charset.insert(t.input);
             }
         }
-        return charset;
+        charset
+    }
+}
+
+impl Default for NFA {
+    fn default() -> Self {
+        Self::new()
     }
 }

@@ -19,7 +19,7 @@ fn skip_until_newline_state_block(file: &mut FileInfo) -> Result<(), String> {
             _ => return Err("unrecognized rule".to_string()),
         }
     }
-    return Ok(());
+    Ok(())
 }
 
 fn extract_state_block(
@@ -61,7 +61,7 @@ fn extract_state_block(
             }
         }
     }
-    return Err(String::from("ERROR: end of file in string"));
+    Err(String::from("ERROR: end of file in string"))
 }
 
 pub fn parse_condition_states(
@@ -95,5 +95,5 @@ pub fn parse_condition_states(
             }
         }
     }
-    return Err("unrecognized rule".to_string());
+    Err("unrecognized rule".to_string())
 }

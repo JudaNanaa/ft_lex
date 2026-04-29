@@ -53,7 +53,7 @@ pub fn range(nfa: NFA, min: usize, max: usize) -> (NFA, usize) {
     final_nfa.final_states.extend(accumulated_final_states);
 
     let next_id = total_offset + 1;
-    return (final_nfa, next_id);
+    (final_nfa, next_id)
 }
 
 #[cfg(test)]

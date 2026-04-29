@@ -1,5 +1,4 @@
-use std::collections::HashSet;
-use std::{collections::HashMap, fmt::Debug};
+use std::collections::{HashMap, HashSet};
 
 pub mod dfa;
 mod dot;
@@ -7,84 +6,70 @@ pub mod rule_actions;
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct State {
-    state: Vec<usize>,
+    pub state: Vec<usize>,
 }
 
 impl State {
     pub fn trap() -> Self {
-        return Self { state: vec![0] };
+        Self { state: vec![0] }
     }
 
     pub fn is_trap(&self) -> bool {
-        return self.state == vec![0];
+        self.state == vec![0]
     }
-}
-
-#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
-pub struct DfaTransition {
-    input: char,
-    target_state: State,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct NewDfaTransition {
-    input: char,
-    target_state: usize,
+    pub input: char,
+    pub target_state: usize,
 }
 
 impl NewDfaTransition {
     pub fn input(&self) -> &char {
-        return &self.input;
+        &self.input
     }
 
     pub fn target_state(&self) -> &usize {
-        return &self.target_state;
+        &self.target_state
     }
 }
 
-#[derive(Clone, PartialEq, Eq)]
+#[derive(Clone, PartialEq, Eq, Debug)]
 pub struct DFA {
-    transitions: HashMap<State, Vec<DfaTransition>>,
-    final_states: HashSet<State>,
-    test: HashMap<State, usize>,
-    new_transitions: HashMap<usize, Vec<NewDfaTransition>>,
-    new_final_states: HashSet<usize>,
-    charset: HashSet<char>,
+    pub transitions: HashMap<usize, Vec<NewDfaTransition>>,
+    pub final_states: HashSet<usize>,
+    pub charset: HashSet<char>,
+    pub nfa_states: HashMap<usize, Vec<usize>>,
 }
 
 impl DFA {
     pub fn new() -> Self {
-        return Self {
+        Self {
             transitions: HashMap::new(),
             final_states: HashSet::new(),
-            test: HashMap::new(),
-            new_transitions: HashMap::new(),
-            new_final_states: HashSet::new(),
             charset: HashSet::new(),
-        };
+            nfa_states: HashMap::new(),
+        }
     }
 
     pub fn charset(&self) -> &HashSet<char> {
-        return &self.charset;
+        &self.charset
     }
 
-    pub fn new_transitions(&self) -> &HashMap<usize, Vec<NewDfaTransition>> {
-        return &self.new_transitions;
+    pub fn transitions(&self) -> &HashMap<usize, Vec<NewDfaTransition>> {
+        &self.transitions
     }
 
-    pub fn new_final_states(&self) -> &HashSet<usize> {
-        return &self.new_final_states;
+    pub fn final_states(&self) -> &HashSet<usize> {
+        &self.final_states
     }
+
+
 }
 
-use std::fmt::{Formatter, Result as FmtResult};
-
-impl Debug for DFA {
-    fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
-        f.debug_struct("DFA")
-            .field("new_transitions", &self.new_transitions)
-            .field("new_final_states", &self.new_final_states)
-            .field("charset", &self.charset)
-            .finish()
+impl Default for DFA {
+    fn default() -> Self {
+        Self::new()
     }
 }

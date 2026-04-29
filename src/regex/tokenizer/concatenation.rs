@@ -4,25 +4,10 @@ use super::Token::Operator;
 
 fn need_concatenate(token: &Token, next: &Token) -> bool {
     match token {
-        Token::Char(_) => match next {
-            Token::Char(_) | Operator(OpenParen) => {
-                return true;
-            }
-            _ => return false,
-        },
-        Operator(CloseParen) => match next {
-            Token::Char(_) | Operator(OpenParen) => {
-                return true;
-            }
-            _ => return false,
-        },
-        Operator(Quantifier(_)) => match next {
-            Token::Char(_) | Operator(OpenParen) => {
-                return true;
-            }
-            _ => return false,
-        },
-        _ => return false,
+        Token::Char(_) => matches!(next, Token::Char(_) | Operator(OpenParen)),
+        Operator(CloseParen) => matches!(next, Token::Char(_) | Operator(OpenParen)),
+        Operator(Quantifier(_)) => matches!(next, Token::Char(_) | Operator(OpenParen)),
+        _ => false,
     }
 }
 
@@ -32,14 +17,13 @@ pub fn add_concatenation_token(tokens: Vec<Token>) -> Vec<Token> {
 
     while let Some(token) = token_it.next() {
         dest.push(*token);
-        if token_it.peek().is_none() {
-            break;
-        }
-        if need_concatenate(token, token_it.peek().unwrap()) == true {
-            dest.push(Operator(Concatenation));
+        if let Some(next) = token_it.peek() {
+            if need_concatenate(token, next) {
+                dest.push(Operator(Concatenation));
+            }
         }
     }
-    return dest;
+    dest
 }
 
 // --------------------------- Tests
