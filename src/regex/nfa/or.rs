@@ -3,6 +3,8 @@ use super::NFA;
 pub fn or(left: NFA, right: NFA) -> NFA {
     let mut transitions = left.transitions;
     let mut final_states = left.final_states;
+    let mut trailing_states = left.trailing_states;
+    let mut trailing_final_states = left.trailing_final_states;
 
     for (state, mut trans) in right.transitions {
         transitions
@@ -12,11 +14,14 @@ pub fn or(left: NFA, right: NFA) -> NFA {
     }
 
     final_states.extend(right.final_states);
+    trailing_states.extend(right.trailing_states);
+    trailing_final_states.extend(right.trailing_final_states);
 
     NFA {
         transitions,
         final_states,
-        ..NFA::new()
+        trailing_states,
+        trailing_final_states,
     }
 }
 
@@ -95,5 +100,59 @@ mod tests {
 
         // Vérification des états finaux
         assert_eq!(result.final_states, HashSet::from([1, 2]));
+    }
+
+    #[test]
+    fn test_or_trailing_states_empty_when_none() {
+        let result = or(create_test_nfa_a(), create_test_nfa_b());
+        assert!(result.trailing_states.is_empty());
+    }
+
+    #[test]
+    fn test_or_preserves_trailing_states_from_left() {
+        let mut nfa_a = create_test_nfa_a();
+        nfa_a.trailing_states = HashSet::from([1]);
+        let nfa_b = create_test_nfa_b();
+
+        let result = or(nfa_a, nfa_b);
+        assert_eq!(result.trailing_states, HashSet::from([1]));
+    }
+
+    #[test]
+    fn test_or_merges_trailing_states_from_both() {
+        let mut nfa_a = create_test_nfa_a();
+        nfa_a.trailing_states = HashSet::from([1]);
+        let mut nfa_b = create_test_nfa_b();
+        nfa_b.trailing_states = HashSet::from([2]);
+
+        let result = or(nfa_a, nfa_b);
+        assert_eq!(result.trailing_states, HashSet::from([1, 2]));
+    }
+
+    #[test]
+    fn test_or_preserves_trailing_final_states_from_left() {
+        let mut nfa_a = create_test_nfa_a();
+        nfa_a.trailing_final_states = HashSet::from([1]);
+        let nfa_b = create_test_nfa_b();
+
+        let result = or(nfa_a, nfa_b);
+        assert_eq!(result.trailing_final_states, HashSet::from([1]));
+    }
+
+    #[test]
+    fn test_or_merges_trailing_final_states_from_both() {
+        let mut nfa_a = create_test_nfa_a();
+        nfa_a.trailing_final_states = HashSet::from([1]);
+        let mut nfa_b = create_test_nfa_b();
+        nfa_b.trailing_final_states = HashSet::from([2]);
+
+        let result = or(nfa_a, nfa_b);
+        assert_eq!(result.trailing_final_states, HashSet::from([1, 2]));
+    }
+
+    #[test]
+    fn test_or_trailing_final_states_empty_when_none() {
+        let result = or(create_test_nfa_a(), create_test_nfa_b());
+        assert!(result.trailing_final_states.is_empty());
     }
 }

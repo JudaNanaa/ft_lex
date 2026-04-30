@@ -4,6 +4,7 @@ extern int yyleng;
 
 typedef struct accept_elem {
 	int state;
+	int dfa_state;
 	size_t len_match;
 } a_elem;
 
@@ -30,6 +31,7 @@ extern int yy_start;	/* start state number */
 extern int clean_flag;
 extern int yy_trailing_len;
 extern const int yy_trailing[];
+extern const int yy_trailing_accept[];
 
 
 change_me_in_variables!

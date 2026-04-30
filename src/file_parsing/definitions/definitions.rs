@@ -143,7 +143,7 @@ pub fn parse_definitions(file: &mut FileInfo) -> Result<Vec<Definition>, String>
             }
             '\n' => {
                 file.it.next();
-                file.line_nb += 1
+                file.line_nb += 1;
             }
             c if WHITESPACE.contains(*c) => {
                 let content = read_spaced_line(file);
@@ -168,10 +168,10 @@ pub fn list_all_states(defs: &[Definition]) -> Vec<(&String, DefinitionState)> {
     for def in defs {
         match def {
             Definition::InclusiveState { name, .. } => {
-                result.push((name, DefinitionState::Inclusive))
+                result.push((name, DefinitionState::Inclusive));
             }
             Definition::ExclusiveState { name, .. } => {
-                result.push((name, DefinitionState::Exclusive))
+                result.push((name, DefinitionState::Exclusive));
             }
             _ => {}
         }
@@ -190,5 +190,5 @@ pub fn get_state_type(defs: &[Definition], state_name: &str) -> Result<Definitio
         .iter()
         .find(|(name, _)| name == &state_name)
         .map(|&(_, typ)| Ok(typ))
-        .unwrap_or_else(|| Err(format!("undeclared start condition {}", state_name)))
+        .unwrap_or_else(|| Err(format!("undeclared start condition {state_name}")))
 }

@@ -9,9 +9,10 @@
 #define YY_CHAR_TO_INT(c) ((uint8_t) (c))
 
 
-extern const unsigned char yy_ec[256];           // tableau externe
-extern const unsigned int yy_nxt[][256]; // ici, 256 est connu               // transition de l'automate
-extern const int yy_accept[];               // états finaux
+extern const unsigned char yy_ec[256];
+extern const unsigned int yy_nxt[][256];
+extern const int yy_accept[];
+extern const int yy_trailing_accept[];
 
 void yy_search_final(int state, int len);
 void yy_if_match(void);
@@ -25,6 +26,7 @@ FILE *yyin = NULL, *yyout = NULL;
 
 typedef struct accept_elem {
 	int state;
+	int dfa_state;
 	size_t len_match;
 } a_elem;
 
@@ -84,12 +86,13 @@ void yy_increase_accepting_stack_len(void) {
 		yy_fatal_error( "out of dynamic memory in increase_accepting_stack_len()" );
 	stack.capacity *= 2;
 }
-void yy_push_accepting_state(int state, int len_match) {
+void yy_push_accepting_state(int action, int dfa_state, int len_match) {
 	int index = stack.len;
 
 	if (stack.len == stack.capacity)
 		yy_increase_accepting_stack_len();
-	stack.t[index].state = state;
+	stack.t[index].state = action;
+	stack.t[index].dfa_state = dfa_state;
 	stack.t[index].len_match = len_match;
 	stack.len++;
 }
@@ -99,6 +102,7 @@ a_elem yy_pop_accepting_state(void) {
 	int index = stack.len - 1;
 
 	pop.state = stack.t[index].state;
+	pop.dfa_state = stack.t[index].dfa_state;
 	pop.len_match = stack.t[index].len_match;
 
 	stack.len--;
@@ -238,8 +242,8 @@ int yy_at_eol(void) {
 void yy_if_match() {
 	a_elem matching_state = yy_pop_accepting_state();
 
-	if (yy_trailing_len > 0) {
-		a_elem tc = { matching_state.state, yy_trailing_len };
+	if (yy_trailing_len > 0 && yy_trailing_accept[matching_state.dfa_state]) {
+		a_elem tc = { matching_state.state, matching_state.dfa_state, yy_trailing_len };
 		yy_set_yytext(tc);
 		yy_trailing_len = 0;
 	} else {

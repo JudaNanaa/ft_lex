@@ -70,6 +70,7 @@ int yylex(void) {
 			current_state = 0;
 			next_state = 0;
 			len_match = 0;
+			yy_trailing_len = 0;
 			clean_flag = 0;
 		}
 		current_state = next_state;

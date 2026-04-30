@@ -14,7 +14,6 @@ fn skip_until_newline_state_block(file: &mut FileInfo) -> Result<(), String> {
             }
             ' ' | '\t' => {
                 file.it.next();
-                continue;
             }
             _ => return Err("unrecognized rule".to_string()),
         }

@@ -7,15 +7,15 @@ pub fn yy_final(file_parts: &FilePart, file: &mut File) -> std::io::Result<()> {
     let hash = file_parts.map_actions();
 
     for (state, actions) in final_state {
-        writeln!(file, "void final{}(int len_match) {{", state)?;
+        writeln!(file, "void final{state}(int len_match) {{")?;
 
         for elem in actions.iter().rev() {
             let action = hash.get(elem).unwrap();
 
             writeln!(
                 file,
-                "{}yy_push_accepting_state({}, len_match);",
-                SPACE, action
+                "{}yy_push_accepting_state({}, {}, len_match);",
+                SPACE, action, state
             )?;
         }
         writeln!(file, "}}")?;

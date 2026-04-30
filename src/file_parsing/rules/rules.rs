@@ -55,12 +55,12 @@ fn append_quoted(rule: &mut String, file: &mut FileInfo) -> Result<(), String> {
 
 fn resolve_def(name: &str, defs: &[Definition]) -> Result<String, String> {
     if name.starts_with(|c: char| c.is_ascii_digit()) {
-        return Ok(format!("{{{}}}", name));
+        return Ok(format!("{{{name}}}"));
     }
-    for def in defs.iter() {
+    for def in defs {
         if let Definition::Definition { name: n, value } = def {
             if n == name {
-                return Ok(format!("({})", value));
+                return Ok(format!("({value})"));
             }
         }
     }
@@ -247,7 +247,7 @@ pub fn parse_rules(
     let mut rules = Vec::new();
     let mut next_state_id = 1;
 
-    while let Some(ch) = file.it.peek().cloned() {
+    while let Some(ch) = file.it.peek().copied() {
         match ch {
             '\n' => {
                 file.line_nb += 1;

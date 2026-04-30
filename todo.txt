@@ -1,5 +1,3 @@
-faire trailing context
-
 array or pointer
 
 compression des tables -> https://stackoverflow.com/questions/29139162/dfa-state-transition-table-compression
