@@ -19,10 +19,10 @@ fn get_file_content(file_path: &str) -> std::io::Result<String> {
 }
 
 pub fn parsing_lex_file(file_path: &str) -> Result<FilePart, String> {
-    let file_content = match get_file_content(file_path) {
-        Ok(content) => content,
-        Err(_) => return Err(format!("can't open {}", file_path)),
+    let Ok(file_content) = get_file_content(file_path) else {
+        return Err(format!("can't open {file_path}"));
     };
+
     let mut file = FileInfo {
         it: file_content.chars().peekable(),
         line_nb: 0,

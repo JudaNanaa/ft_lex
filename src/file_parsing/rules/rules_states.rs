@@ -11,13 +11,13 @@ use crate::file_parsing::{
 fn extract_state_from_line(file: &mut FileInfo) -> Result<String, String> {
     let mut states_from_line = String::new();
 
-    while let Some(char) = file.it.next() {
+    for char in file.it.by_ref() {
         match char {
             '\n' => {
                 file.line_nb += 1;
                 break;
             }
-            'a'..'z' | 'A'..'Z' | '_' | ',' | '0'..'9' | '*' => {
+            'a'..='z' | 'A'..='Z' | '_' | ',' | '0'..='9' | '*' => {
                 states_from_line.push(char);
             }
             '>' => {
@@ -30,11 +30,11 @@ fn extract_state_from_line(file: &mut FileInfo) -> Result<String, String> {
                 return Ok(states_from_line);
             }
             _ => {
-                return Err(format!("bad <start condition>: {}", char));
+                return Err(format!("bad <start condition>: {char}"));
             }
         }
     }
-    Err(format!("bad <start condition>"))
+    Err("bad <start condition>".to_string())
 }
 
 fn split_state_form_line(states: &str) -> Result<Vec<String>, String> {
@@ -43,7 +43,7 @@ fn split_state_form_line(states: &str) -> Result<Vec<String>, String> {
 
     for char in states.chars() {
         match char {
-            '0'..'9' => {
+            '0'..='9' => {
                 if current_state_name.is_empty() {
                     return Err("bad <start condition>".to_string());
                 }
@@ -105,17 +105,14 @@ fn find_states(
     let mut state_list: Vec<ConditionState> = Vec::new();
 
     for state_name in all_states {
-        match state_name.as_str() {
-            "*" => {
-                let mut star_states = expand_star_for_state(definitions);
+        if let "*" = state_name.as_str() {
+            let mut star_states = expand_star_for_state(definitions);
 
-                state_list.append(&mut star_states);
-            }
-            _ => {
-                let state_type = get_state_type(definitions, state_name)?;
-                let new_def_state = ConditionState::new(state_name.clone(), state_type);
-                state_list.push(new_def_state);
-            }
+            state_list.append(&mut star_states);
+        } else {
+            let state_type = get_state_type(definitions, state_name)?;
+            let new_def_state = ConditionState::new(state_name.clone(), state_type);
+            state_list.push(new_def_state);
         }
     }
     Ok(state_list)

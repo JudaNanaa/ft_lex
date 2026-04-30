@@ -34,9 +34,17 @@ pub fn build_nfa(tokens: &[Token], start_id: &mut usize) -> NFA {
                         new_nfa
                     }
                 },
-                Operator::Concatenation | Operator::TrailingContext => {
+                Operator::Concatenation => {
                     let (left, right) = pop_last_two(&mut stack);
                     concatenate(left, right)
+                }
+                Operator::TrailingContext => {
+                    let (left, right) = pop_last_two(&mut stack);
+                    let boundary = left.final_states.clone();
+                    let mut combined = concatenate(left, right);
+                    combined.trailing_states = boundary;
+                    combined.trailing_final_states = combined.final_states.clone();
+                    combined
                 }
                 Operator::Or => {
                     let (left, right) = pop_last_two(&mut stack);
@@ -254,6 +262,61 @@ mod tests {
         let result = build_nfa(&tokens, &mut 1);
 
         assert_eq!(result.final_states.len(), 2); // 2 états finaux
+    }
+
+    #[test]
+    fn test_build_nfa_trailing_context() {
+        // ab/cd : trailing_states doit pointer sur les états finaux de "ab"
+        // start_id=1 → a:1, b:2, c:3, d:4
+        let tokens = vec![
+            Token::Char('a'),
+            Token::Char('b'),
+            Token::Operator(Operator::Concatenation),
+            Token::Char('c'),
+            Token::Char('d'),
+            Token::Operator(Operator::Concatenation),
+            Token::Operator(Operator::TrailingContext),
+        ];
+        let nfa = build_nfa(&tokens, &mut 1);
+
+        assert_eq!(nfa.trailing_states, HashSet::from([2]));
+        assert_eq!(nfa.final_states, HashSet::from([4]));
+        assert_ne!(nfa.trailing_states, nfa.final_states);
+    }
+
+    #[test]
+    fn test_build_nfa_trailing_context_single_chars() {
+        // a/b : trailing_states = final de "a" = {1}, final de "ab" = {2}
+        let tokens = vec![
+            Token::Char('a'),
+            Token::Char('b'),
+            Token::Operator(Operator::TrailingContext),
+        ];
+        let nfa = build_nfa(&tokens, &mut 1);
+
+        assert_eq!(nfa.trailing_states, HashSet::from([1]));
+        assert_eq!(nfa.final_states, HashSet::from([2]));
+        assert_eq!(nfa.trailing_final_states, HashSet::from([2]));
+        assert_ne!(nfa.trailing_states, nfa.trailing_final_states);
+    }
+
+    #[test]
+    fn test_build_nfa_trailing_final_states_distinct_from_boundary() {
+        // ab/cd : trailing_states = {2} (frontière), trailing_final_states = {4} (fin du lookahead)
+        let tokens = vec![
+            Token::Char('a'),
+            Token::Char('b'),
+            Token::Operator(Operator::Concatenation),
+            Token::Char('c'),
+            Token::Char('d'),
+            Token::Operator(Operator::Concatenation),
+            Token::Operator(Operator::TrailingContext),
+        ];
+        let nfa = build_nfa(&tokens, &mut 1);
+
+        assert_eq!(nfa.trailing_states, HashSet::from([2]));
+        assert_eq!(nfa.trailing_final_states, HashSet::from([4]));
+        assert!(nfa.trailing_states.is_disjoint(&nfa.trailing_final_states));
     }
 
     // Test pour des expressions vides et erreurs avec des quantificateurs invalides

@@ -39,7 +39,7 @@ pub fn write_defines(file: &mut File, definitions: &[Definition]) -> std::io::Re
             _ => continue,
         }
     }
-    writeln!(file, "")?;
+    writeln!(file)?;
     Ok(())
 }
 

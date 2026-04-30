@@ -21,6 +21,8 @@ pub struct Transition {
 pub struct NFA {
     pub transitions: HashMap<usize, Vec<Transition>>,
     pub final_states: HashSet<usize>,
+    pub trailing_states: HashSet<usize>,
+    pub trailing_final_states: HashSet<usize>,
 }
 
 impl NFA {
@@ -28,6 +30,8 @@ impl NFA {
         Self {
             transitions: HashMap::new(),
             final_states: HashSet::new(),
+            trailing_states: HashSet::new(),
+            trailing_final_states: HashSet::new(),
         }
     }
 

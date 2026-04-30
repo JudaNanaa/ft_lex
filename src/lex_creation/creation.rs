@@ -14,20 +14,20 @@ use crate::{
     },
 };
 
-pub fn lex_creation(file_parts: FilePart) -> std::io::Result<()> {
+pub fn lex_creation(file_parts: &FilePart) -> std::io::Result<()> {
     let mut file = File::create(LEX_FILE)?;
 
     write_includes(&mut file)?;
     write_defines(&mut file, file_parts.definitions())?;
     write_variables(file_parts.definitions(), &mut file)?;
 
-    tables_creation(&file_parts, &mut file)?;
+    tables_creation(file_parts, &mut file)?;
 
-    write_yy_is_exclusive_state(&file_parts, &mut file)?;
+    write_yy_is_exclusive_state(file_parts, &mut file)?;
 
-    yy_action(&file_parts, &mut file)?;
+    yy_action(file_parts, &mut file)?;
 
-    yy_final(&file_parts, &mut file)?;
+    yy_final(file_parts, &mut file)?;
     create_yy_search_final(file_parts.actions(), &mut file)?;
 
     write_yylex(&mut file, file_parts.in_yylex())?;

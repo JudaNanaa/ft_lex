@@ -51,6 +51,22 @@ pub fn build_dfa(nfa: NFA) -> DFA {
         visited.insert(current.clone());
         let current_id = *state_map.get(&current).unwrap();
 
+        if current
+            .state
+            .iter()
+            .any(|s| nfa.trailing_states.contains(s))
+        {
+            dfa.trailing_states.insert(current_id);
+        }
+
+        if current
+            .state
+            .iter()
+            .any(|s| nfa.trailing_final_states.contains(s))
+        {
+            dfa.trailing_final_states.insert(current_id);
+        }
+
         let mut new_transitions = Vec::with_capacity(ascii_chars.len());
 
         for &ch in &ascii_chars {

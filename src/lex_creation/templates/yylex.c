@@ -26,6 +26,7 @@ int yylex(void) {
 	}
 
 	len_match = 0;
+	yy_trailing_len = 0;
 	current_state = yy_start;
 	last_accepting_state = yy_start;
 
@@ -47,8 +48,10 @@ int yylex(void) {
 		c = *pos;
 		len_match++;
 		unsigned char yy_c = yy_ec[YY_CHAR_TO_INT(c)];
-		
+
 		int next_state = yy_nxt[current_state][yy_c];
+		if (yy_trailing[next_state])
+			yy_trailing_len = len_match;
 		if ( yy_accept[next_state] )
 		{
 			yy_search_final(next_state, len_match);
@@ -67,6 +70,7 @@ int yylex(void) {
 			current_state = 0;
 			next_state = 0;
 			len_match = 0;
+			yy_trailing_len = 0;
 			clean_flag = 0;
 		}
 		current_state = next_state;

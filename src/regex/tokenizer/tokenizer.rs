@@ -68,8 +68,7 @@ mod tests {
     use super::*;
 
     fn tok(regex: &str) -> Vec<Token> {
-        let token_list = regex_tokenizer(&regex.to_string());
-        token_list
+        regex_tokenizer(regex)
     }
 
     #[test]

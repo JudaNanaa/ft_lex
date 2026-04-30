@@ -73,7 +73,7 @@ fn write_condition_state(
     write!(file, "{}if (", SPACE.repeat(2))?;
     while let Some(state) = condition_state.pop() {
         write!(file, "state != {}", state.name())?;
-        if condition_state.len() != 0 {
+        if !condition_state.is_empty() {
             write!(file, " && ")?;
         }
     }
@@ -96,7 +96,7 @@ pub fn yy_action(file_parts: &FilePart, file: &mut File) -> std::io::Result<()> 
     }
 
     writeln!(file, "void yy_action(int action) {{")?;
-    writeln!(file, "{}switch (action) {{", SPACE)?;
+    writeln!(file, "{SPACE}switch (action) {{")?;
 
     for nb_action in 1..=action_hash.len() {
         writeln!(file, "{}case {}:", SPACE.repeat(2), nb_action)?;
@@ -117,13 +117,13 @@ pub fn yy_action(file_parts: &FilePart, file: &mut File) -> std::io::Result<()> 
                 SPACE.repeat(2)
             )?;
         }
-        writeln!(file, "{}", action)?;
+        writeln!(file, "{action}")?;
         writeln!(file, "{}break;", SPACE.repeat(2))?;
     }
     writeln!(file, "{}default:", SPACE.repeat(2))?;
     writeln!(file, "{}yy_fatal_error(\"not normal\");", SPACE.repeat(3))?;
 
-    writeln!(file, "{}}}", SPACE)?;
+    writeln!(file, "{SPACE}}}")?;
 
     writeln!(file, "}}\n")?;
 

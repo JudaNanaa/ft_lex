@@ -24,7 +24,7 @@ fn write_yy_nxt(transition_table: &[Vec<usize>], file: &mut File) -> std::io::Re
             } else if index != state.len() - 1 {
                 write!(file, ",{}", SPACE)?;
             } else {
-                writeln!(file, "")?;
+                writeln!(file)?;
             }
         }
         if index != transition_table.len() - 1 {

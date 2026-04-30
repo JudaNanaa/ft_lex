@@ -41,6 +41,8 @@ pub struct DFA {
     pub final_states: HashSet<usize>,
     pub charset: HashSet<char>,
     pub nfa_states: HashMap<usize, Vec<usize>>,
+    pub trailing_states: HashSet<usize>,
+    pub trailing_final_states: HashSet<usize>,
 }
 
 impl DFA {
@@ -50,6 +52,8 @@ impl DFA {
             final_states: HashSet::new(),
             charset: HashSet::new(),
             nfa_states: HashMap::new(),
+            trailing_states: HashSet::new(),
+            trailing_final_states: HashSet::new(),
         }
     }
 

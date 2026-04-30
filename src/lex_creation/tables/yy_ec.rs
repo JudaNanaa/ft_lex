@@ -36,7 +36,7 @@ pub fn create_yy_ec(
                 write!(file, "{}", SPACE)?;
             }
         } else {
-            writeln!(file, "\n{}}} ;\n", SPACE.to_string())?;
+            writeln!(file, "\n{}}} ;\n", SPACE)?;
         }
     }
 
