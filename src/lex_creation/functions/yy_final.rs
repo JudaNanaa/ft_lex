@@ -14,8 +14,7 @@ pub fn yy_final(file_parts: &FilePart, file: &mut File) -> std::io::Result<()> {
 
             writeln!(
                 file,
-                "{}yy_push_accepting_state({}, {}, len_match);",
-                SPACE, action, state
+                "{SPACE}yy_push_accepting_state({action}, {state}, len_match);",
             )?;
         }
         writeln!(file, "}}")?;

@@ -7,7 +7,7 @@ pub fn create_yy_search_final(
     file: &mut File,
 ) -> std::io::Result<()> {
     writeln!(file, "void yy_search_final(int state, int len_match) {{")?;
-    writeln!(file, "{}switch (state) {{", SPACE)?;
+    writeln!(file, "{SPACE}switch (state) {{")?;
 
     for nb in actions.keys() {
         writeln!(file, "{}case {}:", SPACE.repeat(2), nb)?;
@@ -17,7 +17,7 @@ pub fn create_yy_search_final(
     writeln!(file, "{}default :", SPACE.repeat(2))?;
     writeln!(file, "{}yy_fatal_error(\"Not normal\");", SPACE.repeat(3))?;
 
-    writeln!(file, "{}}}", SPACE)?;
+    writeln!(file, "{SPACE}}}")?;
     writeln!(file, "}}\n")?;
 
     Ok(())

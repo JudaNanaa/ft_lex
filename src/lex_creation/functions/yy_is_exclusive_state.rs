@@ -14,7 +14,7 @@ pub fn write_yy_is_exclusive_state(file_parts: &FilePart, file: &mut File) -> st
     let all_condition_state = list_all_states(definitions);
 
     writeln!(file, "int yy_is_exclusive_state(int state) {{")?;
-    writeln!(file, "{}switch (state) {{", SPACE)?;
+    writeln!(file, "{SPACE}switch (state) {{")?;
 
     for (state_name, state_type) in all_condition_state {
         if state_type == DefinitionState::Exclusive {
@@ -24,7 +24,7 @@ pub fn write_yy_is_exclusive_state(file_parts: &FilePart, file: &mut File) -> st
     }
     writeln!(file, "{}default:", SPACE.repeat(2))?;
     writeln!(file, "{}return 0;", SPACE.repeat(3))?;
-    writeln!(file, "{}}}", SPACE)?;
+    writeln!(file, "{SPACE}}}")?;
     writeln!(file, "}}\n")?;
     Ok(())
 }
