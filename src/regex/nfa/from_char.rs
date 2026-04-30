@@ -18,6 +18,7 @@ pub fn from_char(c: char, state_id: &mut usize) -> NFA {
     NFA {
         transitions,
         final_states: HashSet::from([final_state]),
+        ..NFA::new()
     }
 }
 

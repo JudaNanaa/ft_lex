@@ -54,6 +54,7 @@ t_buffer buffer;
 int yy_init = 0;		/* whether we need to initialize */
 int yy_start = -1;	/* start state number */
 int yy_at_bol = 1;	/* 1 if current position is at beginning of line */
+int yy_trailing_len = 0;
 
 void yy_fatal_error (const char* msg )
 {
@@ -237,8 +238,13 @@ int yy_at_eol(void) {
 void yy_if_match() {
 	a_elem matching_state = yy_pop_accepting_state();
 
-	
-	yy_set_yytext(matching_state);
+	if (yy_trailing_len > 0) {
+		a_elem tc = { matching_state.state, yy_trailing_len };
+		yy_set_yytext(tc);
+		yy_trailing_len = 0;
+	} else {
+		yy_set_yytext(matching_state);
+	}
 	yy_action(matching_state.state);
 	yy_at_bol = (yyleng > 0 && yytext[yyleng - 1] == '\n') ? 1 : 0;
 	char *after_match = buffer.str + yyleng;

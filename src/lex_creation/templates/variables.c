@@ -28,6 +28,8 @@ extern t_buffer buffer;
 extern int yy_init;		/* whether we need to initialize */
 extern int yy_start;	/* start state number */
 extern int clean_flag;
+extern int yy_trailing_len;
+extern const int yy_trailing[];
 
 
 change_me_in_variables!

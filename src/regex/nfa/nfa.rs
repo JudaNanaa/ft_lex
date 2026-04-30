@@ -34,9 +34,16 @@ pub fn build_nfa(tokens: &[Token], start_id: &mut usize) -> NFA {
                         new_nfa
                     }
                 },
-                Operator::Concatenation | Operator::TrailingContext => {
+                Operator::Concatenation => {
                     let (left, right) = pop_last_two(&mut stack);
                     concatenate(left, right)
+                }
+                Operator::TrailingContext => {
+                    let (left, right) = pop_last_two(&mut stack);
+                    let boundary = left.final_states.clone();
+                    let mut combined = concatenate(left, right);
+                    combined.trailing_states = boundary;
+                    combined
                 }
                 Operator::Or => {
                     let (left, right) = pop_last_two(&mut stack);

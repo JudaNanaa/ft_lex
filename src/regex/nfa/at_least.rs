@@ -61,6 +61,7 @@ mod tests {
         let mut nfa = NFA {
             transitions: HashMap::new(),
             final_states: HashSet::from([2]),
+            ..NFA::new()
         };
 
         // Transition de 0 à 1 avec le caractère 'a'
@@ -139,6 +140,7 @@ mod tests {
         let mut nfa = NFA {
             transitions: HashMap::new(),
             final_states: HashSet::from([3]),
+            ..NFA::new()
         };
 
         // Transitions pour le NFA
@@ -190,6 +192,7 @@ mod tests {
         let mut nfa = NFA {
             transitions: HashMap::new(),
             final_states: HashSet::from([4]),
+            ..NFA::new()
         };
 
         // Définir plusieurs transitions

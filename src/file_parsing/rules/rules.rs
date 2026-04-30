@@ -228,7 +228,11 @@ pub fn build_rule_nfa(
     let is_eol = rule.ends_with('$') && !rule.ends_with("\\$");
 
     let rule = if is_bol { &rule[1..] } else { &rule[..] };
-    let rule = if is_eol { &rule[..rule.len() - 1] } else { rule };
+    let rule = if is_eol {
+        &rule[..rule.len() - 1]
+    } else {
+        rule
+    };
 
     let tokens = regex_tokenizer(rule);
     let nfa = build_nfa(&tokens, next_state_id);
@@ -276,8 +280,7 @@ pub fn parse_rules(
                 rules.append(&mut state_rules);
             }
             _ => {
-                let (nfa, action, is_bol, is_eol) =
-                    build_rule_nfa(file, &mut next_state_id, defs)?;
+                let (nfa, action, is_bol, is_eol) = build_rule_nfa(file, &mut next_state_id, defs)?;
                 rules.push(RuleAction {
                     nfa,
                     action,
