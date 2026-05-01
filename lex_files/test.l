@@ -2,6 +2,8 @@
 #include <stdio.h>
 %}
 
+%array
+
 %%
 
 ^hello      { printf("BOL: ligne commencant par 'hello'\n"); }

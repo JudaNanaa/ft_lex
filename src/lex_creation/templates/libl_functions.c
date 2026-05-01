@@ -44,8 +44,9 @@ typedef struct s_buffer {
 	uint8_t is_init;
 } t_buffer;
 
-char *yytext;
-int yyleng;
+extern int yyleng;
+void yy_set_yytext(a_elem matching_state);
+char yy_yytext_last_char(void);
 
 int clean_flag = 0;
 int yymore_flag = 0;
@@ -140,29 +141,9 @@ void yy_if_no_match(char *last_pos) {
 	buffer.index = 0;
 	// printf("remaining if_no_match = [%s]\n", buffer.str);
 }
-void yy_set_yytext(a_elem matching_state) {
-	if (yymore_flag == 0) {
-		yyleng = matching_state.len_match;
-		free(yytext);		
-		yytext = malloc(sizeof(char) * (yyleng + 1));
-		if (yytext == NULL)
-			yy_fatal_error( "out of dynamic memory in set_yytext()" );
-		memcpy(yytext, buffer.str, yyleng);
-		yytext[yyleng] = '\0';
-	}
-	else {
-		yytext = realloc(yytext, yyleng + matching_state.len_match + 1);
-		if (yytext == NULL)
-			yy_fatal_error( "out of dynamic memory in set_yytext()" );
-		memcpy(&yytext[yyleng], buffer.str, matching_state.len_match);
-		yyleng += matching_state.len_match;
-		yytext[yyleng] = '\0';
-		yymore_flag = 0;
-	}
-}
 char *yy_next_char(void) {
 	int c;
-	
+
 	if (buffer.str[buffer.index] == '\0')
 	{
 		c = getc(yyin);
@@ -176,23 +157,6 @@ char *yy_next_char(void) {
 }
 int yymore(void) {
 	yymore_flag = 1;
-	return 1;
-}
-int yyless(int n) {
-	char *dest;
-
-	if (n > yyleng) {
-		yy_fatal_error("n is bigger than length of yytext!");
-	}
-
-	dest = malloc(sizeof(char) * (n + 1));
-	if (!dest)
-		yy_fatal_error( "out of dynamic memory in set_yytext()" );
-	memcpy(dest, yytext, n);
-	dest[n] = '\0';
-	free(yytext);
-	yytext = dest;
-	yyleng = n;
 	return 1;
 }
 int input(void) {
@@ -250,11 +214,11 @@ void yy_if_match() {
 		yy_set_yytext(matching_state);
 	}
 	yy_action(matching_state.state);
-	yy_at_bol = (yyleng > 0 && yytext[yyleng - 1] == '\n') ? 1 : 0;
+	yy_at_bol = (yyleng > 0 && yy_yytext_last_char() == '\n') ? 1 : 0;
 	char *after_match = buffer.str + yyleng;
 	if (clean_flag == 1)
 		return;
-	int remaining_len = buffer.len - yyleng; 
+	int remaining_len = buffer.len - yyleng;
 	memmove(buffer.str, after_match, remaining_len);
 	bzero(&buffer.str[remaining_len], buffer.len - remaining_len);
 	buffer.len = remaining_len;

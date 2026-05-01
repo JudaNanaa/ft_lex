@@ -108,6 +108,25 @@ pub fn parse_definitions(file: &mut FileInfo) -> Result<Vec<Definition>, String>
                             advance_to_newline(file);
                             return Ok(defs);
                         }
+                        'o' => {
+                            let rest = read_spaced_line(file);
+                            if let Some(opts) = rest.trim().strip_prefix("ption") {
+                                for token in opts.split_whitespace() {
+                                    defs.push(Definition::Option {
+                                        name: token.to_string(),
+                                    });
+                                }
+                            }
+                        }
+                        'a' | 'p' => {
+                            let rest = read_spaced_line(file);
+                            let keyword = rest.trim();
+                            if keyword == "array" || keyword == "pointer" {
+                                defs.push(Definition::Option {
+                                    name: keyword.to_string(),
+                                });
+                            }
+                        }
                         's' | 'x' => {
                             let state_type = if *next == 's' {
                                 DefinitionState::Inclusive

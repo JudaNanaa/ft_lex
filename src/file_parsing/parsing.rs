@@ -1,13 +1,31 @@
 use std::{fs::File, io::Read};
 
 use crate::file_parsing::{
-    definitions::definitions::parse_definitions,
+    definitions::{definitions::parse_definitions, Definition},
     rules::rules::{map_actions, parse_rules},
     user_routine::user_routine::parse_user_routine_part,
-    FilePart,
+    FilePart, YytextMode,
 };
 
 use super::{combine::process_and_combine_rules, FileInfo};
+
+fn extract_yytext_mode(definitions: &[Definition]) -> YytextMode {
+    let mut mode = YytextMode::Pointer;
+    for def in definitions {
+        if let Definition::Option { name } = def {
+            if name == "array" {
+                mode = YytextMode::Array(8192);
+            } else if name == "pointer" {
+                mode = YytextMode::Pointer;
+            } else if let Some(val) = name.strip_prefix("yylmax=") {
+                if let Ok(n) = val.parse::<usize>() {
+                    mode = YytextMode::Array(n);
+                }
+            }
+        }
+    }
+    mode
+}
 
 fn get_file_content(file_path: &str) -> std::io::Result<String> {
     let mut file = File::open(file_path)?;
@@ -44,6 +62,7 @@ pub fn parsing_lex_file(file_path: &str) -> Result<FilePart, String> {
     let (dfa, actions, rule_action) = process_and_combine_rules(rules)?;
 
     let user_routine = parse_user_routine_part(&mut file);
+    let yytext_mode = extract_yytext_mode(&definitions);
 
     Ok(FilePart {
         definitions,
@@ -53,5 +72,6 @@ pub fn parsing_lex_file(file_path: &str) -> Result<FilePart, String> {
         actions,
         map_actions,
         user_routine,
+        yytext_mode,
     })
 }

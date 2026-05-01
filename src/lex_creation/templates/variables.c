@@ -1,6 +1,4 @@
 extern FILE *yyin, *yyout;
-extern char *yytext;
-extern int yyleng;
 
 typedef struct accept_elem {
 	int state;
@@ -29,6 +27,7 @@ extern t_buffer buffer;
 extern int yy_init;		/* whether we need to initialize */
 extern int yy_start;	/* start state number */
 extern int clean_flag;
+extern int yymore_flag;
 extern int yy_trailing_len;
 extern const int yy_trailing[];
 extern const int yy_trailing_accept[];

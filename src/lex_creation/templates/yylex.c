@@ -78,8 +78,7 @@ int yylex(void) {
 
 	free(stack.t);
 	stack.t = NULL;
-	free(yytext);
-	yytext = NULL;
+	change_me_free_yytext!
 	free(buffer.str);
 	buffer.str = NULL;
 	return 0;

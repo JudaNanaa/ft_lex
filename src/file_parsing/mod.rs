@@ -5,6 +5,12 @@ use crate::{
     regex::dfa::DFA,
 };
 
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub enum YytextMode {
+    Pointer,
+    Array(usize),
+}
+
 mod combine;
 pub mod definitions;
 pub mod parsing;
@@ -26,6 +32,7 @@ pub struct FilePart {
     actions: HashMap<usize, Vec<String>>,
     map_actions: HashMap<String, usize>,
     user_routine: String,
+    pub yytext_mode: YytextMode,
 }
 
 impl FilePart {

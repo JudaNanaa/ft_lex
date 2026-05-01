@@ -19,6 +19,7 @@ pub enum Definition {
     Definition { name: String, value: String },
     InclusiveState { name: String, state_nb: usize },
     ExclusiveState { name: String, state_nb: usize },
+    Option { name: String },
 }
 
 impl ConditionState {
