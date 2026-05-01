@@ -4,7 +4,7 @@ use super::DFA;
 
 pub fn assiociate_rule_actions(
     dfa: &DFA,
-    actions_table: HashMap<usize, Vec<String>>,
+    actions_table: &HashMap<usize, Vec<String>>,
 ) -> HashMap<usize, Vec<String>> {
     let mut new_hash = HashMap::new();
 

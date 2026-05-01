@@ -6,7 +6,7 @@ use super::Token;
 use super::Token::Operator;
 use std::str::Chars;
 
-fn string_to_tokens(str: String) -> Vec<Token> {
+fn string_to_tokens(str: &str) -> Vec<Token> {
     let mut token_string: Vec<Token> = Vec::new();
     let str_chars: Chars<'_> = str.chars();
 
@@ -31,7 +31,7 @@ pub fn get_string_under_quotes(chars: &mut Chars<'_>, quote_to_match: char) -> V
                 }
             }
             q if q == quote_to_match => {
-                return string_to_tokens(dest);
+                return string_to_tokens(&dest);
             }
             _ => {
                 dest.push(c);

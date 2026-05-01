@@ -7,11 +7,9 @@ pub fn repeat_exact(nfa: &NFA, count: usize) -> (NFA, usize) {
     let mut offset = 0;
     let offset_increment = get_offset_from_nfa(nfa);
 
-    if count == 0 {
-        panic!("iteration value must be positive");
-    }
+    assert!(count != 0, "iteration value must be positive");
     for _ in 0..count {
-        let shifted = shift_states(nfa, &offset);
+        let shifted = shift_states(nfa, offset);
         offset += offset_increment;
         if let Some(left) = big_nfa {
             big_nfa = Some(concatenate(left, shifted));

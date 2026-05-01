@@ -1,10 +1,10 @@
-use std::{collections::HashMap, fs::File, io::Write};
+use std::collections::HashMap;
 
 use crate::lex_creation::SPACE;
 
 pub fn create_yy_search_final(
     actions: &HashMap<usize, Vec<String>>,
-    file: &mut File,
+    file: &mut dyn std::io::Write,
 ) -> std::io::Result<()> {
     writeln!(file, "void yy_search_final(int state, int len_match) {{")?;
     writeln!(file, "{SPACE}switch (state) {{")?;

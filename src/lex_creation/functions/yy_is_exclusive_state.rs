@@ -1,5 +1,3 @@
-use std::{fs::File, io::Write};
-
 use crate::{
     file_parsing::{
         definitions::{definitions::list_all_states, DefinitionState},
@@ -8,7 +6,10 @@ use crate::{
     lex_creation::SPACE,
 };
 
-pub fn write_yy_is_exclusive_state(file_parts: &FilePart, file: &mut File) -> std::io::Result<()> {
+pub fn write_yy_is_exclusive_state(
+    file_parts: &FilePart,
+    file: &mut dyn std::io::Write,
+) -> std::io::Result<()> {
     let definitions = file_parts.definitions();
 
     let all_condition_state = list_all_states(definitions);

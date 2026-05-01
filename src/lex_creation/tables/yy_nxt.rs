@@ -1,39 +1,42 @@
-use std::{collections::HashMap, fs::File, io::Write};
+use std::collections::HashMap;
 
 use crate::{lex_creation::SPACE, regex::dfa::DFA};
 
-fn write_yy_nxt(transition_table: &[Vec<usize>], file: &mut File) -> std::io::Result<()> {
+fn write_yy_nxt(
+    transition_table: &[Vec<usize>],
+    file: &mut dyn std::io::Write,
+) -> std::io::Result<()> {
     writeln!(
         file,
         "\nconst unsigned int yy_nxt[{}][{}] =",
         transition_table.len(),
         transition_table[0].len()
     )?;
-    writeln!(file, "{}{{", SPACE)?;
+    writeln!(file, "{SPACE}{{")?;
 
     for (index, state) in transition_table.iter().enumerate() {
         writeln!(file, "{}{{", SPACE.repeat(2))?;
         write!(file, "{}", SPACE.repeat(3))?;
         for (index, elem) in state.iter().enumerate() {
-            write!(file, "{}", elem)?;
+            write!(file, "{elem}")?;
             if index != 0 && index % 10 == 0 {
                 write!(file, ",")?;
                 if index != state.len() - 1 {
                     write!(file, "\n{}", SPACE.repeat(2))?;
                 }
             } else if index != state.len() - 1 {
-                write!(file, ",{}", SPACE)?;
+                write!(file, ",{SPACE}")?;
             } else {
                 writeln!(file)?;
             }
         }
-        if index != transition_table.len() - 1 {
-            writeln!(file, "{}}},", SPACE.repeat(2))?;
-        } else {
+        if index == transition_table.len() - 1 {
             writeln!(file, "{}}}", SPACE.repeat(2))?;
+        } else {
+            writeln!(file, "{}}},", SPACE.repeat(2))?;
         }
     }
-    writeln!(file, "{}}} ;\n", SPACE)?;
+    writeln!(file, "{SPACE}}} ;\n")?;
 
     Ok(())
 }
@@ -41,7 +44,7 @@ fn write_yy_nxt(transition_table: &[Vec<usize>], file: &mut File) -> std::io::Re
 pub fn create_yy_nxt(
     dfa: &DFA,
     hash: &HashMap<char, usize>,
-    file: &mut File,
+    file: &mut dyn std::io::Write,
 ) -> std::io::Result<Vec<Vec<usize>>> {
     let nb_states = dfa.transitions().iter().count();
 

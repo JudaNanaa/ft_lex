@@ -1,7 +1,4 @@
-use std::{
-    fs::File,
-    io::{Read, Write},
-};
+use std::{fs::File, io::Read};
 
 use crate::{
     file_parsing::{definitions::Definition, YytextMode},
@@ -17,14 +14,14 @@ fn open_template_file(file_path: &str) -> std::io::Result<String> {
     Ok(file_content)
 }
 
-pub fn write_includes(file: &mut File) -> std::io::Result<()> {
+pub fn write_includes(file: &mut dyn std::io::Write) -> std::io::Result<()> {
     let file_content = open_template_file(INCLUDES)?;
     file.write_all(file_content.as_bytes())?;
     Ok(())
 }
 
 pub fn write_defines(
-    file: &mut File,
+    file: &mut dyn std::io::Write,
     definitions: &[Definition],
     mode: YytextMode,
 ) -> std::io::Result<()> {
@@ -32,7 +29,7 @@ pub fn write_defines(
     file.write_all(file_content.as_bytes())?;
 
     if let YytextMode::Array(n) = mode {
-        writeln!(file, "#define YYLMAX {}", n)?;
+        writeln!(file, "#define YYLMAX {n}")?;
     }
 
     for elem in definitions {
@@ -45,16 +42,19 @@ pub fn write_defines(
                 name: state_name,
                 state_nb,
             } => {
-                writeln!(file, "#define {} {}", state_name, state_nb)?;
+                writeln!(file, "#define {state_name} {state_nb}")?;
             }
-            _ => continue,
+            _ => {}
         }
     }
     writeln!(file)?;
     Ok(())
 }
 
-pub fn write_variables(definitions: &[Definition], file: &mut File) -> std::io::Result<()> {
+pub fn write_variables(
+    definitions: &[Definition],
+    file: &mut dyn std::io::Write,
+) -> std::io::Result<()> {
     let mut file_content = open_template_file(VARIABLES)?;
     let mut to_add = String::new();
 
@@ -73,7 +73,10 @@ pub fn write_variables(definitions: &[Definition], file: &mut File) -> std::io::
     Ok(())
 }
 
-pub fn write_yytext_section(mode: YytextMode, file: &mut File) -> std::io::Result<()> {
+pub fn write_yytext_section(
+    mode: YytextMode,
+    file: &mut dyn std::io::Write,
+) -> std::io::Result<()> {
     match mode {
         YytextMode::Pointer => {
             writeln!(file, "char *yytext = NULL;")?;
@@ -138,7 +141,7 @@ pub fn write_yytext_section(mode: YytextMode, file: &mut File) -> std::io::Resul
             writeln!(file, "}}")?;
         }
         YytextMode::Array(n) => {
-            writeln!(file, "char yytext[{}];", n)?;
+            writeln!(file, "char yytext[{n}];")?;
             writeln!(file, "int yyleng = 0;")?;
             writeln!(file)?;
             writeln!(file, "char yy_yytext_last_char(void) {{")?;
@@ -178,12 +181,19 @@ pub fn write_yytext_section(mode: YytextMode, file: &mut File) -> std::io::Resul
     Ok(())
 }
 
-pub fn write_user_routine(user_routine: &str, file: &mut File) -> std::io::Result<()> {
+pub fn write_user_routine(
+    user_routine: &str,
+    file: &mut dyn std::io::Write,
+) -> std::io::Result<()> {
     file.write_all(user_routine.as_bytes())?;
     Ok(())
 }
 
-pub fn write_yylex(file: &mut File, in_yylex: &[String], mode: YytextMode) -> std::io::Result<()> {
+pub fn write_yylex(
+    file: &mut dyn std::io::Write,
+    in_yylex: &[String],
+    mode: YytextMode,
+) -> std::io::Result<()> {
     let file_content = open_template_file(YYLEX)?;
     let mut in_yylex_content = String::new();
 

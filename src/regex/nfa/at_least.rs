@@ -24,7 +24,7 @@ fn apply_kleene_star(nfa: &mut NFA) {
     }
 }
 
-pub fn at_least(nfa: NFA, count: usize) -> (NFA, usize) {
+pub fn at_least(nfa: &NFA, count: usize) -> (NFA, usize) {
     if count == 0 {
         let mut kleene = nfa.clone();
         apply_kleene_star(&mut kleene);
@@ -34,13 +34,13 @@ pub fn at_least(nfa: NFA, count: usize) -> (NFA, usize) {
         return (kleene, next_id);
     }
 
-    let (repeated, _) = repeat_exact(&nfa, count);
+    let (repeated, _) = repeat_exact(nfa, count);
 
     let mut kleene_part = nfa.clone();
     apply_kleene_star(&mut kleene_part);
 
     let kleene_offset = get_offset_from_nfa(&repeated);
-    let shifted_kleene = shift_states(&kleene_part, &kleene_offset);
+    let shifted_kleene = shift_states(&kleene_part, kleene_offset);
 
     let result = concatenate(repeated, shifted_kleene);
 
@@ -107,7 +107,7 @@ mod tests {
     #[test]
     fn test_at_least_zero() {
         let nfa = create_test_nfa();
-        let (result_nfa, _) = at_least(nfa, 0);
+        let (result_nfa, _) = at_least(&nfa, 0);
 
         // Vérifie si l'automate résultant a bien l'état 0 comme état final avec une répétition de Kleene
         let expected_final_state = HashSet::from([2, 0]);
@@ -126,7 +126,7 @@ mod tests {
     #[test]
     fn test_at_least_non_zero() {
         let nfa = create_test_nfa();
-        let (result_nfa, next_id) = at_least(nfa, 3);
+        let (result_nfa, next_id) = at_least(&nfa, 3);
 
         // L'automate résultant devrait avoir appliqué le Kleene Star sur la répétition de 3 fois
         assert_eq!(result_nfa.final_states.len(), 2);
@@ -251,7 +251,7 @@ mod tests {
     #[test]
     fn test_multiple_repetitions() {
         let nfa = create_test_nfa();
-        let (result_nfa, _) = at_least(nfa, 2);
+        let (result_nfa, _) = at_least(&nfa, 2);
 
         // Vérifie que l'automate contient le bon nombre d'états et transitions après les répétitions
         assert!(result_nfa.final_states.len() > 1);

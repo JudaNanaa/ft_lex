@@ -1,8 +1,6 @@
-use std::{fs::File, io::Write};
-
 use crate::{lex_creation::SPACE, regex::dfa::DFA};
 
-pub fn yy_trailing_accept(dfa: &DFA, file: &mut File) -> std::io::Result<()> {
+pub fn yy_trailing_accept(dfa: &DFA, file: &mut dyn std::io::Write) -> std::io::Result<()> {
     let nb_state = dfa.transitions().len();
     let mut tab = vec![0u8; nb_state];
 
@@ -12,24 +10,24 @@ pub fn yy_trailing_accept(dfa: &DFA, file: &mut File) -> std::io::Result<()> {
         }
     }
 
-    writeln!(file, "\nconst int yy_trailing_accept[{}] =", nb_state)?;
-    writeln!(file, "{}{{", SPACE)?;
+    writeln!(file, "\nconst int yy_trailing_accept[{nb_state}] =")?;
+    writeln!(file, "{SPACE}{{")?;
     write!(file, "{}", SPACE.repeat(2))?;
 
     for (index, value) in tab.iter().enumerate() {
-        write!(file, "{}", value)?;
+        write!(file, "{value}")?;
         if index != 0 && index % 10 == 0 {
             write!(file, ",")?;
             if index != tab.len() - 1 {
                 write!(file, "\n{}", SPACE.repeat(2))?;
             }
         } else if index != tab.len() - 1 {
-            write!(file, ",{}", SPACE)?;
+            write!(file, ",{SPACE}")?;
         } else {
             writeln!(file)?;
         }
     }
-    writeln!(file, "{}}} ;\n", SPACE)?;
+    writeln!(file, "{SPACE}}} ;\n")?;
 
     Ok(())
 }

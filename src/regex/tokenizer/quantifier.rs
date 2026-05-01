@@ -3,20 +3,20 @@ use std::str::Chars;
 use super::Quantifier;
 
 fn is_numeric_string(input: &str) -> bool {
-    input.chars().all(|c| c.is_numeric())
+    input.chars().all(char::is_numeric)
 }
 
 fn parse_range(range_str: &str) -> Quantifier {
     let parts: Vec<&str> = range_str.split(',').collect();
 
-    if parts.len() > 2 {
-        panic!("Unrecognized rule");
-    }
+    assert!(parts.len() <= 2, "Unrecognized rule");
 
     let min_repeats = parts[0];
-    if min_repeats.is_empty() || !is_numeric_string(min_repeats) {
-        panic!("Invalid numeric value inside {}", "{}")
-    }
+    assert!(
+        !min_repeats.is_empty() && is_numeric_string(min_repeats),
+        "Invalid numeric value inside {}",
+        "{}"
+    );
 
     let min_value: usize = min_repeats.parse().unwrap();
 
@@ -28,14 +28,17 @@ fn parse_range(range_str: &str) -> Quantifier {
     if max_repeats.is_empty() {
         return Quantifier::AtLeast(min_value);
     }
-    if !is_numeric_string(max_repeats) {
-        panic!("Invalid numeric value inside {}", "{}")
-    }
+    assert!(
+        is_numeric_string(max_repeats),
+        "Invalid numeric value inside {}",
+        "{}"
+    );
 
     let max_value: usize = max_repeats.parse().unwrap();
-    if min_value > max_value {
-        panic!("Invalid range: min cannot be greater than max")
-    }
+    assert!(
+        min_value <= max_value,
+        "Invalid range: min cannot be greater than max"
+    );
     Quantifier::Range(min_value, max_value)
 }
 
@@ -49,9 +52,7 @@ pub fn extract_repetition_range(chars: &mut Chars<'_>) -> Quantifier {
         range_str.push(c);
     }
 
-    if range_str.is_empty() {
-        panic!("Unrecognized rule")
-    }
+    assert!(!range_str.is_empty(), "Unrecognized rule");
 
     parse_range(&range_str)
 }

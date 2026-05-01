@@ -4,8 +4,8 @@ mod postfix;
 mod quantifier;
 mod quotes;
 pub mod tokenizer;
-use charset::*;
-use quantifier::*;
+use charset::{expand_dot, extract_charset};
+use quantifier::extract_repetition_range;
 pub use tokenizer::*;
 
 #[derive(Debug, PartialEq, Clone, Copy)]

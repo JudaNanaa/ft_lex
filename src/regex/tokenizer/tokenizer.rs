@@ -1,10 +1,11 @@
 use crate::regex::utils::expand_escape;
 
-use super::Operator::*;
-use super::Quantifier::*;
+use super::Operator::{CloseParen, OpenParen, Or, Quantifier, TrailingContext};
+use super::Quantifier::{AtLeast, Range};
 use super::Token::Operator;
 use super::{
-    concatenation::add_concatenation_token, postfix::to_postfix, quotes::get_string_under_quotes, *,
+    concatenation::add_concatenation_token, expand_dot, extract_charset, extract_repetition_range,
+    postfix::to_postfix, quotes::get_string_under_quotes, Token,
 };
 use std::str::Chars;
 
@@ -54,18 +55,20 @@ pub fn regex_tokenizer(regex: &str) -> Vec<Token> {
                 if WHITESPACE.contains(c) {
                     break;
                 }
-                token_list.push(Token::Char(current_char))
+                token_list.push(Token::Char(current_char));
             }
         }
     }
-    token_list = add_concatenation_token(token_list);
-    to_postfix(token_list)
+    token_list = add_concatenation_token(&token_list);
+    to_postfix(&token_list)
 }
 
 #[cfg(test)]
 mod tests {
     use super::Token::{Char, Operator};
     use super::*;
+    use crate::regex::Operator::Concatenation;
+    use crate::regex::Quantifier::Equal;
 
     fn tok(regex: &str) -> Vec<Token> {
         regex_tokenizer(regex)

@@ -8,25 +8,25 @@ use crate::regex::{
     NFA,
 };
 
-pub fn range(nfa: NFA, min: usize, max: usize) -> (NFA, usize) {
+pub fn range(nfa: &NFA, min: usize, max: usize) -> (NFA, usize) {
     assert!(min <= max, "Invalid range");
     assert!(max > 0, "Bad iteration values");
 
     if min == max {
-        return repeat_exact(&nfa, min);
+        return repeat_exact(nfa, min);
     }
 
     let mut result_nfa: Option<NFA> = None;
     let mut total_offset = 0;
     let mut accumulated_final_states = HashSet::new();
 
-    let offset_increment = get_offset_from_nfa(&nfa);
+    let offset_increment = get_offset_from_nfa(nfa);
 
     // Partie obligatoire (min répétitions)
     if min > 0 {
-        let (mandatory_nfa, _) = repeat_exact(&nfa, min);
+        let (mandatory_nfa, _) = repeat_exact(nfa, min);
         total_offset = get_offset_from_nfa(&mandatory_nfa);
-        accumulated_final_states = mandatory_nfa.final_states.clone();
+        accumulated_final_states.clone_from(&mandatory_nfa.final_states);
         result_nfa = Some(mandatory_nfa);
     } else {
         accumulated_final_states.insert(0); // état initial final si min == 0
@@ -34,7 +34,7 @@ pub fn range(nfa: NFA, min: usize, max: usize) -> (NFA, usize) {
 
     // Partie optionnelle (max - min répétitions)
     for _ in min..max {
-        let shifted_nfa = shift_states(&nfa, &total_offset);
+        let shifted_nfa = shift_states(nfa, total_offset);
 
         // Ajout des nouveaux états finaux
         accumulated_final_states.extend(&shifted_nfa.final_states);
@@ -95,7 +95,7 @@ mod tests {
         let min = 2;
         let max = 2;
 
-        let (result_nfa, _) = range(nfa, min, max);
+        let (result_nfa, _) = range(&nfa, min, max);
 
         // Vérifie que l'automate a bien 2 répétitions
         assert_eq!(result_nfa.final_states, HashSet::from([4]));
@@ -113,7 +113,7 @@ mod tests {
         let min = 2;
         let max = 3;
 
-        let (result_nfa, _) = range(nfa, min, max);
+        let (result_nfa, _) = range(&nfa, min, max);
 
         // Vérifie que les états finaux et les transitions sont bien ajoutés
         assert_eq!(result_nfa.final_states.len(), 2); // 4 états finaux au total
@@ -127,7 +127,7 @@ mod tests {
         let min = 0;
         let max = 3;
 
-        let (result_nfa, _) = range(nfa, min, max);
+        let (result_nfa, _) = range(&nfa, min, max);
 
         // Vérifie que l'état initial est final lorsque min == 0
         assert!(result_nfa.final_states.contains(&0));
@@ -144,7 +144,7 @@ mod tests {
         let min = 0;
         let max = 0;
 
-        let (result_nfa, _) = range(nfa, min, max);
+        let (result_nfa, _) = range(&nfa, min, max);
 
         // Vérifie que l'automate résultant a seulement l'état initial comme final
         assert_eq!(result_nfa.final_states, HashSet::from([0]));
@@ -159,7 +159,7 @@ mod tests {
         let min = 3;
         let max = 2;
 
-        range(nfa, min, max); // Doit panic
+        range(&nfa, min, max); // Doit panic
     }
 
     // Test avec une petite automaton répétée un nombre important de fois
@@ -169,7 +169,7 @@ mod tests {
         let min = 2;
         let max = 5;
 
-        let (result_nfa, _) = range(nfa, min, max);
+        let (result_nfa, _) = range(&nfa, min, max);
 
         // Vérifie que les états finaux et les transitions sont bien ajoutés
         assert_eq!(result_nfa.final_states.len(), 4); // 4 états finaux au total

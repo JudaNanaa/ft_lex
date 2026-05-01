@@ -17,7 +17,7 @@ pub fn build_nfa(tokens: &[Token], start_id: &mut usize) -> NFA {
                 Operator::Quantifier(q) => match q {
                     Quantifier::AtLeast(n) => {
                         let base = stack.pop().expect("unrecognized rule");
-                        let (new_nfa, new_id) = at_least(base, n);
+                        let (new_nfa, new_id) = at_least(&base, n);
                         state_id = new_id;
                         new_nfa
                     }
@@ -29,7 +29,7 @@ pub fn build_nfa(tokens: &[Token], start_id: &mut usize) -> NFA {
                     }
                     Quantifier::Range(min, max) => {
                         let base = stack.pop().expect("unrecognized rule");
-                        let (new_nfa, new_id) = range(base, min, max);
+                        let (new_nfa, new_id) = range(&base, min, max);
                         state_id = new_id;
                         new_nfa
                     }
