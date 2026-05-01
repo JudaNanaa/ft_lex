@@ -21,24 +21,20 @@ fn main() {
 
     for source in &sources {
         let (content, name) = match source {
-            None => {
-                match get_stdin_content() {
-                    Err(_) => {
-                        eprintln!("ft_lex: can't read stdin");
-                        return;
-                    }
-                    Ok(c) => (c, "<stdin>".to_string()),
+            None => match get_stdin_content() {
+                Err(_) => {
+                    eprintln!("ft_lex: can't read stdin");
+                    return;
                 }
-            }
-            Some(path) => {
-                match get_file_content(path) {
-                    Err(_) => {
-                        eprintln!("ft_lex: can't open {}", path);
-                        return;
-                    }
-                    Ok(c) => (c, path.clone()),
+                Ok(c) => (c, "<stdin>".to_string()),
+            },
+            Some(path) => match get_file_content(path) {
+                Err(_) => {
+                    eprintln!("ft_lex: can't open {}", path);
+                    return;
                 }
-            }
+                Ok(c) => (c, path.clone()),
+            },
         };
         if !combined_content.is_empty() {
             combined_content.push('\n');

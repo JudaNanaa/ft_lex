@@ -1,4 +1,4 @@
-use std::{fs::File, io::Read, io::stdin};
+use std::{fs::File, io::stdin, io::Read};
 
 use crate::file_parsing::{
     definitions::{definitions::parse_definitions, Definition},
@@ -73,4 +73,3 @@ pub fn parse_lex_content(content: &str, name: &str) -> Result<FilePart, String> 
         yytext_mode,
     })
 }
-
