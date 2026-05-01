@@ -8,11 +8,22 @@ use lex_creation::creation::lex_creation;
 fn main() {
     let args: Vec<String> = std::env::args().skip(1).collect();
 
+    let mut stdin_seen = false;
     let sources: Vec<Option<String>> = if args.is_empty() {
         vec![None]
     } else {
         args.iter()
-            .map(|a| if a == "-" { None } else { Some(a.clone()) })
+            .filter_map(|a| {
+                if a == "-" {
+                    if stdin_seen {
+                        return None;
+                    }
+                    stdin_seen = true;
+                    Some(None)
+                } else {
+                    Some(Some(a.clone()))
+                }
+            })
             .collect()
     };
 
@@ -30,15 +41,12 @@ fn main() {
             },
             Some(path) => match get_file_content(path) {
                 Err(_) => {
-                    eprintln!("ft_lex: can't open {}", path);
+                    eprintln!("ft_lex: can't open {path}");
                     return;
                 }
                 Ok(c) => (c, path.clone()),
             },
         };
-        if !combined_content.is_empty() {
-            combined_content.push('\n');
-        }
         combined_content.push_str(&content);
         names.push(name);
     }
@@ -51,7 +59,7 @@ fn main() {
 
     let file_parts = match parse_lex_content(&combined_content, &parse_name) {
         Err(error) => {
-            eprintln!("ft_lex: {}", error);
+            eprintln!("ft_lex: {error}");
             return;
         }
         Ok(parts) => parts,
@@ -59,6 +67,6 @@ fn main() {
 
     match lex_creation(&file_parts) {
         Ok(()) => {}
-        Err(error) => eprintln!("Error: {}", error),
+        Err(error) => eprintln!("Error: {error}"),
     }
 }
