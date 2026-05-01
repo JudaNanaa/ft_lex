@@ -13,7 +13,6 @@ pub enum YytextMode {
 
 mod combine;
 pub mod definitions;
-pub mod merge;
 pub mod parsing;
 mod rules;
 mod user_routine;

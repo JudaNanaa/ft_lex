@@ -2,8 +2,7 @@ mod file_parsing;
 mod lex_creation;
 mod regex;
 
-use file_parsing::merge::merge_file_parts;
-use file_parsing::parsing::{parsing_lex_file, parsing_lex_stdin};
+use file_parsing::parsing::{get_file_content, get_stdin_content, parse_lex_content};
 use lex_creation::creation::lex_creation;
 
 fn main() {
@@ -17,32 +16,49 @@ fn main() {
             .collect()
     };
 
-    let mut parts = Vec::new();
+    let mut combined_content = String::new();
+    let mut names: Vec<String> = Vec::new();
 
-    for source in sources {
-        let result = match source {
-            None => parsing_lex_stdin(),
-            Some(ref path) => parsing_lex_file(path),
-        };
-        match result {
-            Err(error) => {
-                eprintln!("ft_lex: {}", error);
-                return;
+    for source in &sources {
+        let (content, name) = match source {
+            None => {
+                match get_stdin_content() {
+                    Err(_) => {
+                        eprintln!("ft_lex: can't read stdin");
+                        return;
+                    }
+                    Ok(c) => (c, "<stdin>".to_string()),
+                }
             }
-            Ok(part) => parts.push(part),
+            Some(path) => {
+                match get_file_content(path) {
+                    Err(_) => {
+                        eprintln!("ft_lex: can't open {}", path);
+                        return;
+                    }
+                    Ok(c) => (c, path.clone()),
+                }
+            }
+        };
+        if !combined_content.is_empty() {
+            combined_content.push('\n');
         }
+        combined_content.push_str(&content);
+        names.push(name);
     }
 
-    let file_parts = if parts.len() == 1 {
-        parts.remove(0)
+    let parse_name = if names.len() == 1 {
+        names.remove(0)
     } else {
-        match merge_file_parts(parts) {
-            Err(error) => {
-                eprintln!("ft_lex: {}", error);
-                return;
-            }
-            Ok(merged) => merged,
+        names.join(" ")
+    };
+
+    let file_parts = match parse_lex_content(&combined_content, &parse_name) {
+        Err(error) => {
+            eprintln!("ft_lex: {}", error);
+            return;
         }
+        Ok(parts) => parts,
     };
 
     match lex_creation(&file_parts) {
