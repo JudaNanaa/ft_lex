@@ -13,6 +13,7 @@ pub enum YytextMode {
 
 mod combine;
 pub mod definitions;
+pub mod merge;
 pub mod parsing;
 mod rules;
 mod user_routine;
@@ -25,13 +26,13 @@ pub struct FileInfo<'a> {
 
 #[derive(Debug)]
 pub struct FilePart {
-    definitions: Vec<Definition>,
-    in_yylex: Vec<String>,
-    dfa: DFA,
-    rule_action: Vec<RuleAction>,
-    actions: HashMap<usize, Vec<String>>,
-    map_actions: HashMap<String, usize>,
-    user_routine: String,
+    pub(super) definitions: Vec<Definition>,
+    pub(super) in_yylex: Vec<String>,
+    pub(super) dfa: DFA,
+    pub(super) rule_action: Vec<RuleAction>,
+    pub(super) actions: HashMap<usize, Vec<String>>,
+    pub(super) map_actions: HashMap<String, usize>,
+    pub(super) user_routine: String,
     pub yytext_mode: YytextMode,
 }
 
