@@ -1,9 +1,9 @@
-use crate::regex::NFA;
+use crate::regex::Nfa;
 
 use super::{concatenate::concatenate, offset::get_offset_from_nfa, utils::shift_states};
 
-pub fn repeat_exact(nfa: &NFA, count: usize) -> (NFA, usize) {
-    let mut big_nfa: Option<NFA> = None;
+pub fn repeat_exact(nfa: &Nfa, count: usize) -> (Nfa, usize) {
+    let mut big_nfa: Option<Nfa> = None;
     let mut offset = 0;
     let offset_increment = get_offset_from_nfa(nfa);
 
@@ -28,15 +28,15 @@ pub fn repeat_exact(nfa: &NFA, count: usize) -> (NFA, usize) {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::regex::{Transition, NFA};
+    use crate::regex::{Nfa, Transition};
     use std::collections::{HashMap, HashSet};
 
-    // Fonction pour créer un NFA simple
-    fn create_test_nfa() -> NFA {
-        let mut nfa = NFA {
+    // Fonction pour créer un Nfa simple
+    fn create_test_nfa() -> Nfa {
+        let mut nfa = Nfa {
             transitions: HashMap::new(),
             final_states: HashSet::from([2]),
-            ..NFA::new()
+            ..Nfa::new()
         };
 
         nfa.transitions.insert(

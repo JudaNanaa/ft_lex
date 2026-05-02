@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use crate::{lex_creation::SPACE, regex::dfa::DFA};
+use crate::{lex_creation::SPACE, regex::dfa::Dfa};
 
 fn write_yy_nxt(
     transition_table: &[Vec<usize>],
@@ -42,7 +42,7 @@ fn write_yy_nxt(
 }
 
 pub fn create_yy_nxt(
-    dfa: &DFA,
+    dfa: &Dfa,
     hash: &HashMap<char, usize>,
     file: &mut dyn std::io::Write,
 ) -> std::io::Result<Vec<Vec<usize>>> {

@@ -1,6 +1,6 @@
 use std::collections::{HashMap, HashSet};
 
-pub mod dfa;
+pub mod automaton;
 mod dot;
 pub mod rule_actions;
 
@@ -36,7 +36,7 @@ impl NewDfaTransition {
 }
 
 #[derive(Clone, PartialEq, Eq, Debug)]
-pub struct DFA {
+pub struct Dfa {
     pub transitions: HashMap<usize, Vec<NewDfaTransition>>,
     pub final_states: HashSet<usize>,
     pub charset: HashSet<char>,
@@ -45,7 +45,7 @@ pub struct DFA {
     pub trailing_final_states: HashSet<usize>,
 }
 
-impl DFA {
+impl Dfa {
     pub fn new() -> Self {
         Self {
             transitions: HashMap::new(),
@@ -70,7 +70,7 @@ impl DFA {
     }
 }
 
-impl Default for DFA {
+impl Default for Dfa {
     fn default() -> Self {
         Self::new()
     }

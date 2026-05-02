@@ -8,7 +8,7 @@ use crate::{
         },
         FileInfo,
     },
-    regex::{nfa::nfa::build_nfa, regex_tokenizer, NFA},
+    regex::{nfa::automaton::build_nfa, regex_tokenizer, Nfa},
 };
 
 pub fn map_actions(rules: &[RuleAction]) -> HashMap<String, usize> {
@@ -58,7 +58,7 @@ fn resolve_def(name: &str, defs: &[Definition]) -> Result<String, String> {
         return Ok(format!("{{{name}}}"));
     }
     for def in defs {
-        if let Definition::Definition { name: n, value } = def {
+        if let Definition::MacroDef { name: n, value } = def {
             if n == name {
                 return Ok(format!("({value})"));
             }
@@ -221,14 +221,18 @@ pub fn build_rule_nfa(
     file: &mut FileInfo,
     next_state_id: &mut usize,
     defs: &[Definition],
-) -> Result<(NFA, String, bool, bool), String> {
+) -> Result<(Nfa, String, bool, bool), String> {
     let (rule, action) = parse_rule_action(file, defs)?;
 
-    let is_bol = rule.starts_with('^');
-    let is_eol = rule.ends_with('$') && !rule.ends_with("\\$");
+    let anchored_start = rule.starts_with('^');
+    let anchored_end = rule.ends_with('$') && !rule.ends_with("\\$");
 
-    let rule = if is_bol { &rule[1..] } else { &rule[..] };
-    let rule = if is_eol {
+    let rule = if anchored_start {
+        &rule[1..]
+    } else {
+        &rule[..]
+    };
+    let rule = if anchored_end {
         &rule[..rule.len() - 1]
     } else {
         rule
@@ -236,7 +240,7 @@ pub fn build_rule_nfa(
 
     let tokens = regex_tokenizer(rule);
     let nfa = build_nfa(&tokens, next_state_id);
-    Ok((nfa, action, is_bol, is_eol))
+    Ok((nfa, action, anchored_start, anchored_end))
 }
 
 pub fn parse_rules(
@@ -280,13 +284,14 @@ pub fn parse_rules(
                 rules.append(&mut state_rules);
             }
             _ => {
-                let (nfa, action, is_bol, is_eol) = build_rule_nfa(file, &mut next_state_id, defs)?;
+                let (nfa, action, anchored_start, anchored_end) =
+                    build_rule_nfa(file, &mut next_state_id, defs)?;
                 rules.push(RuleAction {
                     nfa,
                     action,
                     condition_state: vec![ConditionState::initial()],
-                    is_bol,
-                    is_eol,
+                    anchored_start,
+                    anchored_end,
                 });
             }
         }

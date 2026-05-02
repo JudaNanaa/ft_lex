@@ -5,10 +5,10 @@ use crate::regex::{
         concatenate::concatenate, offset::get_offset_from_nfa, repeat_exact::repeat_exact,
         utils::shift_states,
     },
-    NFA,
+    Nfa,
 };
 
-pub fn range(nfa: &NFA, min: usize, max: usize) -> (NFA, usize) {
+pub fn range(nfa: &Nfa, min: usize, max: usize) -> (Nfa, usize) {
     assert!(min <= max, "Invalid range");
     assert!(max > 0, "Bad iteration values");
 
@@ -16,7 +16,7 @@ pub fn range(nfa: &NFA, min: usize, max: usize) -> (NFA, usize) {
         return repeat_exact(nfa, min);
     }
 
-    let mut result_nfa: Option<NFA> = None;
+    let mut result_nfa: Option<Nfa> = None;
     let mut total_offset = 0;
     let mut accumulated_final_states = HashSet::new();
 
@@ -48,7 +48,7 @@ pub fn range(nfa: &NFA, min: usize, max: usize) -> (NFA, usize) {
     }
 
     // Mise à jour des états finaux
-    let mut final_nfa = result_nfa.expect("Should have constructed a valid NFA");
+    let mut final_nfa = result_nfa.expect("Should have constructed a valid Nfa");
 
     final_nfa.final_states.extend(accumulated_final_states);
 
@@ -59,15 +59,15 @@ pub fn range(nfa: &NFA, min: usize, max: usize) -> (NFA, usize) {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::regex::{Transition, NFA};
+    use crate::regex::{Nfa, Transition};
     use std::collections::HashMap;
 
-    // Fonction pour créer un NFA simple
-    fn create_test_nfa() -> NFA {
-        let mut nfa = NFA {
+    // Fonction pour créer un Nfa simple
+    fn create_test_nfa() -> Nfa {
+        let mut nfa = Nfa {
             transitions: HashMap::new(),
             final_states: HashSet::from([2]),
-            ..NFA::new()
+            ..Nfa::new()
         };
 
         nfa.transitions.insert(

@@ -1,6 +1,6 @@
-use crate::{lex_creation::SPACE, regex::dfa::DFA};
+use crate::{lex_creation::SPACE, regex::dfa::Dfa};
 
-fn generate_accept_tab(dfa: &DFA) -> Vec<u8> {
+fn generate_accept_tab(dfa: &Dfa) -> Vec<u8> {
     let nb_state = dfa.transitions().len();
 
     let mut tab = vec![0; nb_state];
@@ -14,7 +14,7 @@ fn generate_accept_tab(dfa: &DFA) -> Vec<u8> {
     tab
 }
 
-pub fn yy_accept(dfa: &DFA, file: &mut dyn std::io::Write) -> std::io::Result<Vec<u8>> {
+pub fn yy_accept(dfa: &Dfa, file: &mut dyn std::io::Write) -> std::io::Result<Vec<u8>> {
     let nb_state = dfa.transitions().len();
 
     let accept_tab = generate_accept_tab(dfa);

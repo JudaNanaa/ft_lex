@@ -3,10 +3,10 @@ use std::collections::{HashMap, HashSet, VecDeque};
 #[cfg(feature = "dotfile")]
 use crate::regex::dfa::dot::generate_dot_file;
 
-use super::{NewDfaTransition, State, DFA};
-use crate::regex::NFA;
+use super::{Dfa, NewDfaTransition, State};
+use crate::regex::Nfa;
 
-fn find_target_state(nfa: &NFA, current_state: &State, input_char: char) -> State {
+fn find_target_state(nfa: &Nfa, current_state: &State, input_char: char) -> State {
     let mut target_states = HashSet::new();
 
     for nfa_state_id in &current_state.state {
@@ -28,8 +28,8 @@ fn find_target_state(nfa: &NFA, current_state: &State, input_char: char) -> Stat
     State { state: sorted }
 }
 
-pub fn build_dfa(nfa: &NFA) -> DFA {
-    let mut dfa = DFA::new();
+pub fn build_dfa(nfa: &Nfa) -> Dfa {
+    let mut dfa = Dfa::new();
     let ascii_chars: Vec<char> = (0..=255u8)
         .filter_map(|c| char::from_u32(u32::from(c)))
         .collect();

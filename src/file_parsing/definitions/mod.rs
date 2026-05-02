@@ -1,4 +1,4 @@
-pub mod definitions;
+pub mod parse;
 
 #[derive(Debug, Hash, PartialEq, Eq, Clone)]
 pub struct ConditionState {
@@ -16,7 +16,7 @@ pub enum DefinitionState {
 pub enum Definition {
     Bloc { content: String },
     LineWithSpace { content: String },
-    Definition { name: String, value: String },
+    MacroDef { name: String, value: String },
     InclusiveState { name: String, state_nb: usize },
     ExclusiveState { name: String, state_nb: usize },
     Option { name: String },

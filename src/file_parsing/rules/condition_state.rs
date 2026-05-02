@@ -1,6 +1,6 @@
 use crate::file_parsing::{
     definitions::{ConditionState, Definition},
-    rules::{rules::build_rule_nfa, RuleAction},
+    rules::{parse::build_rule_nfa, RuleAction},
     FileInfo,
 };
 
@@ -51,14 +51,14 @@ fn extract_state_block(
                     return Ok(rules_from_state_block);
                 }
 
-                let (nfa, action, is_bol, is_eol) =
+                let (nfa, action, anchored_start, anchored_end) =
                     build_rule_nfa(file, next_state_id, definitions)?;
                 rules_from_state_block.push(RuleAction {
                     nfa,
                     action,
                     condition_state: state_list.to_vec(),
-                    is_bol,
-                    is_eol,
+                    anchored_start,
+                    anchored_end,
                 });
             }
         }
@@ -87,15 +87,15 @@ pub fn parse_condition_states(
                 return Err("unrecognized rule".to_string());
             }
             _ => {
-                let (nfa, action, is_bol, is_eol) =
+                let (nfa, action, anchored_start, anchored_end) =
                     build_rule_nfa(file, next_state_id, definitions)?;
 
                 return Ok(vec![RuleAction {
                     nfa,
                     action,
                     condition_state: state_list.to_vec(),
-                    is_bol,
-                    is_eol,
+                    anchored_start,
+                    anchored_end,
                 }]);
             }
         }

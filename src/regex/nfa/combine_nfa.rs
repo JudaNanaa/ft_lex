@@ -1,7 +1,7 @@
-use super::{or::or, NFA};
+use super::{or::or, Nfa};
 
-pub fn combine_nfa(rules: Vec<NFA>) -> NFA {
-    let mut last_nfa: Option<NFA> = None;
+pub fn combine_nfa(rules: Vec<Nfa>) -> Nfa {
+    let mut last_nfa: Option<Nfa> = None;
 
     for rule in rules {
         if let Some(left) = last_nfa {

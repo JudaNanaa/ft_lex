@@ -3,11 +3,11 @@ use crate::regex::{
         at_least::at_least, concatenate::concatenate, from_char::from_char, or::or, range::range,
         repeat_exact::repeat_exact, utils::pop_last_two,
     },
-    Operator, Quantifier, Token, NFA,
+    Nfa, Operator, Quantifier, Token,
 };
 
-pub fn build_nfa(tokens: &[Token], start_id: &mut usize) -> NFA {
-    let mut stack: Vec<NFA> = Vec::new();
+pub fn build_nfa(tokens: &[Token], start_id: &mut usize) -> Nfa {
+    let mut stack: Vec<Nfa> = Vec::new();
     let mut state_id = *start_id;
 
     for token in tokens {
@@ -65,13 +65,13 @@ mod tests {
     use crate::regex::{Operator, Quantifier, Token};
     use std::collections::HashSet;
 
-    // Test pour la construction d'un NFA simple avec un caractère
+    // Test pour la construction d'un Nfa simple avec un caractère
     #[test]
     fn test_build_nfa_single_char() {
         let tokens = vec![Token::Char('a')];
         let result = build_nfa(&tokens, &mut 1);
 
-        // Vérifie que le résultat est un NFA valide (en fonction de l'implémentation de `from_char`)
+        // Vérifie que le résultat est un Nfa valide (en fonction de l'implémentation de `from_char`)
         assert_eq!(result.final_states, HashSet::from([1]));
     }
 
@@ -159,8 +159,8 @@ mod tests {
         assert_eq!(result.final_states, HashSet::from([2, 3]));
     }
 
-    // Fonction utilitaire pour vérifier les transitions d'un NFA
-    fn check_transition(nfa: &NFA, state: usize, input: char, target_state: usize) {
+    // Fonction utilitaire pour vérifier les transitions d'un Nfa
+    fn check_transition(nfa: &Nfa, state: usize, input: char, target_state: usize) {
         if let Some(transitions) = nfa.transitions.get(&state) {
             assert!(
                 transitions
@@ -188,7 +188,7 @@ mod tests {
         ];
         let result = build_nfa(&tokens, &mut 1);
 
-        // Vérifie que le NFA contient les bonnes transitions pour a+b|c
+        // Vérifie que le Nfa contient les bonnes transitions pour a+b|c
         check_transition(&result, 0, 'a', 1);
         check_transition(&result, 1, 'b', 2);
         check_transition(&result, 0, 'c', 3);
@@ -208,7 +208,7 @@ mod tests {
         ];
         let result = build_nfa(&tokens, &mut 1);
 
-        // Vérifie que le NFA est construit avec 2 répétitions exactes de 'a' et 3 de 'b'
+        // Vérifie que le Nfa est construit avec 2 répétitions exactes de 'a' et 3 de 'b'
         assert_eq!(result.final_states.len(), 1); // 1 état final
     }
 
@@ -224,7 +224,7 @@ mod tests {
         ];
         let result = build_nfa(&tokens, &mut 1);
 
-        // Vérifie que le NFA est construit avec au moins 2 'a' et 1 'b'
+        // Vérifie que le Nfa est construit avec au moins 2 'a' et 1 'b'
         assert_eq!(result.transitions.len(), 6); // 6 états au total
         assert_eq!(result.final_states.len(), 2); // 2 états finaux
     }
@@ -241,7 +241,7 @@ mod tests {
         ];
         let result = build_nfa(&tokens, &mut 1);
 
-        // Vérifie que le NFA est correctement construit pour 'a{2,4}' et 'b{1,3}'
+        // Vérifie que le Nfa est correctement construit pour 'a{2,4}' et 'b{1,3}'
         assert_eq!(result.final_states.len(), 3); // 3 états finaux
     }
 
@@ -362,7 +362,7 @@ mod tests {
         assert_eq!(result.final_states, HashSet::from([3])); // 3 est l'état final
     }
 
-    // Test pour un très grand NFA (pour tester les performances)
+    // Test pour un très grand Nfa (pour tester les performances)
     #[test]
     fn test_build_nfa_large_input() {
         let tokens: Vec<Token> = vec![
@@ -372,7 +372,7 @@ mod tests {
 
         let result = build_nfa(&tokens, &mut 1);
 
-        // Teste si le NFA est bien construit avec 1000+ répétitions de 'a'
+        // Teste si le Nfa est bien construit avec 1000+ répétitions de 'a'
         assert!(result.transitions.len() >= 1000); // +1000 transitions
         assert_eq!(result.final_states.len(), 2);
     }

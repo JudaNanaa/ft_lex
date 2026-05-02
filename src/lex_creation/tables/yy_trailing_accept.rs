@@ -1,6 +1,6 @@
-use crate::{lex_creation::SPACE, regex::dfa::DFA};
+use crate::{lex_creation::SPACE, regex::dfa::Dfa};
 
-pub fn yy_trailing_accept(dfa: &DFA, file: &mut dyn std::io::Write) -> std::io::Result<()> {
+pub fn yy_trailing_accept(dfa: &Dfa, file: &mut dyn std::io::Write) -> std::io::Result<()> {
     let nb_state = dfa.transitions().len();
     let mut tab = vec![0u8; nb_state];
 

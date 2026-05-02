@@ -1,6 +1,6 @@
 use crate::{
     file_parsing::{
-        definitions::{definitions::list_all_states, DefinitionState},
+        definitions::{parse::list_all_states, DefinitionState},
         FilePart,
     },
     lex_creation::SPACE,

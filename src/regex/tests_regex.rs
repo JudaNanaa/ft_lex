@@ -1,4 +1,4 @@
-use crate::regex::{nfa::nfa::build_nfa, Operator, Quantifier, Token};
+use crate::regex::{nfa::automaton::build_nfa, Operator, Quantifier, Token};
 
 use super::regex_tokenizer;
 

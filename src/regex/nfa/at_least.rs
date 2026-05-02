@@ -1,9 +1,9 @@
 use super::{
     concatenate::concatenate, offset::get_offset_from_nfa, repeat_exact::repeat_exact,
-    utils::shift_states, NFA,
+    utils::shift_states, Nfa,
 };
 
-fn apply_kleene_star(nfa: &mut NFA) {
+fn apply_kleene_star(nfa: &mut Nfa) {
     let initial_transitions = nfa
         .transitions
         .get(&0)
@@ -24,7 +24,7 @@ fn apply_kleene_star(nfa: &mut NFA) {
     }
 }
 
-pub fn at_least(nfa: &NFA, count: usize) -> (NFA, usize) {
+pub fn at_least(nfa: &Nfa, count: usize) -> (Nfa, usize) {
     if count == 0 {
         let mut kleene = nfa.clone();
         apply_kleene_star(&mut kleene);
@@ -56,12 +56,12 @@ mod tests {
     use super::*;
     use std::collections::{HashMap, HashSet};
 
-    // Fonction de création d'un NFA de test simple
-    fn create_test_nfa() -> NFA {
-        let mut nfa = NFA {
+    // Fonction de création d'un Nfa de test simple
+    fn create_test_nfa() -> Nfa {
+        let mut nfa = Nfa {
             transitions: HashMap::new(),
             final_states: HashSet::from([2]),
-            ..NFA::new()
+            ..Nfa::new()
         };
 
         // Transition de 0 à 1 avec le caractère 'a'
@@ -130,20 +130,20 @@ mod tests {
 
         // L'automate résultant devrait avoir appliqué le Kleene Star sur la répétition de 3 fois
         assert_eq!(result_nfa.final_states.len(), 2);
-        assert!(result_nfa.final_states.contains(&(next_id - 1))); // Assumer que `states` soit disponible dans `NFA`
+        assert!(result_nfa.final_states.contains(&(next_id - 1))); // Assumer que `states` soit disponible dans `Nfa`
         assert!(result_nfa.transitions.contains_key(&(next_id - 1)));
     }
 
-    // Test d'un NFA avec des transitions supplémentaires
+    // Test d'un Nfa avec des transitions supplémentaires
     #[test]
     fn test_complex_nfa() {
-        let mut nfa = NFA {
+        let mut nfa = Nfa {
             transitions: HashMap::new(),
             final_states: HashSet::from([3]),
-            ..NFA::new()
+            ..Nfa::new()
         };
 
-        // Transitions pour le NFA
+        // Transitions pour le Nfa
         nfa.transitions.insert(
             0,
             vec![
@@ -186,13 +186,13 @@ mod tests {
             .any(|t| t.input == 'a' || t.input == 'b'));
     }
 
-    // Test avec un NFA ayant plusieurs états
+    // Test avec un Nfa ayant plusieurs états
     #[test]
     fn test_multiple_states() {
-        let mut nfa = NFA {
+        let mut nfa = Nfa {
             transitions: HashMap::new(),
             final_states: HashSet::from([4]),
-            ..NFA::new()
+            ..Nfa::new()
         };
 
         // Définir plusieurs transitions
@@ -247,7 +247,7 @@ mod tests {
             .all(|t| t.input != 'c'));
     }
 
-    // Test d'un NFA avec plusieurs répétitions
+    // Test d'un Nfa avec plusieurs répétitions
     #[test]
     fn test_multiple_repetitions() {
         let nfa = create_test_nfa();

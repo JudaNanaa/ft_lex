@@ -52,7 +52,7 @@ fn parse_definition(file: &mut FileInfo) -> Result<Definition, String> {
     if let Some(idx) = trimmed.find(' ') {
         let name = trimmed[0..idx].to_string();
         let value = trimmed[idx + 1..].trim().to_string();
-        Ok(Definition::Definition { name, value })
+        Ok(Definition::MacroDef { name, value })
     } else {
         Err("incomplete name definition".to_string())
     }
@@ -208,6 +208,8 @@ pub fn get_state_type(defs: &[Definition], state_name: &str) -> Result<Definitio
     states
         .iter()
         .find(|(name, _)| name == &state_name)
-        .map(|&(_, typ)| Ok(typ))
-        .unwrap_or_else(|| Err(format!("undeclared start condition {state_name}")))
+        .map_or_else(
+            || Err(format!("undeclared start condition {state_name}")),
+            |&(_, typ)| Ok(typ),
+        )
 }

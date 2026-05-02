@@ -26,7 +26,7 @@ fn get_condition_state_for_action(file_parts: &FilePart, action: &str) -> Vec<Co
 fn get_bol_for_action(file_parts: &FilePart, action: &str) -> bool {
     for elem in file_parts.rule_action() {
         if elem.action() == action {
-            return elem.is_bol;
+            return elem.anchored_start;
         }
     }
     false
@@ -35,7 +35,7 @@ fn get_bol_for_action(file_parts: &FilePart, action: &str) -> bool {
 fn get_eol_for_action(file_parts: &FilePart, action: &str) -> bool {
     for elem in file_parts.rule_action() {
         if elem.action() == action {
-            return elem.is_eol;
+            return elem.anchored_end;
         }
     }
     false
@@ -88,13 +88,13 @@ fn write_condition_state(
 pub fn yy_action(file_parts: &FilePart, file: &mut dyn std::io::Write) -> std::io::Result<()> {
     let action_hash = file_parts.map_actions();
 
-    let has_bol = file_parts.rule_action().iter().any(|r| r.is_bol);
-    let has_eol = file_parts.rule_action().iter().any(|r| r.is_eol);
+    let has_anchored_start = file_parts.rule_action().iter().any(|r| r.anchored_start);
+    let has_anchored_end = file_parts.rule_action().iter().any(|r| r.anchored_end);
 
-    if has_bol {
+    if has_anchored_start {
         writeln!(file, "extern int yy_at_bol;")?;
     }
-    if has_eol {
+    if has_anchored_end {
         writeln!(file, "int yy_at_eol(void);")?;
     }
 
