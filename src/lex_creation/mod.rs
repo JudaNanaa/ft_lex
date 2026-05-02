@@ -1,5 +1,6 @@
 pub mod creation;
 mod functions;
+pub mod stats;
 mod tables;
 mod write;
 
