@@ -14,9 +14,10 @@ extern const unsigned int yy_nxt_flat[];
 extern const int yy_nxt_cols;
 extern const int yy_accept[];
 extern const int yy_trailing_accept[];
+extern const int yy_accept_cols;
+extern const int yy_accept_actions_flat[];
 #define YY_NXT(s, c) (yy_nxt_flat[(s) * yy_nxt_cols + (c)])
-
-void yy_search_final(int state, int len);
+#define YY_ACCEPT(s, i) (yy_accept_actions_flat[(s) * yy_accept_cols + (i)])
 void yy_if_match(void);
 void yy_if_no_match(char *cpos);
 void yy_action(int state);
@@ -99,6 +100,11 @@ void yy_push_accepting_state(int action, int dfa_state, int len_match) {
 	stack.t[index].len_match = len_match;
 	stack.len++;
 }
+void yy_search_final(int state, int len_match) {
+	for (int i = 0; YY_ACCEPT(state, i); i++)
+		yy_push_accepting_state(YY_ACCEPT(state, i), state, len_match);
+}
+
 a_elem yy_pop_accepting_state(void) {
 	a_elem pop;
 

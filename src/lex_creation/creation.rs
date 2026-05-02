@@ -2,9 +2,8 @@ use crate::{
     file_parsing::FilePart,
     lex_creation::{
         functions::{
-            yy_action::yy_action, yy_final::yy_final,
+            yy_action::yy_action, yy_final::write_yy_accept_actions,
             yy_is_exclusive_state::write_yy_is_exclusive_state,
-            yy_search_final::create_yy_search_final,
         },
         tables::table::tables_creation,
         write::{
@@ -28,8 +27,7 @@ pub fn lex_creation(file_parts: &FilePart, output: &mut dyn std::io::Write) -> s
 
     yy_action(file_parts, output)?;
 
-    yy_final(file_parts, output)?;
-    create_yy_search_final(file_parts.actions(), output)?;
+    write_yy_accept_actions(file_parts, output)?;
 
     write_yylex(output, file_parts.in_yylex(), mode)?;
 
