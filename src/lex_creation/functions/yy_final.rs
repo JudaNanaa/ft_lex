@@ -1,8 +1,6 @@
-use std::{fs::File, io::Write};
-
 use crate::{file_parsing::FilePart, lex_creation::SPACE};
 
-pub fn yy_final(file_parts: &FilePart, file: &mut File) -> std::io::Result<()> {
+pub fn yy_final(file_parts: &FilePart, file: &mut dyn std::io::Write) -> std::io::Result<()> {
     let final_state = file_parts.actions();
     let hash = file_parts.map_actions();
 

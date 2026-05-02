@@ -4,8 +4,8 @@ use crate::{
     file_parsing::rules::RuleAction,
     regex::{
         combine_nfa::combine_nfa,
-        dfa::{dfa::build_dfa, rule_actions::assiociate_rule_actions, DFA},
-        NFA,
+        dfa::{automaton::build_dfa, rule_actions::assiociate_rule_actions, Dfa},
+        Nfa,
     },
 };
 
@@ -30,13 +30,13 @@ fn map_final_states_to_actions(rules: &[RuleAction]) -> HashMap<usize, Vec<Strin
     final_state_actions
 }
 
-fn extract_all_nfas(rules: &[RuleAction]) -> Vec<NFA> {
+fn extract_all_nfas(rules: &[RuleAction]) -> Vec<Nfa> {
     rules.iter().map(|rule| rule.nfa().clone()).collect()
 }
 
-pub fn process_and_combine_rules(
-    rules: Vec<RuleAction>,
-) -> Result<(DFA, HashMap<usize, Vec<String>>, Vec<RuleAction>), String> {
+type CombineResult = Result<(Dfa, HashMap<usize, Vec<String>>, Vec<RuleAction>), String>;
+
+pub fn process_and_combine_rules(rules: Vec<RuleAction>) -> CombineResult {
     let mut pipe_buffer: Vec<RuleAction> = Vec::new();
     let mut rule_buffer: Vec<RuleAction> = Vec::new();
     let mut processed_rules = Vec::new();
@@ -59,8 +59,8 @@ pub fn process_and_combine_rules(
                     nfa: orig.nfa,
                     action: rule.action().to_string(),
                     condition_state: condition_state_list.clone(),
-                    is_bol: orig.is_bol,
-                    is_eol: orig.is_eol,
+                    anchored_start: orig.anchored_start,
+                    anchored_end: orig.anchored_end,
                 });
             }
         }
@@ -74,9 +74,9 @@ pub fn process_and_combine_rules(
     let nfa_list = extract_all_nfas(&processed_rules);
 
     let combined_nfa = combine_nfa(nfa_list);
-    let dfa = build_dfa(combined_nfa);
+    let dfa = build_dfa(&combined_nfa);
 
-    let action_mapping = assiociate_rule_actions(&dfa, final_state_map.clone());
+    let action_mapping = assiociate_rule_actions(&dfa, &final_state_map);
 
     Ok((dfa, action_mapping, processed_rules))
 }

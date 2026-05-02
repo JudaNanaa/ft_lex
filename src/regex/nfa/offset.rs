@@ -1,6 +1,6 @@
-use super::NFA;
+use super::Nfa;
 
-pub fn get_offset_from_nfa(nfa: &NFA) -> usize {
+pub fn get_offset_from_nfa(nfa: &Nfa) -> usize {
     *nfa.final_states.iter().max().unwrap() + 1
         - nfa
             .transitions
@@ -21,14 +21,14 @@ mod tests {
 
     #[test]
     fn test_new_nfa() {
-        let nfa = NFA::new();
+        let nfa = Nfa::new();
         assert_eq!(nfa.transitions.len(), 0);
         assert_eq!(nfa.final_states.len(), 0);
     }
 
     #[test]
     fn test_get_offset_simple() {
-        let mut nfa = NFA::new();
+        let mut nfa = Nfa::new();
 
         // Ajouter des transitions
         nfa.transitions.insert(
@@ -57,7 +57,7 @@ mod tests {
 
     #[test]
     fn test_get_offset_multiple_final_states() {
-        let mut nfa = NFA::new();
+        let mut nfa = Nfa::new();
 
         nfa.transitions.insert(
             1,
@@ -90,7 +90,7 @@ mod tests {
 
     #[test]
     fn test_get_offset_with_state_zero() {
-        let mut nfa = NFA::new();
+        let mut nfa = Nfa::new();
 
         nfa.transitions.insert(
             0,
@@ -117,7 +117,7 @@ mod tests {
 
     #[test]
     fn test_get_offset_with_larger_state_numbers() {
-        let mut nfa = NFA::new();
+        let mut nfa = Nfa::new();
 
         nfa.transitions.insert(
             5,
@@ -144,7 +144,7 @@ mod tests {
 
     #[test]
     fn test_get_offset_with_non_sequential_states() {
-        let mut nfa = NFA::new();
+        let mut nfa = Nfa::new();
 
         nfa.transitions.insert(
             3,
@@ -172,14 +172,14 @@ mod tests {
     #[test]
     #[should_panic(expected = "called `Option::unwrap()` on a `None` value")]
     fn test_get_offset_empty_nfa_should_panic() {
-        let nfa = NFA::new();
+        let nfa = Nfa::new();
         get_offset_from_nfa(&nfa); // Devrait paniquer car pas d'états finaux
     }
 
     #[test]
     #[should_panic(expected = "called `Option::unwrap()` on a `None` value")]
     fn test_get_offset_only_zero_state_should_panic() {
-        let mut nfa = NFA::new();
+        let mut nfa = Nfa::new();
 
         nfa.transitions.insert(
             0,

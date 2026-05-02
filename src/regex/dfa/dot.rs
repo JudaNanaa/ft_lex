@@ -4,7 +4,7 @@ use std::process::Command;
 use std::{fs::File, io::Write};
 
 #[cfg(feature = "dotfile")]
-use super::DFA;
+use super::Dfa;
 
 #[cfg(feature = "dotfile")]
 fn escape_label(label: &str) -> String {
@@ -15,10 +15,10 @@ fn escape_label(label: &str) -> String {
 }
 
 #[cfg(feature = "dotfile")]
-pub fn generate_dot_file(dfa: &DFA) -> std::io::Result<()> {
+pub fn generate_dot_file(dfa: &Dfa) -> std::io::Result<()> {
     let mut file = File::create("dfa.dot")?;
 
-    writeln!(file, "digraph DFA {{")?;
+    writeln!(file, "digraph Dfa {{")?;
     writeln!(file, "  rankdir=LR;")?;
     writeln!(file, "  node [shape=circle];")?;
 

@@ -1,4 +1,4 @@
-use super::Operator::*;
+use super::Operator::{CloseParen, Concatenation, OpenParen, Quantifier};
 use super::Token;
 use super::Token::Operator;
 
@@ -7,11 +7,11 @@ fn need_concatenate(token: &Token, next: &Token) -> bool {
         Token::Char(_) => matches!(next, Token::Char(_) | Operator(OpenParen)),
         Operator(CloseParen) => matches!(next, Token::Char(_) | Operator(OpenParen)),
         Operator(Quantifier(_)) => matches!(next, Token::Char(_) | Operator(OpenParen)),
-        _ => false,
+        Operator(_) => false,
     }
 }
 
-pub fn add_concatenation_token(tokens: Vec<Token>) -> Vec<Token> {
+pub fn add_concatenation_token(tokens: &[Token]) -> Vec<Token> {
     let mut dest = Vec::with_capacity(tokens.len() * 2);
     let mut token_it = tokens.iter().peekable();
 
@@ -44,7 +44,7 @@ mod tests {
     #[test]
     fn test_simple_concatenation_between_chars() {
         let input = vec![Token::Char('a'), Token::Char('b')];
-        let result = add_concatenation_token(input.clone());
+        let result = add_concatenation_token(&input);
 
         let expected = vec![
             Token::Char('a'),
@@ -58,7 +58,7 @@ mod tests {
     #[test]
     fn test_char_followed_by_group() {
         let input = vec![Token::Char('a'), Operator(Operator::OpenParen)];
-        let result = add_concatenation_token(input.clone());
+        let result = add_concatenation_token(&input);
 
         let expected = vec![
             Token::Char('a'),
@@ -72,7 +72,7 @@ mod tests {
     #[test]
     fn test_group_followed_by_char() {
         let input = vec![Operator(Operator::CloseParen), Token::Char('a')];
-        let result = add_concatenation_token(input.clone());
+        let result = add_concatenation_token(&input);
 
         let expected = vec![
             Operator(Operator::CloseParen),
@@ -90,7 +90,7 @@ mod tests {
             Operator(Operator::Quantifier(Quantifier::AtLeast(0))),
             Operator(Operator::OpenParen),
         ];
-        let result = add_concatenation_token(input.clone());
+        let result = add_concatenation_token(&input);
 
         let expected = vec![
             Token::Char('a'),
@@ -111,7 +111,7 @@ mod tests {
             Token::Char('b'),
             Operator(Operator::CloseParen),
         ];
-        let result = add_concatenation_token(input.clone());
+        let result = add_concatenation_token(&input);
 
         let expected = vec![
             Operator(Operator::OpenParen),
@@ -134,7 +134,7 @@ mod tests {
             Operator(Operator::CloseParen),
         ];
 
-        let result = add_concatenation_token(input.clone());
+        let result = add_concatenation_token(&input);
 
         let expected = vec![
             Token::Char('a'),

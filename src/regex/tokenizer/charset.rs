@@ -3,8 +3,8 @@ use crate::regex::utils::expand_escape;
 use super::Operator::CloseParen;
 use super::Operator::OpenParen;
 use super::Operator::Or;
+use super::Token;
 use super::Token::Operator;
-use super::*;
 use std::{char, str::Chars};
 
 #[derive(PartialEq)]
@@ -13,21 +13,13 @@ enum CharsetState {
     Exit,
 }
 
-fn create_charset_group(charset: String, is_negative: bool) -> Vec<Token> {
+fn create_charset_group(charset: &str, is_negative: bool) -> Vec<Token> {
     let mut tokens_charset = Vec::new();
 
     tokens_charset.push(Operator(OpenParen));
-    if !is_negative {
-        let mut chars_it = charset.chars().peekable();
-        while let Some(char) = chars_it.next() {
-            tokens_charset.push(Token::Char(char));
-            if chars_it.peek().is_some() {
-                tokens_charset.push(Operator(Or));
-            }
-        }
-    } else {
+    if is_negative {
         let all_chars = (0..=255u8)
-            .filter_map(|c| char::from_u32(c as u32))
+            .filter_map(|c| char::from_u32(u32::from(c)))
             .collect::<Vec<char>>();
 
         let mut iter = all_chars.iter().peekable();
@@ -39,6 +31,14 @@ fn create_charset_group(charset: String, is_negative: bool) -> Vec<Token> {
                 if iter.peek().is_some() {
                     tokens_charset.push(Operator(Or));
                 }
+            }
+        }
+    } else {
+        let mut chars_it = charset.chars().peekable();
+        while let Some(char) = chars_it.next() {
+            tokens_charset.push(Token::Char(char));
+            if chars_it.peek().is_some() {
+                tokens_charset.push(Operator(Or));
             }
         }
     }
@@ -69,9 +69,10 @@ fn check_if_negative_charset(chars: &mut Chars<'_>, charset: &mut String) -> (bo
 fn expand_minus(mut char_begin: char, char_end: char) -> String {
     let mut range_chars = String::new();
 
-    if char_begin > char_end {
-        panic!("Range values reversed. Start char code is greater than end char code.");
-    }
+    assert!(
+        char_begin <= char_end,
+        "Range values reversed. Start char code is greater than end char code."
+    );
 
     while char_begin <= char_end {
         range_chars.push(char_begin);
@@ -122,12 +123,12 @@ pub fn extract_charset(chars: &mut Chars<'_>) -> Vec<Token> {
     let (is_negative, state) = check_if_negative_charset(chars, &mut charset);
 
     if state == CharsetState::Exit {
-        return create_charset_group(charset, is_negative);
+        return create_charset_group(&charset, is_negative);
     }
     while let Some(char) = chars.next() {
         match char {
             ']' => {
-                return create_charset_group(charset, is_negative);
+                return create_charset_group(&charset, is_negative);
             }
             '\\' => {
                 if let Some(escaped_char) = expand_escape(chars) {
@@ -138,7 +139,7 @@ pub fn extract_charset(chars: &mut Chars<'_>) -> Vec<Token> {
             }
             '-' => {
                 if minus_gesture(chars, &mut charset) == CharsetState::Exit {
-                    return create_charset_group(charset, is_negative);
+                    return create_charset_group(&charset, is_negative);
                 }
             }
             _ => {
@@ -152,7 +153,7 @@ pub fn extract_charset(chars: &mut Chars<'_>) -> Vec<Token> {
 pub fn expand_dot() -> Vec<Token> {
     let mut dest = Vec::new();
     let mut all_chars: Vec<char> = (0..=255u8)
-        .filter_map(|c| char::from_u32(c as u32))
+        .filter_map(|c| char::from_u32(u32::from(c)))
         .collect();
 
     all_chars.remove('\n' as usize);

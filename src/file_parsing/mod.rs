@@ -2,7 +2,7 @@ use std::{collections::HashMap, iter::Peekable, str::Chars};
 
 use crate::{
     file_parsing::{definitions::Definition, rules::RuleAction},
-    regex::dfa::DFA,
+    regex::dfa::Dfa,
 };
 
 #[derive(Debug, Clone, Copy, PartialEq)]
@@ -27,7 +27,7 @@ pub struct FileInfo<'a> {
 pub struct FilePart {
     pub(super) definitions: Vec<Definition>,
     pub(super) in_yylex: Vec<String>,
-    pub(super) dfa: DFA,
+    pub(super) dfa: Dfa,
     pub(super) rule_action: Vec<RuleAction>,
     pub(super) actions: HashMap<usize, Vec<String>>,
     pub(super) map_actions: HashMap<String, usize>,
@@ -39,7 +39,7 @@ impl FilePart {
     pub fn user_routine(&self) -> &str {
         &self.user_routine
     }
-    pub fn dfa(&self) -> &DFA {
+    pub fn dfa(&self) -> &Dfa {
         &self.dfa
     }
     pub fn actions(&self) -> &HashMap<usize, Vec<String>> {

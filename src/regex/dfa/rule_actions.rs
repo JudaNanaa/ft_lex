@@ -1,10 +1,10 @@
 use std::collections::HashMap;
 
-use super::DFA;
+use super::Dfa;
 
 pub fn assiociate_rule_actions(
-    dfa: &DFA,
-    actions_table: HashMap<usize, Vec<String>>,
+    dfa: &Dfa,
+    actions_table: &HashMap<usize, Vec<String>>,
 ) -> HashMap<usize, Vec<String>> {
     let mut new_hash = HashMap::new();
 

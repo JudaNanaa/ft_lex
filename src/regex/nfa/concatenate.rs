@@ -1,6 +1,6 @@
-use super::NFA;
+use super::Nfa;
 
-pub fn concatenate(mut left: NFA, mut right: NFA) -> NFA {
+pub fn concatenate(mut left: Nfa, mut right: Nfa) -> Nfa {
     let right_initial = right.transitions.remove(&0).unwrap_or_default();
     let right_has_initial_final = right.final_states.contains(&0);
 
@@ -19,10 +19,10 @@ pub fn concatenate(mut left: NFA, mut right: NFA) -> NFA {
 
     left.transitions.extend(right.transitions);
 
-    NFA {
+    Nfa {
         transitions: left.transitions,
         final_states: right.final_states,
-        ..NFA::new()
+        ..Nfa::new()
     }
 }
 
@@ -32,12 +32,12 @@ mod tests {
     use crate::regex::nfa::Transition;
     use std::collections::{HashMap, HashSet};
 
-    // Fonction de création d'un NFA de test simple
-    fn create_test_nfa() -> NFA {
-        let mut nfa = NFA {
+    // Fonction de création d'un Nfa de test simple
+    fn create_test_nfa() -> Nfa {
+        let mut nfa = Nfa {
             transitions: HashMap::new(),
             final_states: HashSet::from([2]),
-            ..NFA::new()
+            ..Nfa::new()
         };
 
         // Transition de 0 à 1 avec le caractère 'a'
@@ -60,12 +60,12 @@ mod tests {
         nfa
     }
 
-    // Fonction de création d'un autre NFA de test
-    fn create_second_test_nfa() -> NFA {
-        let mut nfa = NFA {
+    // Fonction de création d'un autre Nfa de test
+    fn create_second_test_nfa() -> Nfa {
+        let mut nfa = Nfa {
             transitions: HashMap::new(),
             final_states: HashSet::from([4]),
-            ..NFA::new()
+            ..Nfa::new()
         };
 
         // Transition de 0 à 1 avec le caractère 'c'
@@ -96,7 +96,7 @@ mod tests {
 
         let result = concatenate(left, right);
 
-        // Vérifie les transitions du NFA résultant
+        // Vérifie les transitions du Nfa résultant
         assert_eq!(result.transitions[&0].len(), 1); // Il y a une transition partant de l'état 0
         assert_eq!(result.transitions[&0][0].input, 'a'); // La transition part de 0 avec 'a'
         assert_eq!(result.transitions[&1].len(), 1); // Il y a une transition partant de l'état 1
@@ -106,11 +106,11 @@ mod tests {
         assert_eq!(result.transitions[&3].len(), 1); // La transition part de 3 avec 'd'
         assert_eq!(result.transitions[&3][0].input, 'd'); // La transition part de 3 avec 'd'
 
-        // Vérifie les états finaux du NFA résultant
+        // Vérifie les états finaux du Nfa résultant
         assert_eq!(result.final_states, HashSet::from([4]));
     }
 
-    // Test de concaténation avec plusieurs états finaux dans le NFA de gauche
+    // Test de concaténation avec plusieurs états finaux dans le Nfa de gauche
     #[test]
     fn test_concatenate_with_multiple_final_states() {
         let left = create_test_nfa();
@@ -133,10 +133,10 @@ mod tests {
     #[test]
     fn test_concatenate_without_initial_state() {
         let left = create_test_nfa();
-        let mut right = NFA {
+        let mut right = Nfa {
             transitions: HashMap::new(),
             final_states: HashSet::from([3]),
-            ..NFA::new()
+            ..Nfa::new()
         };
 
         right.transitions.insert(

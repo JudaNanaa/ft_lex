@@ -1,8 +1,8 @@
 mod at_least;
+pub mod automaton;
 pub mod combine_nfa;
 mod concatenate;
 mod from_char;
-pub mod nfa;
 mod offset;
 mod or;
 mod range;
@@ -18,14 +18,14 @@ pub struct Transition {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct NFA {
+pub struct Nfa {
     pub transitions: HashMap<usize, Vec<Transition>>,
     pub final_states: HashSet<usize>,
     pub trailing_states: HashSet<usize>,
     pub trailing_final_states: HashSet<usize>,
 }
 
-impl NFA {
+impl Nfa {
     pub fn new() -> Self {
         Self {
             transitions: HashMap::new(),
@@ -46,7 +46,7 @@ impl NFA {
     }
 }
 
-impl Default for NFA {
+impl Default for Nfa {
     fn default() -> Self {
         Self::new()
     }

@@ -1,12 +1,12 @@
 mod charset;
 mod concatenation;
+pub mod parse;
 mod postfix;
 mod quantifier;
 mod quotes;
-pub mod tokenizer;
-use charset::*;
-use quantifier::*;
-pub use tokenizer::*;
+use charset::{expand_dot, extract_charset};
+pub use parse::*;
+use quantifier::extract_repetition_range;
 
 #[derive(Debug, PartialEq, Clone, Copy)]
 pub enum Operator {

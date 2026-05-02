@@ -1,5 +1,5 @@
 use super::Operator as Operators;
-use super::Operator::*;
+use super::Operator::{CloseParen, Concatenation, OpenParen, Or, Quantifier, TrailingContext};
 use super::Token;
 use super::Token::Operator;
 use std::collections::VecDeque;
@@ -11,7 +11,7 @@ fn precedence(op: &Operators) -> u8 {
         Or => 2,
         TrailingContext => 1,
         OpenParen => 0,
-        _ => panic!("Opérateur non reconnu"),
+        CloseParen => panic!("Not normal"),
     }
 }
 
@@ -19,7 +19,7 @@ fn has_higher_precedence(current: &Operators, stack_top: &Operators) -> bool {
     precedence(current) > precedence(stack_top)
 }
 
-pub fn to_postfix(tokens: Vec<Token>) -> Vec<Token> {
+pub fn to_postfix(tokens: &[Token]) -> Vec<Token> {
     let mut output: Vec<Token> = Vec::with_capacity(tokens.len());
     let mut operator_stack: VecDeque<Operators> = VecDeque::new();
     let token_iter = tokens.iter();
@@ -57,9 +57,7 @@ pub fn to_postfix(tokens: Vec<Token>) -> Vec<Token> {
     }
 
     while let Some(remaining_op) = operator_stack.pop_front() {
-        if remaining_op == OpenParen {
-            panic!("Parenthèse fermante manquante");
-        }
+        assert!(remaining_op != OpenParen, "Parenthèse fermante manquante");
         output.push(Operator(remaining_op));
     }
 
@@ -86,14 +84,14 @@ mod tests {
     fn test_simple_concatenation() {
         let infix = vec![char('a'), op(Operator::Concatenation), char('b')];
         let expected = vec![char('a'), char('b'), op(Operator::Concatenation)];
-        assert_eq!(to_postfix(infix), expected);
+        assert_eq!(to_postfix(&infix), expected);
     }
 
     #[test]
     fn test_with_or_operator() {
         let infix = vec![char('a'), op(Operator::Or), char('b')];
         let expected = vec![char('a'), char('b'), op(Operator::Or)];
-        assert_eq!(to_postfix(infix), expected);
+        assert_eq!(to_postfix(&infix), expected);
     }
 
     #[test]
@@ -103,7 +101,7 @@ mod tests {
             op(Operator::Quantifier(Quantifier::AtLeast(0))), // a*
         ];
         let expected = vec![char('a'), op(Operator::Quantifier(Quantifier::AtLeast(0)))];
-        assert_eq!(to_postfix(infix), expected);
+        assert_eq!(to_postfix(&infix), expected);
     }
 
     #[test]
@@ -124,7 +122,7 @@ mod tests {
             char('c'),
             op(Operator::Or),
         ];
-        assert_eq!(to_postfix(infix), expected);
+        assert_eq!(to_postfix(&infix), expected);
     }
 
     #[test]
@@ -147,6 +145,6 @@ mod tests {
             op(Operator::Or),
             op(Operator::Or),
         ];
-        assert_eq!(to_postfix(infix), expected);
+        assert_eq!(to_postfix(&infix), expected);
     }
 }

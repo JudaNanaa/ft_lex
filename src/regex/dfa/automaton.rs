@@ -3,10 +3,10 @@ use std::collections::{HashMap, HashSet, VecDeque};
 #[cfg(feature = "dotfile")]
 use crate::regex::dfa::dot::generate_dot_file;
 
-use super::{NewDfaTransition, State, DFA};
-use crate::regex::NFA;
+use super::{Dfa, NewDfaTransition, State};
+use crate::regex::Nfa;
 
-fn find_target_state(nfa: &NFA, current_state: &State, input_char: char) -> State {
+fn find_target_state(nfa: &Nfa, current_state: &State, input_char: char) -> State {
     let mut target_states = HashSet::new();
 
     for nfa_state_id in &current_state.state {
@@ -28,10 +28,10 @@ fn find_target_state(nfa: &NFA, current_state: &State, input_char: char) -> Stat
     State { state: sorted }
 }
 
-pub fn build_dfa(nfa: NFA) -> DFA {
-    let mut dfa = DFA::new();
+pub fn build_dfa(nfa: &Nfa) -> Dfa {
+    let mut dfa = Dfa::new();
     let ascii_chars: Vec<char> = (0..=255u8)
-        .filter_map(|c| char::from_u32(c as u32))
+        .filter_map(|c| char::from_u32(u32::from(c)))
         .collect();
 
     let mut state_map: HashMap<State, usize> = HashMap::new();
@@ -70,24 +70,23 @@ pub fn build_dfa(nfa: NFA) -> DFA {
         let mut new_transitions = Vec::with_capacity(ascii_chars.len());
 
         for &ch in &ascii_chars {
-            let target = find_target_state(&nfa, &current, ch);
+            let target = find_target_state(nfa, &current, ch);
             if target.is_trap() {
                 continue;
             }
 
-            let target_id = match state_map.get(&target) {
-                Some(&id) => id,
-                None => {
-                    let id = next_id;
-                    dfa.nfa_states.insert(id, target.state.clone());
-                    state_map.insert(target.clone(), id);
-                    next_id += 1;
-                    if !visited.contains(&target) && !pending_set.contains(&target) {
-                        pending_set.insert(target.clone());
-                        pending.push_back(target.clone());
-                    }
-                    id
+            let target_id = if let Some(&id) = state_map.get(&target) {
+                id
+            } else {
+                let id = next_id;
+                dfa.nfa_states.insert(id, target.state.clone());
+                state_map.insert(target.clone(), id);
+                next_id += 1;
+                if !visited.contains(&target) && !pending_set.contains(&target) {
+                    pending_set.insert(target.clone());
+                    pending.push_back(target.clone());
                 }
+                id
             };
 
             new_transitions.push(NewDfaTransition {

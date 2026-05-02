@@ -1,20 +1,20 @@
-use crate::{file_parsing::definitions::ConditionState, regex::NFA};
+use crate::{file_parsing::definitions::ConditionState, regex::Nfa};
 
 mod condition_state;
-pub mod rules;
+pub mod parse;
 mod rules_states;
 
 #[derive(Debug, Clone)]
 pub struct RuleAction {
-    pub nfa: NFA,
+    pub nfa: Nfa,
     pub action: String,
     pub condition_state: Vec<ConditionState>,
-    pub is_bol: bool,
-    pub is_eol: bool,
+    pub anchored_start: bool,
+    pub anchored_end: bool,
 }
 
 impl RuleAction {
-    pub fn nfa(&self) -> &NFA {
+    pub fn nfa(&self) -> &Nfa {
         &self.nfa
     }
 

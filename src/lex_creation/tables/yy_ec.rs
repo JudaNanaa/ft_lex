@@ -1,14 +1,10 @@
-use std::{
-    collections::{HashMap, HashSet},
-    fs::File,
-    io::Write,
-};
+use std::collections::{HashMap, HashSet};
 
 use crate::lex_creation::SPACE;
 
 pub fn create_yy_ec(
     charset: &HashSet<char>,
-    file: &mut File,
+    file: &mut dyn std::io::Write,
 ) -> std::io::Result<HashMap<char, usize>> {
     let mut hash = HashMap::new();
     let mut eq_index = 1;

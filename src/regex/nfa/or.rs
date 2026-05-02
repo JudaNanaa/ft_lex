@@ -1,6 +1,6 @@
-use super::NFA;
+use super::Nfa;
 
-pub fn or(left: NFA, right: NFA) -> NFA {
+pub fn or(left: Nfa, right: Nfa) -> Nfa {
     let mut transitions = left.transitions;
     let mut final_states = left.final_states;
     let mut trailing_states = left.trailing_states;
@@ -17,7 +17,7 @@ pub fn or(left: NFA, right: NFA) -> NFA {
     trailing_states.extend(right.trailing_states);
     trailing_final_states.extend(right.trailing_final_states);
 
-    NFA {
+    Nfa {
         transitions,
         final_states,
         trailing_states,
@@ -34,12 +34,12 @@ mod tests {
     use super::*;
     use std::collections::{HashMap, HashSet};
 
-    // Fonction pour créer un NFA simple
-    fn create_test_nfa_a() -> NFA {
-        let mut nfa = NFA {
+    // Fonction pour créer un Nfa simple
+    fn create_test_nfa_a() -> Nfa {
+        let mut nfa = Nfa {
             transitions: HashMap::new(),
             final_states: HashSet::from([1]),
-            ..NFA::new()
+            ..Nfa::new()
         };
 
         nfa.transitions.insert(
@@ -53,12 +53,12 @@ mod tests {
         nfa
     }
 
-    // Fonction pour créer un autre NFA simple
-    fn create_test_nfa_b() -> NFA {
-        let mut nfa = NFA {
+    // Fonction pour créer un autre Nfa simple
+    fn create_test_nfa_b() -> Nfa {
+        let mut nfa = Nfa {
             transitions: HashMap::new(),
             final_states: HashSet::from([2]),
-            ..NFA::new()
+            ..Nfa::new()
         };
 
         nfa.transitions.insert(

@@ -1,9 +1,9 @@
 use std::{fs::File, io::stdin, io::Read};
 
 use crate::file_parsing::{
-    definitions::{definitions::parse_definitions, Definition},
-    rules::rules::{map_actions, parse_rules},
-    user_routine::user_routine::parse_user_routine_part,
+    definitions::{parse::parse_definitions, Definition},
+    rules::parse::{map_actions, parse_rules},
+    user_routine::parse::parse_user_routine_part,
     FilePart, YytextMode,
 };
 
