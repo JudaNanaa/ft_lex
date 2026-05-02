@@ -4,6 +4,7 @@ pub mod parse;
 mod postfix;
 mod quantifier;
 mod quotes;
+pub use charset::extract_charset_hashset;
 use charset::{expand_dot, extract_charset};
 pub use parse::*;
 use quantifier::extract_repetition_range;

@@ -1,4 +1,7 @@
-use std::{char, collections::HashMap};
+use std::{
+    char,
+    collections::{HashMap, HashSet},
+};
 
 use crate::{
     file_parsing::{
@@ -10,6 +13,8 @@ use crate::{
     },
     regex::{nfa::automaton::build_nfa, regex_tokenizer, Nfa},
 };
+
+type RuleNfaResult = Result<(Nfa, String, bool, bool, Vec<HashSet<char>>), String>;
 
 pub fn map_actions(rules: &[RuleAction]) -> HashMap<String, usize> {
     let mut map = HashMap::new();
@@ -221,7 +226,7 @@ pub fn build_rule_nfa(
     file: &mut FileInfo,
     next_state_id: &mut usize,
     defs: &[Definition],
-) -> Result<(Nfa, String, bool, bool), String> {
+) -> RuleNfaResult {
     let (rule, action) = parse_rule_action(file, defs)?;
 
     let anchored_start = rule.starts_with('^');
@@ -238,9 +243,11 @@ pub fn build_rule_nfa(
         rule
     };
 
+    let charsets = crate::regex::partition::collect_charsets_from_regex(rule);
+
     let tokens = regex_tokenizer(rule);
     let nfa = build_nfa(&tokens, next_state_id);
-    Ok((nfa, action, anchored_start, anchored_end))
+    Ok((nfa, action, anchored_start, anchored_end, charsets))
 }
 
 pub fn parse_rules(
@@ -284,7 +291,7 @@ pub fn parse_rules(
                 rules.append(&mut state_rules);
             }
             _ => {
-                let (nfa, action, anchored_start, anchored_end) =
+                let (nfa, action, anchored_start, anchored_end, charsets) =
                     build_rule_nfa(file, &mut next_state_id, defs)?;
                 rules.push(RuleAction {
                     nfa,
@@ -292,6 +299,7 @@ pub fn parse_rules(
                     condition_state: vec![ConditionState::initial()],
                     anchored_start,
                     anchored_end,
+                    charsets,
                 });
             }
         }

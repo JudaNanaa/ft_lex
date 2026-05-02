@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 
 use crate::{
     file_parsing::rules::RuleAction,
@@ -61,6 +61,7 @@ pub fn process_and_combine_rules(rules: Vec<RuleAction>) -> CombineResult {
                     condition_state: condition_state_list.clone(),
                     anchored_start: orig.anchored_start,
                     anchored_end: orig.anchored_end,
+                    charsets: orig.charsets,
                 });
             }
         }
@@ -73,8 +74,14 @@ pub fn process_and_combine_rules(rules: Vec<RuleAction>) -> CombineResult {
     let final_state_map = map_final_states_to_actions(&processed_rules);
     let nfa_list = extract_all_nfas(&processed_rules);
 
+    let all_charsets: Vec<HashSet<char>> = processed_rules
+        .iter()
+        .flat_map(|r| r.charsets.iter().cloned())
+        .collect();
+    let (eq_classes, _num_classes) = crate::regex::partition::partition_refinement(&all_charsets);
+
     let combined_nfa = combine_nfa(nfa_list);
-    let dfa = build_dfa(&combined_nfa);
+    let dfa = build_dfa(&combined_nfa, &eq_classes);
 
     let action_mapping = assiociate_rule_actions(&dfa, &final_state_map);
 

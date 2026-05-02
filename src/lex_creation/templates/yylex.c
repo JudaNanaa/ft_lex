@@ -49,7 +49,7 @@ int yylex(void) {
 		len_match++;
 		unsigned char yy_c = yy_ec[YY_CHAR_TO_INT(c)];
 
-		int next_state = yy_nxt[current_state][yy_c];
+		int next_state = YY_NXT(current_state, yy_c);
 		if (yy_trailing[next_state])
 			yy_trailing_len = len_match;
 		if ( yy_accept[next_state] )

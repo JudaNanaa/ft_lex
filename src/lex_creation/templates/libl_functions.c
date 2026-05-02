@@ -10,9 +10,11 @@
 
 
 extern const unsigned char yy_ec[256];
-extern const unsigned int yy_nxt[][256];
+extern const unsigned int yy_nxt_flat[];
+extern const int yy_nxt_cols;
 extern const int yy_accept[];
 extern const int yy_trailing_accept[];
+#define YY_NXT(s, c) (yy_nxt_flat[(s) * yy_nxt_cols + (c)])
 
 void yy_search_final(int state, int len);
 void yy_if_match(void);
@@ -238,8 +240,8 @@ void yy_reject(void)
 int yy_finish_state(int next_state) {
 	int i = 0;
 
-	while (i < UINT8_MAX) {
-		if (yy_nxt[next_state][i] != 0) {
+	while (i < yy_nxt_cols) {
+		if (YY_NXT(next_state, i) != 0) {
 			return 1;
 		}
 		i++;

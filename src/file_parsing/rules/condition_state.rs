@@ -51,7 +51,7 @@ fn extract_state_block(
                     return Ok(rules_from_state_block);
                 }
 
-                let (nfa, action, anchored_start, anchored_end) =
+                let (nfa, action, anchored_start, anchored_end, charsets) =
                     build_rule_nfa(file, next_state_id, definitions)?;
                 rules_from_state_block.push(RuleAction {
                     nfa,
@@ -59,6 +59,7 @@ fn extract_state_block(
                     condition_state: state_list.to_vec(),
                     anchored_start,
                     anchored_end,
+                    charsets,
                 });
             }
         }
@@ -87,7 +88,7 @@ pub fn parse_condition_states(
                 return Err("unrecognized rule".to_string());
             }
             _ => {
-                let (nfa, action, anchored_start, anchored_end) =
+                let (nfa, action, anchored_start, anchored_end, charsets) =
                     build_rule_nfa(file, next_state_id, definitions)?;
 
                 return Ok(vec![RuleAction {
@@ -96,6 +97,7 @@ pub fn parse_condition_states(
                     condition_state: state_list.to_vec(),
                     anchored_start,
                     anchored_end,
+                    charsets,
                 }]);
             }
         }

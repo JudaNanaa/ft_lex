@@ -20,7 +20,13 @@ pub fn compute_stats(file_parts: &FilePart) -> Stats {
         .copied()
         .unwrap_or(0)
         + 1;
-    let eq_classes = file_parts.dfa().charset().len();
+    let eq_classes = file_parts
+        .dfa()
+        .eq_classes
+        .values()
+        .copied()
+        .collect::<std::collections::HashSet<_>>()
+        .len();
     let start_conditions = file_parts
         .definitions()
         .iter()

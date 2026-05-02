@@ -39,7 +39,7 @@ impl NewDfaTransition {
 pub struct Dfa {
     pub transitions: HashMap<usize, Vec<NewDfaTransition>>,
     pub final_states: HashSet<usize>,
-    pub charset: HashSet<char>,
+    pub eq_classes: HashMap<char, usize>,
     pub nfa_states: HashMap<usize, Vec<usize>>,
     pub trailing_states: HashSet<usize>,
     pub trailing_final_states: HashSet<usize>,
@@ -50,15 +50,11 @@ impl Dfa {
         Self {
             transitions: HashMap::new(),
             final_states: HashSet::new(),
-            charset: HashSet::new(),
+            eq_classes: HashMap::new(),
             nfa_states: HashMap::new(),
             trailing_states: HashSet::new(),
             trailing_final_states: HashSet::new(),
         }
-    }
-
-    pub fn charset(&self) -> &HashSet<char> {
-        &self.charset
     }
 
     pub fn transitions(&self) -> &HashMap<usize, Vec<NewDfaTransition>> {

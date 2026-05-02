@@ -9,9 +9,9 @@ pub fn tables_creation(
     file_parts: &FilePart,
     file: &mut dyn std::io::Write,
 ) -> std::io::Result<()> {
-    let eq_hash = create_yy_ec(file_parts.dfa().charset(), file)?;
+    create_yy_ec(&file_parts.dfa().eq_classes, file)?;
 
-    create_yy_nxt(file_parts.dfa(), &eq_hash, file)?;
+    create_yy_nxt(file_parts.dfa(), file)?;
 
     yy_accept(file_parts.dfa(), file)?;
     yy_trailing(file_parts.dfa(), file)?;

@@ -28,11 +28,20 @@ fn find_target_state(nfa: &Nfa, current_state: &State, input_char: char) -> Stat
     State { state: sorted }
 }
 
-pub fn build_dfa(nfa: &Nfa) -> Dfa {
+pub fn build_dfa(nfa: &Nfa, eq_classes: &HashMap<char, usize>) -> Dfa {
     let mut dfa = Dfa::new();
-    let ascii_chars: Vec<char> = (0..=255u8)
-        .filter_map(|c| char::from_u32(u32::from(c)))
-        .collect();
+
+    // Build one representative (lowest byte value char) per equivalence class
+    let mut representatives: HashMap<usize, char> = HashMap::new();
+    for byte in 0u8..=255 {
+        let ch = char::from_u32(u32::from(byte)).unwrap();
+        if let Some(&class_idx) = eq_classes.get(&ch) {
+            representatives.entry(class_idx).or_insert(ch);
+        }
+    }
+    // Convert to sorted Vec for deterministic iteration
+    let mut repr_list: Vec<(usize, char)> = representatives.into_iter().collect();
+    repr_list.sort_by_key(|&(idx, _)| idx);
 
     let mut state_map: HashMap<State, usize> = HashMap::new();
     let mut visited: HashSet<State> = HashSet::new();
@@ -67,10 +76,10 @@ pub fn build_dfa(nfa: &Nfa) -> Dfa {
             dfa.trailing_final_states.insert(current_id);
         }
 
-        let mut new_transitions = Vec::with_capacity(ascii_chars.len());
+        let mut new_transitions = Vec::with_capacity(repr_list.len());
 
-        for &ch in &ascii_chars {
-            let target = find_target_state(nfa, &current, ch);
+        for &(_class_idx, repr_char) in &repr_list {
+            let target = find_target_state(nfa, &current, repr_char);
             if target.is_trap() {
                 continue;
             }
@@ -90,7 +99,7 @@ pub fn build_dfa(nfa: &Nfa) -> Dfa {
             };
 
             new_transitions.push(NewDfaTransition {
-                input: ch,
+                input: repr_char,
                 target_state: target_id,
             });
         }
@@ -104,11 +113,11 @@ pub fn build_dfa(nfa: &Nfa) -> Dfa {
         }
     }
     dfa.final_states.remove(&0);
-    dfa.charset = nfa.compute_charset();
+    dfa.eq_classes.clone_from(eq_classes);
 
     #[cfg(feature = "dotfile")]
     if let Err(e) = generate_dot_file(&dfa) {
-        eprintln!("Error generating dfa.dot: {}", e);
+        eprintln!("Error generating dfa.dot: {e}");
     }
 
     dfa

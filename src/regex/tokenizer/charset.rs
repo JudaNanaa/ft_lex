@@ -5,6 +5,7 @@ use super::Operator::OpenParen;
 use super::Operator::Or;
 use super::Token;
 use super::Token::Operator;
+use std::collections::HashSet;
 use std::{char, str::Chars};
 
 #[derive(PartialEq)]
@@ -168,6 +169,51 @@ pub fn expand_dot() -> Vec<Token> {
     }
     dest.push(Operator(CloseParen));
     dest
+}
+
+fn string_to_hashset(charset_str: &str, is_negative: bool) -> HashSet<char> {
+    let chars_in: HashSet<char> = charset_str.chars().collect();
+    if is_negative {
+        (0..=255u8)
+            .filter_map(|c| char::from_u32(u32::from(c)))
+            .filter(|c| !chars_in.contains(c))
+            .collect()
+    } else {
+        chars_in
+    }
+}
+
+pub fn extract_charset_hashset(chars: &mut Chars<'_>) -> HashSet<char> {
+    let mut charset = String::new();
+
+    let (is_negative, state) = check_if_negative_charset(chars, &mut charset);
+
+    if state == CharsetState::Exit {
+        return string_to_hashset(&charset, is_negative);
+    }
+    while let Some(char) = chars.next() {
+        match char {
+            ']' => {
+                return string_to_hashset(&charset, is_negative);
+            }
+            '\\' => {
+                if let Some(escaped_char) = expand_escape(chars) {
+                    charset.push(escaped_char);
+                } else {
+                    panic!("No Ending bracket");
+                }
+            }
+            '-' => {
+                if minus_gesture(chars, &mut charset) == CharsetState::Exit {
+                    return string_to_hashset(&charset, is_negative);
+                }
+            }
+            _ => {
+                charset.push(char);
+            }
+        }
+    }
+    panic!("No Ending bracket");
 }
 
 // ------------------- tests

@@ -1,3 +1,5 @@
+use std::collections::HashSet;
+
 use crate::{file_parsing::definitions::ConditionState, regex::Nfa};
 
 mod condition_state;
@@ -11,6 +13,7 @@ pub struct RuleAction {
     pub condition_state: Vec<ConditionState>,
     pub anchored_start: bool,
     pub anchored_end: bool,
+    pub charsets: Vec<HashSet<char>>,
 }
 
 impl RuleAction {
