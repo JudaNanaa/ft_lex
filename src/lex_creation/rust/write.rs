@@ -23,9 +23,9 @@ pub fn write_header_rust(
             Definition::InclusiveState { name, state_nb } => {
                 writeln!(out, "const {name}: usize = {state_nb};")?;
             }
-            Definition::Bloc { content } | Definition::LineWithSpace { content } => {
-                writeln!(out, "{content}")?;
-            }
+            // Bloc / LineWithSpace hold raw C code from the %{ … %} section.
+            // They must not be emitted in Rust output.
+            Definition::Bloc { .. } | Definition::LineWithSpace { .. } => {}
             _ => {}
         }
     }
@@ -117,12 +117,49 @@ pub fn write_action_rust(
     writeln!(out)
 }
 
-/// Wraps a user action string so that bare `return <integer>;` becomes `return Some(<integer>);`.
+/// Wraps a user action string for Rust emission.
+///
+/// - Replaces bare `yytext` with `self.yytext` so field access compiles.
+/// - Replaces bare `return <expr>;` with `return Some(<expr> as i32);`.
+/// - If the action still contains C-only constructs that would not compile as
+///   Rust (detected by heuristic: unresolved C function calls such as `printf`),
+///   the whole original body is emitted as a comment and an empty block `{}`
+///   is used instead, so the generated file is always syntactically valid Rust.
 fn wrap_user_action(action: &str) -> String {
-    // Simple transformation: replace `return <expr>;` with `return Some(<expr>);`
-    // This handles the common case of `{ return 1; }` etc.
-    // Replace patterns like `return <non-Some-expr>;` inside the action block
-    // We look for `return` followed by something that isn't `None` or `Some`
+    // Step 1: substitute bare `yytext` → `self.yytext`
+    let action = action.replace("yytext", "self.yytext");
+
+    // Step 2: fix bare `return <expr>;` → `return Some(<expr> as i32);`
+    let action = fix_return_stmts(&action);
+
+    // Step 3: heuristic — if still looks like C (e.g. contains `printf(`),
+    //         emit it as a comment with a no-op block so rustc is happy.
+    if looks_like_c_action(&action) {
+        let comment_body = action
+            .lines()
+            .map(|l| format!("/* C: {} */", l))
+            .collect::<Vec<_>>()
+            .join("\n                ");
+        return format!("{comment_body}\n                // (C action not compiled in Rust backend)");
+    }
+
+    action
+}
+
+/// Returns true when `action` contains constructs that are valid C but not Rust
+/// and cannot be trivially translated (e.g. C standard-library calls with C
+/// format-string arguments).
+fn looks_like_c_action(action: &str) -> bool {
+    // printf / fprintf / scanf are the most common offenders in .l files.
+    action.contains("printf(")
+        || action.contains("fprintf(")
+        || action.contains("scanf(")
+        || action.contains("fputs(")
+        || action.contains("puts(")
+        || action.contains("fputc(")
+}
+
+fn fix_return_stmts(action: &str) -> String {
     let mut out = String::new();
     let mut remaining = action;
     while let Some(idx) = remaining.find("return ") {
@@ -215,6 +252,17 @@ pub fn write_user_routine_rust(
     user_routine: &str,
     out: &mut dyn std::io::Write,
 ) -> std::io::Result<()> {
+    // The user-routine section (after the second %%) is C code in a .l file.
+    // Skip it entirely for Rust output; emitting C code would break compilation.
+    let trimmed = user_routine.trim();
+    if trimmed.is_empty() {
+        return Ok(());
+    }
+    // Preserve the content as line comments so it is visible but inert.
     writeln!(out)?;
-    out.write_all(user_routine.as_bytes())
+    writeln!(out, "// User routines (C only — not compiled by Rust backend):")?;
+    for line in trimmed.lines() {
+        writeln!(out, "// {line}")?;
+    }
+    Ok(())
 }
