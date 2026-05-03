@@ -82,7 +82,13 @@ pub fn write_accept_actions_rust(file_parts: &FilePart, out: &mut dyn std::io::W
             flat[state * cols + i] = *action_map.get(action_str).unwrap();
         }
     }
+    // Close the impl block opened by write_is_exclusive_state_rust so we can
+    // emit module-level statics, then reopen a second impl block for yylex.
+    writeln!(out, "}} // end first impl block")?;
+    writeln!(out)?;
     writeln!(out, "const YY_ACCEPT_COLS: usize = {cols};")?;
     write_usize_slice("YY_ACCEPT_FLAT", &flat, out)?;
+    writeln!(out)?;
+    writeln!(out, "impl<R: std::io::Read> Lexer<R> {{")?;
     writeln!(out)
 }

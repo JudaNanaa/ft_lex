@@ -16,7 +16,9 @@
                     if last_accepting_state == 0 {
                         self.yy_if_no_match(last_accepting_pos);
                     } else {
-                        self.yy_if_match();
+                        if let Some(v) = self.yy_if_match() {
+                            return v;
+                        }
                     }
                     break;
                 }
@@ -36,7 +38,9 @@
                         if last_accepting_state == 0 {
                             self.yy_if_no_match(last_accepting_pos);
                         } else {
-                            self.yy_if_match();
+                            if let Some(v) = self.yy_if_match() {
+                                return v;
+                            }
                         }
                         last_accepting_pos = 0;
                         last_accepting_state = 0;

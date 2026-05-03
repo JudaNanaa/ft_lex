@@ -3,7 +3,8 @@ use crate::file_parsing::{
     FilePart, YytextMode,
 };
 
-const LEXER_RUNTIME: &str = include_str!("templates/lexer_runtime.rs.tpl");
+const LEXER_STRUCT: &str = include_str!("templates/lexer_struct.rs.tpl");
+const LEXER_IMPL_METHODS: &str = include_str!("templates/lexer_impl_methods.rs.tpl");
 const YYLEX_BODY: &str    = include_str!("templates/yylex_body.rs.tpl");
 
 pub fn write_header_rust(
@@ -31,17 +32,26 @@ pub fn write_header_rust(
     writeln!(out)
 }
 
+/// Emits the Lexer struct definition (module-level, before the tables).
 pub fn write_yytext_section_rust(
     _mode: YytextMode,
     out: &mut dyn std::io::Write,
 ) -> std::io::Result<()> {
-    out.write_all(LEXER_RUNTIME.as_bytes())
+    out.write_all(LEXER_STRUCT.as_bytes())
 }
 
+/// Emits the first `impl` block: fixed runtime methods + `yy_is_exclusive_state`.
+/// The impl block is left OPEN for `write_action_rust` to add `yy_action`.
+/// `write_accept_actions_rust` will close this impl block, emit module-level
+/// accept statics, and reopen a second impl block for `write_yylex_rust`.
 pub fn write_is_exclusive_state_rust(
     file_parts: &FilePart,
     out: &mut dyn std::io::Write,
 ) -> std::io::Result<()> {
+    // Emit the fixed runtime methods inside an impl block (left open).
+    out.write_all(LEXER_IMPL_METHODS.as_bytes())?;
+    writeln!(out)?;
+
     let all_states = list_all_states(file_parts.definitions());
     let exclusive: Vec<_> = all_states
         .iter()
@@ -68,7 +78,7 @@ pub fn write_action_rust(
 ) -> std::io::Result<()> {
     let action_hash = file_parts.map_actions();
 
-    writeln!(out, "    fn yy_action(&mut self, action: usize) {{")?;
+    writeln!(out, "    fn yy_action(&mut self, action: usize) -> Option<i32> {{")?;
     writeln!(out, "        let state = self.yy_start;")?;
 
     // Check if any rule uses condition states, if not suppress unused variable warning
@@ -90,18 +100,55 @@ pub fn write_action_rust(
             write_rust_condition_state_check(&condition_states, out)?;
         }
         if get_bol(file_parts, action_str) {
-            writeln!(out, "                if !self.yy_at_bol {{ return; }}")?;
+            writeln!(out, "                if !self.yy_at_bol {{ return None; }}")?;
         }
         if get_eol(file_parts, action_str) {
-            writeln!(out, "                if !self.yy_at_eol() {{ return; }}")?;
+            writeln!(out, "                if !self.yy_at_eol() {{ return None; }}")?;
         }
-        writeln!(out, "                {action_str}")?;
+        // Wrap user code: replace bare `return <expr>;` with `return Some(<expr>);`
+        let wrapped = wrap_user_action(action_str);
+        writeln!(out, "                {wrapped}")?;
         writeln!(out, "            }}")?;
     }
     writeln!(out, "            _ => {{}}")?;
     writeln!(out, "        }}")?;
+    writeln!(out, "        None")?;
     writeln!(out, "    }}")?;
     writeln!(out)
+}
+
+/// Wraps a user action string so that bare `return <integer>;` becomes `return Some(<integer>);`.
+fn wrap_user_action(action: &str) -> String {
+    // Simple transformation: replace `return <expr>;` with `return Some(<expr>);`
+    // This handles the common case of `{ return 1; }` etc.
+    let mut result = action.to_string();
+    // Replace patterns like `return <non-Some-expr>;` inside the action block
+    // We look for `return` followed by something that isn't `None` or `Some`
+    let mut out = String::new();
+    let mut remaining = result.as_str();
+    while let Some(idx) = remaining.find("return ") {
+        out.push_str(&remaining[..idx]);
+        let after_return = &remaining[idx + 7..]; // skip "return "
+        // Check if it's already `None` or `Some(`
+        if after_return.starts_with("None") || after_return.starts_with("Some(") {
+            out.push_str("return ");
+            remaining = after_return;
+        } else {
+            // Find the semicolon to get the expression
+            if let Some(semi_idx) = after_return.find(';') {
+                let expr = after_return[..semi_idx].trim();
+                out.push_str(&format!("return Some({expr} as i32);"));
+                remaining = &after_return[semi_idx + 1..];
+            } else {
+                // No semicolon found, leave as-is
+                out.push_str("return ");
+                remaining = after_return;
+            }
+        }
+    }
+    out.push_str(remaining);
+    result = out;
+    result
 }
 
 fn get_key_by_value(map: &std::collections::HashMap<String, usize>, val: usize) -> Option<&String> {
@@ -133,14 +180,14 @@ fn write_rust_condition_state_check(
     out: &mut dyn std::io::Write,
 ) -> std::io::Result<()> {
     if states.len() == 1 && states[0].name() == "INITIAL" {
-        writeln!(out, "                if self.yy_is_exclusive_state(state) {{ return; }}")?;
+        writeln!(out, "                if self.yy_is_exclusive_state(state) {{ return None; }}")?;
         return Ok(());
     }
     let conds: Vec<String> = states
         .iter()
         .map(|s| format!("state != {}", s.name()))
         .collect();
-    writeln!(out, "                if {} {{ return; }}", conds.join(" && "))?;
+    writeln!(out, "                if {} {{ return None; }}", conds.join(" && "))?;
     Ok(())
 }
 
