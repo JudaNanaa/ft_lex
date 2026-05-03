@@ -5,11 +5,12 @@ mod regex;
 use std::fs::File;
 
 use file_parsing::parsing::{get_file_content, get_stdin_content, parse_lex_content};
-use lex_creation::c::CBackend;
-use lex_creation::creation::lex_creation;
-use lex_creation::stats::{compute_stats, print_stats};
-
-const LEX_FILE: &str = "ft_lex.yy.c";
+use lex_creation::{
+    backend::CodegenBackend,
+    c::CBackend,
+    creation::lex_creation,
+    stats::{compute_stats, print_stats},
+};
 
 fn main() {
     let args: Vec<String> = std::env::args().skip(1).collect();
@@ -17,6 +18,7 @@ fn main() {
     let mut flag_t = false;
     let mut flag_v = false;
     let mut flag_n = false;
+    let mut flag_rust = false;
     let mut stdin_seen = false;
 
     let sources: Vec<Option<String>> = if args.is_empty() {
@@ -34,6 +36,10 @@ fn main() {
                 }
                 "-n" => {
                     flag_n = true;
+                    None
+                }
+                "--rust" => {
+                    flag_rust = true;
                     None
                 }
                 "-" => {
@@ -87,15 +93,22 @@ fn main() {
         Ok(parts) => parts,
     };
 
-    let result = if flag_t {
-        lex_creation(&file_parts, &CBackend::new(), &mut std::io::stdout())
+    let backend: Box<dyn CodegenBackend> = if flag_rust {
+        Box::new(lex_creation::rust::RustBackend::new())
     } else {
-        match File::create(LEX_FILE) {
+        Box::new(CBackend::new())
+    };
+
+    let result = if flag_t {
+        lex_creation(&file_parts, backend.as_ref(), &mut std::io::stdout())
+    } else {
+        let filename = backend.output_filename();
+        match File::create(filename) {
             Err(_) => {
-                eprintln!("ft_lex: can't create {LEX_FILE}");
+                eprintln!("ft_lex: can't create {filename}");
                 return;
             }
-            Ok(mut f) => lex_creation(&file_parts, &CBackend::new(), &mut f),
+            Ok(mut f) => lex_creation(&file_parts, backend.as_ref(), &mut f),
         }
     };
 
