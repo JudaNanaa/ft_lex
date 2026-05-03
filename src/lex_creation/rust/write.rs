@@ -121,11 +121,10 @@ pub fn write_action_rust(
 fn wrap_user_action(action: &str) -> String {
     // Simple transformation: replace `return <expr>;` with `return Some(<expr>);`
     // This handles the common case of `{ return 1; }` etc.
-    let mut result = action.to_string();
     // Replace patterns like `return <non-Some-expr>;` inside the action block
     // We look for `return` followed by something that isn't `None` or `Some`
     let mut out = String::new();
-    let mut remaining = result.as_str();
+    let mut remaining = action;
     while let Some(idx) = remaining.find("return ") {
         out.push_str(&remaining[..idx]);
         let after_return = &remaining[idx + 7..]; // skip "return "
@@ -137,7 +136,11 @@ fn wrap_user_action(action: &str) -> String {
             // Find the semicolon to get the expression
             if let Some(semi_idx) = after_return.find(';') {
                 let expr = after_return[..semi_idx].trim();
-                out.push_str(&format!("return Some({expr} as i32);"));
+                if expr.is_empty() {
+                    out.push_str("return None;");
+                } else {
+                    out.push_str(&format!("return Some({expr} as i32);"));
+                }
                 remaining = &after_return[semi_idx + 1..];
             } else {
                 // No semicolon found, leave as-is
@@ -147,8 +150,7 @@ fn wrap_user_action(action: &str) -> String {
         }
     }
     out.push_str(remaining);
-    result = out;
-    result
+    out
 }
 
 fn get_key_by_value(map: &std::collections::HashMap<String, usize>, val: usize) -> Option<&String> {

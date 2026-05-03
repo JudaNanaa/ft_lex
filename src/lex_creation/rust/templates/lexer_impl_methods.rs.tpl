@@ -95,6 +95,10 @@ impl<R: std::io::Read> Lexer<R> {
         ret
     }
 
+    fn yy_at_eol(&self) -> bool {
+        self.yytext.ends_with('\n')
+    }
+
     fn yy_if_no_match(&mut self, _last_pos: usize) {
         if !self.buffer.is_empty() {
             let ch = self.buffer[0] as char;

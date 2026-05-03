@@ -11,6 +11,8 @@ fn run_ft_lex_rust(lex_src: &str) -> String {
         .expect("failed to spawn ft_lex");
     child.stdin.take().unwrap().write_all(lex_src.as_bytes()).unwrap();
     let output = child.wait_with_output().unwrap();
+    assert!(output.status.success(), "ft_lex exited with: {}\nstderr: {}", output.status,
+        String::from_utf8_lossy(&output.stderr));
     String::from_utf8(output.stdout).unwrap()
 }
 
