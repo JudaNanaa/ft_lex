@@ -44,12 +44,13 @@
                         }
                         last_accepting_pos = 0;
                         last_accepting_state = 0;
-                        current_state = 0;
+                        current_state = self.yy_start;
                         len_match = 0;
                         self.yy_trailing_len = 0;
                         self.clean_flag = false;
+                    } else {
+                        current_state = next_state;
                     }
-                    current_state = next_state;
                 }
             }
         }
