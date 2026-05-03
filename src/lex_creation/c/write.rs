@@ -1,23 +1,12 @@
-use std::{fs::File, io::Read};
+use crate::file_parsing::{definitions::Definition, YytextMode};
 
-use crate::{
-    file_parsing::{definitions::Definition, YytextMode},
-    lex_creation::YYLEX,
-};
-
-use super::{DEFINES, INCLUDES, VARIABLES};
-
-fn open_template_file(file_path: &str) -> std::io::Result<String> {
-    let mut file = File::open(file_path)?;
-    let mut file_content = String::new();
-    file.read_to_string(&mut file_content)?;
-    Ok(file_content)
-}
+const INCLUDES: &str = include_str!("templates/includes.c");
+const DEFINES: &str = include_str!("templates/defines.c");
+const VARIABLES: &str = include_str!("templates/variables.c");
+pub(super) const YYLEX: &str = include_str!("templates/yylex.c");
 
 pub fn write_includes(file: &mut dyn std::io::Write) -> std::io::Result<()> {
-    let file_content = open_template_file(INCLUDES)?;
-    file.write_all(file_content.as_bytes())?;
-    Ok(())
+    file.write_all(INCLUDES.as_bytes())
 }
 
 pub fn write_defines(
@@ -25,39 +14,27 @@ pub fn write_defines(
     definitions: &[Definition],
     mode: YytextMode,
 ) -> std::io::Result<()> {
-    let file_content = open_template_file(DEFINES)?;
-    file.write_all(file_content.as_bytes())?;
-
+    file.write_all(DEFINES.as_bytes())?;
     if let YytextMode::Array(n) = mode {
         writeln!(file, "#define YYLMAX {n}")?;
     }
-
     for elem in definitions {
         match elem {
-            Definition::ExclusiveState {
-                name: state_name,
-                state_nb,
-            }
-            | Definition::InclusiveState {
-                name: state_name,
-                state_nb,
-            } => {
-                writeln!(file, "#define {state_name} {state_nb}")?;
+            Definition::ExclusiveState { name, state_nb }
+            | Definition::InclusiveState { name, state_nb } => {
+                writeln!(file, "#define {name} {state_nb}")?;
             }
             _ => {}
         }
     }
-    writeln!(file)?;
-    Ok(())
+    writeln!(file)
 }
 
 pub fn write_variables(
     definitions: &[Definition],
     file: &mut dyn std::io::Write,
 ) -> std::io::Result<()> {
-    let mut file_content = open_template_file(VARIABLES)?;
     let mut to_add = String::new();
-
     for elem in definitions {
         match elem {
             Definition::Bloc { content } | Definition::LineWithSpace { content } => {
@@ -67,13 +44,11 @@ pub fn write_variables(
             _ => {}
         }
     }
-
-    file_content = file_content.replace("change_me_in_variables!", &to_add);
-    file.write_all(file_content.as_bytes())?;
-    Ok(())
+    let content = VARIABLES.replace("change_me_in_variables!", &to_add);
+    file.write_all(content.as_bytes())
 }
 
-fn write_yytext_pointer(file: &mut dyn std::io::Write) -> std::io::Result<()> {
+pub fn write_yytext_pointer(file: &mut dyn std::io::Write) -> std::io::Result<()> {
     writeln!(file, "char *yytext = NULL;")?;
     writeln!(file, "int yyleng = 0;")?;
     writeln!(file)?;
@@ -136,7 +111,7 @@ fn write_yytext_pointer(file: &mut dyn std::io::Write) -> std::io::Result<()> {
     writeln!(file, "}}")
 }
 
-fn write_yytext_array(n: usize, file: &mut dyn std::io::Write) -> std::io::Result<()> {
+pub fn write_yytext_array(n: usize, file: &mut dyn std::io::Write) -> std::io::Result<()> {
     writeln!(file, "char yytext[{n}];")?;
     writeln!(file, "int yyleng = 0;")?;
     writeln!(file)?;
@@ -181,16 +156,14 @@ pub fn write_yytext_section(
         YytextMode::Pointer => write_yytext_pointer(file)?,
         YytextMode::Array(n) => write_yytext_array(n, file)?,
     }
-    writeln!(file)?;
-    Ok(())
+    writeln!(file)
 }
 
 pub fn write_user_routine(
     user_routine: &str,
     file: &mut dyn std::io::Write,
 ) -> std::io::Result<()> {
-    file.write_all(user_routine.as_bytes())?;
-    Ok(())
+    file.write_all(user_routine.as_bytes())
 }
 
 pub fn write_yylex(
@@ -198,21 +171,16 @@ pub fn write_yylex(
     in_yylex: &[String],
     mode: YytextMode,
 ) -> std::io::Result<()> {
-    let file_content = open_template_file(YYLEX)?;
     let mut in_yylex_content = String::new();
-
     for elem in in_yylex {
-        in_yylex_content += elem;
+        in_yylex_content.push_str(elem);
     }
-
     let free_yytext = match mode {
         YytextMode::Pointer => "free(yytext);\n\tyytext = NULL;",
         YytextMode::Array(_) => "",
     };
-
-    let replaced = file_content
+    let replaced = YYLEX
         .replace("#write_in_yylex", &in_yylex_content)
         .replace("change_me_free_yytext!", free_yytext);
-    file.write_all(replaced.as_bytes())?;
-    Ok(())
+    file.write_all(replaced.as_bytes())
 }

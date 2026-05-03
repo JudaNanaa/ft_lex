@@ -5,110 +5,149 @@ mod regex;
 use std::fs::File;
 
 use file_parsing::parsing::{get_file_content, get_stdin_content, parse_lex_content};
-use lex_creation::creation::lex_creation;
-use lex_creation::stats::{compute_stats, print_stats};
+use lex_creation::{
+    backend::CodegenBackend,
+    c::CBackend,
+    creation::lex_creation,
+    stats::{compute_stats, print_stats},
+};
 
-const LEX_FILE: &str = "ft_lex.yy.c";
+enum OutputDest {
+    File,
+    Stdout,
+}
+enum Backend {
+    C,
+    Rust,
+}
 
-fn main() {
-    let args: Vec<String> = std::env::args().skip(1).collect();
+struct Opts {
+    output: OutputDest,
+    backend: Backend,
+    verbose: bool,
+    no_stats: bool,
+    sources: Vec<Option<String>>,
+}
 
-    let mut flag_t = false;
-    let mut flag_v = false;
-    let mut flag_n = false;
+fn parse_args(args: &[String]) -> Opts {
+    let mut output = OutputDest::File;
+    let mut backend = Backend::C;
+    let mut verbose = false;
+    let mut no_stats = false;
+    let mut sources: Vec<Option<String>> = vec![];
     let mut stdin_seen = false;
-
-    let sources: Vec<Option<String>> = if args.is_empty() {
-        vec![None]
-    } else {
-        args.iter()
-            .filter_map(|a| match a.as_str() {
-                "-t" => {
-                    flag_t = true;
-                    None
-                }
-                "-v" => {
-                    flag_v = true;
-                    None
-                }
-                "-n" => {
-                    flag_n = true;
-                    None
-                }
-                "-" => {
-                    if stdin_seen {
-                        return None;
-                    }
-                    stdin_seen = true;
-                    Some(None)
-                }
-                _ if a.starts_with('-') => None,
-                _ => Some(Some(a.clone())),
-            })
-            .collect()
-    };
-
-    let mut combined_content = String::new();
-    let mut names: Vec<String> = Vec::new();
-
-    for source in &sources {
-        let (content, name) = match source {
-            None => match get_stdin_content() {
-                Err(_) => {
-                    eprintln!("ft_lex: can't read stdin");
-                    return;
-                }
-                Ok(c) => (c, "<stdin>".to_string()),
-            },
-            Some(path) => match get_file_content(path) {
-                Err(_) => {
-                    eprintln!("ft_lex: can't open {path}");
-                    return;
-                }
-                Ok(c) => (c, path.clone()),
-            },
+    if args.is_empty() {
+        sources.push(None);
+        return Opts {
+            output,
+            backend,
+            verbose,
+            no_stats,
+            sources,
         };
-        combined_content.push_str(&content);
+    }
+    for a in args {
+        match a.as_str() {
+            "-t" => output = OutputDest::Stdout,
+            "-v" => verbose = true,
+            "-n" => no_stats = true,
+            "--rust" => backend = Backend::Rust,
+            "-" if !stdin_seen => {
+                stdin_seen = true;
+                sources.push(None);
+            }
+            "-" => {}
+            _ if a.starts_with('-') => {}
+            _ => sources.push(Some(a.clone())),
+        }
+    }
+    Opts {
+        output,
+        backend,
+        verbose,
+        no_stats,
+        sources,
+    }
+}
+
+fn read_sources(sources: &[Option<String>]) -> Option<(String, String)> {
+    let mut combined = String::new();
+    let mut names: Vec<String> = Vec::new();
+    for source in sources {
+        let (content, name) = match source {
+            None => {
+                if let Ok(c) = get_stdin_content() {
+                    (c, "<stdin>".to_string())
+                } else {
+                    eprintln!("ft_lex: can't read stdin");
+                    return None;
+                }
+            }
+            Some(path) => {
+                if let Ok(c) = get_file_content(path) {
+                    (c, path.clone())
+                } else {
+                    eprintln!("ft_lex: can't open {path}");
+                    return None;
+                }
+            }
+        };
+        combined.push_str(&content);
         names.push(name);
     }
-
-    let parse_name = if names.len() == 1 {
+    let name = if names.len() == 1 {
         names.remove(0)
     } else {
         names.join(" ")
     };
+    Some((combined, name))
+}
 
-    let file_parts = match parse_lex_content(&combined_content, &parse_name) {
-        Err(error) => {
-            eprintln!("ft_lex: {error}");
+fn main() {
+    let args: Vec<String> = std::env::args().skip(1).collect();
+    let opts = parse_args(&args);
+
+    let Some((content, name)) = read_sources(&opts.sources) else {
+        return;
+    };
+
+    let file_parts = match parse_lex_content(&content, &name) {
+        Ok(parts) => parts,
+        Err(e) => {
+            eprintln!("ft_lex: {e}");
             return;
         }
-        Ok(parts) => parts,
     };
 
-    let result = if flag_t {
-        lex_creation(&file_parts, &mut std::io::stdout())
-    } else {
-        match File::create(LEX_FILE) {
-            Err(_) => {
-                eprintln!("ft_lex: can't create {LEX_FILE}");
+    let backend: Box<dyn CodegenBackend> = match opts.backend {
+        Backend::Rust => Box::new(lex_creation::rust::RustBackend::new()),
+        Backend::C => Box::new(CBackend::new()),
+    };
+
+    let result = match opts.output {
+        OutputDest::Stdout => lex_creation(&file_parts, backend.as_ref(), &mut std::io::stdout()),
+        OutputDest::File => {
+            let filename = backend.output_filename();
+            if let Ok(mut f) = File::create(filename) {
+                lex_creation(&file_parts, backend.as_ref(), &mut f)
+            } else {
+                eprintln!("ft_lex: can't create {filename}");
                 return;
             }
-            Ok(mut f) => lex_creation(&file_parts, &mut f),
         }
     };
 
-    if let Err(error) = result {
-        if error.kind() != std::io::ErrorKind::BrokenPipe {
-            eprintln!("Error: {error}");
+    if let Err(e) = result {
+        if e.kind() != std::io::ErrorKind::BrokenPipe {
+            eprintln!("Error: {e}");
         }
     }
 
-    if flag_v && !flag_n {
-        if flag_t {
-            print_stats(&compute_stats(&file_parts), &mut std::io::stderr());
-        } else {
-            print_stats(&compute_stats(&file_parts), &mut std::io::stdout());
-        }
+    if opts.verbose && !opts.no_stats {
+        let out: &mut dyn std::io::Write = match opts.output {
+            OutputDest::Stdout => &mut std::io::stderr(),
+            OutputDest::File => &mut std::io::stdout(),
+        };
+        print_stats(&compute_stats(&file_parts), out);
     }
 }

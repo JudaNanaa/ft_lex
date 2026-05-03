@@ -1,19 +1,24 @@
 use crate::{lex_creation::SPACE, regex::dfa::Dfa};
 
-pub fn yy_trailing_accept(dfa: &Dfa, file: &mut dyn std::io::Write) -> std::io::Result<()> {
+pub fn compute_yy_trailing_accept(dfa: &Dfa) -> Vec<u8> {
     let nb_state = dfa.transitions().len();
     let mut tab = vec![0u8; nb_state];
-
     for &state in &dfa.trailing_final_states {
         if state < nb_state {
             tab[state] = 1;
         }
     }
+    tab
+}
 
+pub fn write_yy_trailing_accept_c(
+    tab: &[u8],
+    file: &mut dyn std::io::Write,
+) -> std::io::Result<()> {
+    let nb_state = tab.len();
     writeln!(file, "\nconst int yy_trailing_accept[{nb_state}] =")?;
     writeln!(file, "{SPACE}{{")?;
     write!(file, "{}", SPACE.repeat(2))?;
-
     for (index, value) in tab.iter().enumerate() {
         write!(file, "{value}")?;
         if index != 0 && index % 10 == 0 {
@@ -27,7 +32,5 @@ pub fn yy_trailing_accept(dfa: &Dfa, file: &mut dyn std::io::Write) -> std::io::
             writeln!(file)?;
         }
     }
-    writeln!(file, "{SPACE}}} ;\n")?;
-
-    Ok(())
+    writeln!(file, "{SPACE}}} ;\n")
 }
