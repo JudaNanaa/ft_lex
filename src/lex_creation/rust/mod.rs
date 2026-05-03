@@ -1,3 +1,6 @@
+mod tables;
+use tables::{write_accept_actions_rust, write_tables_rust};
+
 use crate::{
     file_parsing::{definitions::Definition, FilePart, YytextMode},
     lex_creation::backend::CodegenBackend,
@@ -20,8 +23,8 @@ impl CodegenBackend for RustBackend {
         todo!()
     }
 
-    fn write_tables(&self, _: &FilePart, _: &mut dyn std::io::Write) -> std::io::Result<()> {
-        todo!()
+    fn write_tables(&self, file_parts: &FilePart, out: &mut dyn std::io::Write) -> std::io::Result<()> {
+        write_tables_rust(file_parts, out)
     }
 
     fn write_is_exclusive_state(&self, _: &FilePart, _: &mut dyn std::io::Write) -> std::io::Result<()> {
@@ -32,8 +35,8 @@ impl CodegenBackend for RustBackend {
         todo!()
     }
 
-    fn write_accept_actions(&self, _: &FilePart, _: &mut dyn std::io::Write) -> std::io::Result<()> {
-        todo!()
+    fn write_accept_actions(&self, file_parts: &FilePart, out: &mut dyn std::io::Write) -> std::io::Result<()> {
+        write_accept_actions_rust(file_parts, out)
     }
 
     fn write_yylex(&self, _: &[String], _: YytextMode, _: &mut dyn std::io::Write) -> std::io::Result<()> {
