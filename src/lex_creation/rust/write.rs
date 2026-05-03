@@ -23,9 +23,9 @@ pub fn write_header_rust(
             Definition::InclusiveState { name, state_nb } => {
                 writeln!(out, "const {name}: usize = {state_nb};")?;
             }
-            // Bloc / LineWithSpace hold raw C code from the %{ … %} section.
-            // They must not be emitted in Rust output.
-            Definition::Bloc { .. } | Definition::LineWithSpace { .. } => {}
+            Definition::Bloc { content } | Definition::LineWithSpace { content } => {
+                writeln!(out, "{content}")?;
+            }
             _ => {}
         }
     }
@@ -121,42 +121,11 @@ pub fn write_action_rust(
 ///
 /// - Replaces bare `yytext` with `self.yytext` so field access compiles.
 /// - Replaces bare `return <expr>;` with `return Some(<expr> as i32);`.
-/// - If the action still contains C-only constructs that would not compile as
-///   Rust (detected by heuristic: unresolved C function calls such as `printf`),
-///   the whole original body is emitted as a comment and an empty block `{}`
-///   is used instead, so the generated file is always syntactically valid Rust.
+/// Actions are otherwise emitted verbatim — users targeting `--rust` must
+/// write Rust action code.
 fn wrap_user_action(action: &str) -> String {
-    // Step 1: substitute bare `yytext` → `self.yytext`
     let action = action.replace("yytext", "self.yytext");
-
-    // Step 2: fix bare `return <expr>;` → `return Some(<expr> as i32);`
-    let action = fix_return_stmts(&action);
-
-    // Step 3: heuristic — if still looks like C (e.g. contains `printf(`),
-    //         emit it as a comment with a no-op block so rustc is happy.
-    if looks_like_c_action(&action) {
-        let comment_body = action
-            .lines()
-            .map(|l| format!("/* C: {} */", l))
-            .collect::<Vec<_>>()
-            .join("\n                ");
-        return format!("{comment_body}\n                // (C action not compiled in Rust backend)");
-    }
-
-    action
-}
-
-/// Returns true when `action` contains constructs that are valid C but not Rust
-/// and cannot be trivially translated (e.g. C standard-library calls with C
-/// format-string arguments).
-fn looks_like_c_action(action: &str) -> bool {
-    // printf / fprintf / scanf are the most common offenders in .l files.
-    action.contains("printf(")
-        || action.contains("fprintf(")
-        || action.contains("scanf(")
-        || action.contains("fputs(")
-        || action.contains("puts(")
-        || action.contains("fputc(")
+    fix_return_stmts(&action)
 }
 
 fn fix_return_stmts(action: &str) -> String {
