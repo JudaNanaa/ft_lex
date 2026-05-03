@@ -15,7 +15,7 @@ fn run_ft_lex_rust(lex_src: &str) -> String {
 }
 
 #[test]
-fn generated_rust_compiles() {
+fn rust_backend_generated_rust_compiles() {
     let lex_src = include_str!("fixtures/simple.lex");
     let generated = run_ft_lex_rust(lex_src);
 
@@ -36,7 +36,7 @@ fn generated_rust_compiles() {
 }
 
 #[test]
-fn generated_rust_contains_lexer_struct() {
+fn rust_backend_generated_rust_contains_lexer_struct() {
     let lex_src = include_str!("fixtures/simple.lex");
     let generated = run_ft_lex_rust(lex_src);
     assert!(generated.contains("pub struct Lexer<R: std::io::Read>"),
