@@ -1,3 +1,4 @@
+pub mod backend;
 pub mod creation;
 mod functions;
 pub mod stats;
@@ -9,4 +10,4 @@ const DEFINES: &str = "src/lex_creation/templates/defines.c";
 const VARIABLES: &str = "src/lex_creation/templates/variables.c";
 const YYLEX: &str = "src/lex_creation/templates/yylex.c";
 
-const SPACE: &str = "    ";
+pub(crate) const SPACE: &str = "    ";
