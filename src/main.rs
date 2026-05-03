@@ -5,6 +5,7 @@ mod regex;
 use std::fs::File;
 
 use file_parsing::parsing::{get_file_content, get_stdin_content, parse_lex_content};
+use lex_creation::c::CBackend;
 use lex_creation::creation::lex_creation;
 use lex_creation::stats::{compute_stats, print_stats};
 
@@ -87,14 +88,14 @@ fn main() {
     };
 
     let result = if flag_t {
-        lex_creation(&file_parts, &mut std::io::stdout())
+        lex_creation(&file_parts, &CBackend::new(), &mut std::io::stdout())
     } else {
         match File::create(LEX_FILE) {
             Err(_) => {
                 eprintln!("ft_lex: can't create {LEX_FILE}");
                 return;
             }
-            Ok(mut f) => lex_creation(&file_parts, &mut f),
+            Ok(mut f) => lex_creation(&file_parts, &CBackend::new(), &mut f),
         }
     };
 
