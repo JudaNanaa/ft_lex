@@ -1,4 +1,3 @@
-pub mod table;
 pub mod yy_accept;
 pub mod yy_ec;
 pub mod yy_nxt;

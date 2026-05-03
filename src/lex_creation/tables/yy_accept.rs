@@ -31,9 +31,3 @@ pub fn write_yy_accept_c(tab: &[u8], file: &mut dyn std::io::Write) -> std::io::
     }
     writeln!(file, "{SPACE}}} ;\n")
 }
-
-pub fn yy_accept(dfa: &Dfa, file: &mut dyn std::io::Write) -> std::io::Result<Vec<u8>> {
-    let tab = compute_yy_accept(dfa);
-    write_yy_accept_c(&tab, file)?;
-    Ok(tab)
-}

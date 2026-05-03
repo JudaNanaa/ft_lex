@@ -1,6 +1,6 @@
+use crate::lex_creation::SPACE;
 use std::collections::HashMap;
 use std::io;
-use crate::lex_creation::SPACE;
 
 pub fn compute_yy_ec(eq_classes: &HashMap<char, usize>) -> [usize; 256] {
     let mut ec = [0usize; 256];
@@ -30,9 +30,4 @@ pub fn write_yy_ec_c(ec: &[usize; 256], file: &mut dyn io::Write) -> io::Result<
         }
     }
     Ok(())
-}
-
-pub fn create_yy_ec(eq_classes: &HashMap<char, usize>, file: &mut dyn io::Write) -> io::Result<()> {
-    let ec = compute_yy_ec(eq_classes);
-    write_yy_ec_c(&ec, file)
 }

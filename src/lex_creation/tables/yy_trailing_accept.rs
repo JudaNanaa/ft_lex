@@ -11,7 +11,10 @@ pub fn compute_yy_trailing_accept(dfa: &Dfa) -> Vec<u8> {
     tab
 }
 
-pub fn write_yy_trailing_accept_c(tab: &[u8], file: &mut dyn std::io::Write) -> std::io::Result<()> {
+pub fn write_yy_trailing_accept_c(
+    tab: &[u8],
+    file: &mut dyn std::io::Write,
+) -> std::io::Result<()> {
     let nb_state = tab.len();
     writeln!(file, "\nconst int yy_trailing_accept[{nb_state}] =")?;
     writeln!(file, "{SPACE}{{")?;
@@ -30,9 +33,4 @@ pub fn write_yy_trailing_accept_c(tab: &[u8], file: &mut dyn std::io::Write) -> 
         }
     }
     writeln!(file, "{SPACE}}} ;\n")
-}
-
-pub fn yy_trailing_accept(dfa: &Dfa, file: &mut dyn std::io::Write) -> std::io::Result<()> {
-    let tab = compute_yy_trailing_accept(dfa);
-    write_yy_trailing_accept_c(&tab, file)
 }

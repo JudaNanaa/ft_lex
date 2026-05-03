@@ -1,9 +1,9 @@
 mod tables;
 mod write;
-use tables::{write_accept_actions_rust, write_tables_rust};
+use tables::write_tables_rust;
 use write::{
-    write_action_rust, write_header_rust, write_is_exclusive_state_rust, write_user_routine_rust,
-    write_yylex_rust, write_yytext_section_rust,
+    write_accept_actions_rust, write_action_rust, write_header_rust, write_is_exclusive_state_rust,
+    write_user_routine_rust, write_yylex_rust, write_yytext_section_rust,
 };
 
 use crate::{
@@ -79,6 +79,6 @@ impl CodegenBackend for RustBackend {
         write_user_routine_rust(user_routine, out)
     }
     fn output_filename(&self) -> &'static str {
-        "ft_lex.yy.rs"
+        "ft_lex_yy.rs"
     }
 }

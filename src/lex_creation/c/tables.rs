@@ -21,11 +21,18 @@ pub fn write_tables_c(file_parts: &FilePart, out: &mut dyn std::io::Write) -> st
     write_yy_trailing_accept_c(&compute_yy_trailing_accept(file_parts.dfa()), out)
 }
 
-pub fn write_accept_actions_c(file_parts: &FilePart, out: &mut dyn std::io::Write) -> std::io::Result<()> {
+pub fn write_accept_actions_c(
+    file_parts: &FilePart,
+    out: &mut dyn std::io::Write,
+) -> std::io::Result<()> {
     let final_states = file_parts.actions();
     let action_map = file_parts.map_actions();
     let nb_states = file_parts.dfa().transitions().len();
-    let max_actions = final_states.values().map(|v| v.len()).max().unwrap_or(0);
+    let max_actions = final_states
+        .values()
+        .map(std::vec::Vec::len)
+        .max()
+        .unwrap_or(0);
     let cols = max_actions + 1;
     let mut flat = vec![0usize; nb_states * cols];
     for (state, actions) in final_states {
@@ -35,8 +42,15 @@ pub fn write_accept_actions_c(file_parts: &FilePart, out: &mut dyn std::io::Writ
         }
     }
     writeln!(out, "const int yy_accept_cols = {cols};")?;
-    writeln!(out, "#define YY_ACCEPT(s, i) (yy_accept_actions_flat[(s) * yy_accept_cols + (i)])")?;
-    writeln!(out, "const int yy_accept_actions_flat[{}] =", nb_states * cols)?;
+    writeln!(
+        out,
+        "#define YY_ACCEPT(s, i) (yy_accept_actions_flat[(s) * yy_accept_cols + (i)])"
+    )?;
+    writeln!(
+        out,
+        "const int yy_accept_actions_flat[{}] =",
+        nb_states * cols
+    )?;
     writeln!(out, "{SPACE}{{")?;
     write!(out, "{}", SPACE.repeat(2))?;
     for (i, val) in flat.iter().enumerate() {

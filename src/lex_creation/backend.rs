@@ -10,17 +10,9 @@ pub trait CodegenBackend {
         out: &mut dyn io::Write,
     ) -> io::Result<()>;
 
-    fn write_yytext_section(
-        &self,
-        mode: YytextMode,
-        out: &mut dyn io::Write,
-    ) -> io::Result<()>;
+    fn write_yytext_section(&self, mode: YytextMode, out: &mut dyn io::Write) -> io::Result<()>;
 
-    fn write_tables(
-        &self,
-        file_parts: &FilePart,
-        out: &mut dyn io::Write,
-    ) -> io::Result<()>;
+    fn write_tables(&self, file_parts: &FilePart, out: &mut dyn io::Write) -> io::Result<()>;
 
     fn write_is_exclusive_state(
         &self,
@@ -28,11 +20,7 @@ pub trait CodegenBackend {
         out: &mut dyn io::Write,
     ) -> io::Result<()>;
 
-    fn write_action(
-        &self,
-        file_parts: &FilePart,
-        out: &mut dyn io::Write,
-    ) -> io::Result<()>;
+    fn write_action(&self, file_parts: &FilePart, out: &mut dyn io::Write) -> io::Result<()>;
 
     fn write_accept_actions(
         &self,
@@ -47,11 +35,7 @@ pub trait CodegenBackend {
         out: &mut dyn io::Write,
     ) -> io::Result<()>;
 
-    fn write_user_routine(
-        &self,
-        user_routine: &str,
-        out: &mut dyn io::Write,
-    ) -> io::Result<()>;
+    fn write_user_routine(&self, user_routine: &str, out: &mut dyn io::Write) -> io::Result<()>;
 
     fn output_filename(&self) -> &str;
 }

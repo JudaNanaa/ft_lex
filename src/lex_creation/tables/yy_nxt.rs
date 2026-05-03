@@ -19,14 +19,20 @@ pub fn compute_yy_nxt(dfa: &Dfa) -> YyNxtData {
         }
         transition_table.push(tab);
     }
-    YyNxtData { transition_table, num_cols: num_classes + 1 }
+    YyNxtData {
+        transition_table,
+        num_cols: num_classes + 1,
+    }
 }
 
 pub fn write_yy_nxt_c(data: &YyNxtData, file: &mut dyn std::io::Write) -> std::io::Result<()> {
     let nb_states = data.transition_table.len();
     let total = nb_states * data.num_cols;
     writeln!(file, "const int yy_nxt_cols = {};", data.num_cols)?;
-    writeln!(file, "#define YY_NXT(s, c) (yy_nxt_flat[(s) * yy_nxt_cols + (c)])")?;
+    writeln!(
+        file,
+        "#define YY_NXT(s, c) (yy_nxt_flat[(s) * yy_nxt_cols + (c)])"
+    )?;
     writeln!(file, "\nconst unsigned int yy_nxt_flat[{total}] =")?;
     writeln!(file, "{SPACE}{{")?;
     let flat: Vec<usize> = data.transition_table.iter().flatten().copied().collect();
@@ -47,10 +53,4 @@ pub fn write_yy_nxt_c(data: &YyNxtData, file: &mut dyn std::io::Write) -> std::i
     }
     writeln!(file)?;
     writeln!(file, "{SPACE}}} ;\n")
-}
-
-pub fn create_yy_nxt(dfa: &Dfa, file: &mut dyn std::io::Write) -> std::io::Result<Vec<Vec<usize>>> {
-    let data = compute_yy_nxt(dfa);
-    write_yy_nxt_c(&data, file)?;
-    Ok(data.transition_table)
 }

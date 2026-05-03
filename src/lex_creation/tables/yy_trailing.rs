@@ -31,8 +31,3 @@ pub fn write_yy_trailing_c(tab: &[u8], file: &mut dyn std::io::Write) -> std::io
     }
     writeln!(file, "{SPACE}}} ;\n")
 }
-
-pub fn yy_trailing(dfa: &Dfa, file: &mut dyn std::io::Write) -> std::io::Result<()> {
-    let tab = compute_yy_trailing(dfa);
-    write_yy_trailing_c(&tab, file)
-}
