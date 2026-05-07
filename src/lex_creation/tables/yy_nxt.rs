@@ -120,22 +120,23 @@ pub struct YyNxtPackedData {
     pub base: Vec<usize>,
     pub nxt: Vec<usize>,
     pub chk: Vec<usize>,
+    pub def: Vec<usize>,
 }
 
 pub fn pack_yy_nxt(data: &YyNxtData) -> YyNxtPackedData {
     let num_states = data.transition_table.len();
     let num_cols = data.num_cols;
-    let sentinel = num_states;
+    let jam = num_states;
 
-    // Sort densest states first for better packing
     let mut order: Vec<usize> = (0..num_states).collect();
     order.sort_by_key(|&s| {
         std::cmp::Reverse(data.transition_table[s].iter().filter(|&&v| v != 0).count())
     });
 
     let mut packed_nxt: Vec<usize> = vec![0; num_cols.max(1)];
-    let mut packed_chk: Vec<usize> = vec![sentinel; num_cols.max(1)];
+    let mut packed_chk: Vec<usize> = vec![jam; num_cols.max(1)];
     let mut base = vec![0usize; num_states];
+    let def = vec![jam; num_states]; // placeholder: real chaining in Task 2
 
     for &state in &order {
         let row = &data.transition_table[state];
@@ -150,10 +151,10 @@ pub fn pack_yy_nxt(data: &YyNxtData) -> YyNxtPackedData {
             let needed = offset + num_cols;
             if needed > packed_chk.len() {
                 packed_nxt.resize(needed, 0);
-                packed_chk.resize(needed, sentinel);
+                packed_chk.resize(needed, jam);
             }
             for &ec in &non_zero {
-                if packed_chk[offset + ec] != sentinel {
+                if packed_chk[offset + ec] != jam {
                     offset += 1;
                     continue 'find;
                 }
@@ -166,7 +167,7 @@ pub fn pack_yy_nxt(data: &YyNxtData) -> YyNxtPackedData {
         let needed = offset + num_cols;
         if needed > packed_chk.len() {
             packed_nxt.resize(needed, 0);
-            packed_chk.resize(needed, sentinel);
+            packed_chk.resize(needed, jam);
         }
         for &ec in &non_zero {
             packed_nxt[offset + ec] = row[ec];
@@ -174,11 +175,7 @@ pub fn pack_yy_nxt(data: &YyNxtData) -> YyNxtPackedData {
         }
     }
 
-    YyNxtPackedData {
-        base,
-        nxt: packed_nxt,
-        chk: packed_chk,
-    }
+    YyNxtPackedData { base, nxt: packed_nxt, chk: packed_chk, def }
 }
 
 pub fn write_yy_nxt_packed_c(
@@ -261,27 +258,33 @@ mod tests {
         }
     }
 
+    fn lookup(packed: &YyNxtPackedData, state: usize, ec: usize) -> usize {
+        let jam = packed.base.len();
+        let mut s = state;
+        loop {
+            if s == jam {
+                return 0;
+            }
+            let pos = packed.base[s] + ec;
+            if pos < packed.chk.len() && packed.chk[pos] == s {
+                return packed.nxt[pos];
+            }
+            s = packed.def[s];
+        }
+    }
+
     #[test]
     fn pack_small_table() {
-        // 3 states, 3 cols
-        // state 0: [1, 0, 2]
-        // state 1: [0, 3, 0]
-        // state 2: [0, 0, 0]
         let data = make_data(vec![vec![1, 0, 2], vec![0, 3, 0], vec![0, 0, 0]]);
         let packed = pack_yy_nxt(&data);
 
         assert_eq!(packed.base.len(), 3);
+        assert_eq!(packed.def.len(), 3);
 
-        // Verify round-trip: lookup should match original table
         for state in 0..3 {
             for ec in 0..3 {
                 let expected = data.transition_table[state][ec];
-                let pos = packed.base[state] + ec;
-                let got = if pos < packed.chk.len() && packed.chk[pos] == state {
-                    packed.nxt[pos]
-                } else {
-                    0
-                };
+                let got = lookup(&packed, state, ec);
                 assert_eq!(got, expected, "state={state} ec={ec}");
             }
         }
@@ -291,17 +294,45 @@ mod tests {
     fn pack_all_zero_table() {
         let data = make_data(vec![vec![0, 0], vec![0, 0]]);
         let packed = pack_yy_nxt(&data);
-        // All lookups return 0
+        assert_eq!(packed.def.len(), 2);
         for state in 0..2 {
             for ec in 0..2 {
-                let pos = packed.base[state] + ec;
-                let got = if pos < packed.chk.len() && packed.chk[pos] == state {
-                    packed.nxt[pos]
-                } else {
-                    0
-                };
-                assert_eq!(got, 0);
+                assert_eq!(lookup(&packed, state, ec), 0);
             }
         }
+    }
+
+    #[test]
+    fn pack_prototype_sharing() {
+        // state 0: dense prototype [1, 2, 3, 4]
+        // state 1: differs only at ec=3 → [1, 2, 3, 0]
+        // With prototype chaining, state 1 uses state 0 as its prototype and
+        // stores only 1 entry (ec=3, nxt=0) instead of 3 entries (old algo).
+        let data = make_data(vec![
+            vec![1, 2, 3, 4],
+            vec![1, 2, 3, 0],
+        ]);
+        let packed = pack_yy_nxt(&data);
+
+        for state in 0..2 {
+            for ec in 0..4 {
+                assert_eq!(
+                    lookup(&packed, state, ec),
+                    data.transition_table[state][ec],
+                    "state={state} ec={ec}"
+                );
+            }
+        }
+
+        // state 1's prototype should be state 0 (3 out of 4 columns agree)
+        assert_eq!(packed.def[1], 0, "state 1 should have state 0 as prototype");
+
+        // With sharing: state0 stores 4 entries, state1 stores 1.
+        // nxt[] needs at most 5 filled slots → length ≤ 6 (with possible offset gap).
+        assert!(
+            packed.nxt.len() <= 6,
+            "expected prototype sharing to compress nxt[], got len={}",
+            packed.nxt.len()
+        );
     }
 }
