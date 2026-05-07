@@ -120,15 +120,12 @@ pub struct YyNxtPackedData {
     pub base: Vec<usize>,
     pub nxt: Vec<usize>,
     pub chk: Vec<usize>,
-    pub has_trans: Vec<u8>,
 }
 
 pub fn pack_yy_nxt(data: &YyNxtData) -> YyNxtPackedData {
     let num_states = data.transition_table.len();
     let num_cols = data.num_cols;
     let sentinel = num_states;
-
-    let has_trans = compute_yy_has_trans(data);
 
     // Sort densest states first for better packing
     let mut order: Vec<usize> = (0..num_states).collect();
@@ -181,7 +178,6 @@ pub fn pack_yy_nxt(data: &YyNxtData) -> YyNxtPackedData {
         base,
         nxt: packed_nxt,
         chk: packed_chk,
-        has_trans,
     }
 }
 
@@ -275,7 +271,6 @@ mod tests {
         let packed = pack_yy_nxt(&data);
 
         assert_eq!(packed.base.len(), 3);
-        assert_eq!(packed.has_trans, vec![1, 1, 0]);
 
         // Verify round-trip: lookup should match original table
         for state in 0..3 {
@@ -296,7 +291,6 @@ mod tests {
     fn pack_all_zero_table() {
         let data = make_data(vec![vec![0, 0], vec![0, 0]]);
         let packed = pack_yy_nxt(&data);
-        assert_eq!(packed.has_trans, vec![0, 0]);
         // All lookups return 0
         for state in 0..2 {
             for ec in 0..2 {
