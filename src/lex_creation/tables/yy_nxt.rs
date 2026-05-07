@@ -54,3 +54,58 @@ pub fn write_yy_nxt_c(data: &YyNxtData, file: &mut dyn std::io::Write) -> std::i
     writeln!(file)?;
     writeln!(file, "{SPACE}}} ;\n")
 }
+
+pub fn compute_yy_has_trans(data: &YyNxtData) -> Vec<u8> {
+    data.transition_table
+        .iter()
+        .map(|row| if row.iter().any(|&v| v != 0) { 1u8 } else { 0u8 })
+        .collect()
+}
+
+pub fn write_yy_has_trans_c(
+    has_trans: &[u8],
+    file: &mut dyn std::io::Write,
+) -> std::io::Result<()> {
+    use crate::lex_creation::SPACE;
+    let n = has_trans.len();
+    writeln!(file, "\nconst int yy_has_trans[{n}] =")?;
+    writeln!(file, "{SPACE}{{")?;
+    write!(file, "{}", SPACE.repeat(2))?;
+    for (i, &v) in has_trans.iter().enumerate() {
+        write!(file, "{v}")?;
+        if i + 1 < n {
+            write!(file, ",")?;
+            if (i + 1) % 10 == 0 {
+                writeln!(file)?;
+                write!(file, "{}", SPACE.repeat(2))?;
+            } else {
+                write!(file, " ")?;
+            }
+        }
+    }
+    writeln!(file)?;
+    writeln!(file, "{SPACE}}} ;\n")
+}
+
+pub fn write_yy_has_trans_rust(
+    has_trans: &[u8],
+    out: &mut dyn std::io::Write,
+) -> std::io::Result<()> {
+    use crate::lex_creation::SPACE;
+    writeln!(out, "static YY_HAS_TRANS: &[u8] = &[")?;
+    write!(out, "{}", SPACE.repeat(2))?;
+    for (i, &v) in has_trans.iter().enumerate() {
+        write!(out, "{v}")?;
+        if i + 1 < has_trans.len() {
+            write!(out, ",")?;
+            if (i + 1) % 16 == 0 {
+                writeln!(out)?;
+                write!(out, "{}", SPACE.repeat(2))?;
+            } else {
+                write!(out, " ")?;
+            }
+        }
+    }
+    writeln!(out)?;
+    writeln!(out, "];")
+}
