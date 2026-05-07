@@ -26,6 +26,25 @@ fn run_ft_lex_rust(lex_src: &str) -> String {
     String::from_utf8(output.stdout).unwrap()
 }
 
+fn run_ft_lex_c(lex_src: &str) -> String {
+    let mut child = std::process::Command::new(env!("CARGO_BIN_EXE_ft_lex"))
+        .args(["-t", "-"])
+        .stdin(std::process::Stdio::piped())
+        .stdout(std::process::Stdio::piped())
+        .stderr(std::process::Stdio::piped())
+        .spawn()
+        .expect("failed to spawn ft_lex");
+    child
+        .stdin
+        .take()
+        .unwrap()
+        .write_all(lex_src.as_bytes())
+        .unwrap();
+    let output = child.wait_with_output().unwrap();
+    assert!(output.status.success());
+    String::from_utf8(output.stdout).unwrap()
+}
+
 fn build_runtime_rlib(dir: &std::path::Path) -> PathBuf {
     let runtime_src = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
         .join("src/lex_creation/rust/templates/ft_lex_runtime.rs");
@@ -101,5 +120,15 @@ fn rust_backend_generated_rust_contains_lexer_struct() {
     assert!(
         generated.contains("static YY_NXT_FLAT"),
         "Missing YY_NXT_FLAT table in generated output"
+    );
+}
+
+#[test]
+fn c_backend_contains_yy_has_trans() {
+    let lex_src = include_str!("fixtures/simple.lex");
+    let generated = run_ft_lex_c(lex_src);
+    assert!(
+        generated.contains("yy_has_trans"),
+        "Missing yy_has_trans in C output"
     );
 }

@@ -35,7 +35,7 @@ impl CodegenBackend for CBackend {
     }
 
     fn write_tables(&self, file_parts: &FilePart, out: &mut dyn io::Write) -> io::Result<()> {
-        write_tables_c(file_parts, out)
+        write_tables_c(file_parts, false, out)
     }
 
     fn write_is_exclusive_state(
