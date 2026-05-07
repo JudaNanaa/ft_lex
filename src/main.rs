@@ -153,6 +153,6 @@ fn main() {
             OutputDest::Stdout => &mut std::io::stderr(),
             OutputDest::File => &mut std::io::stdout(),
         };
-        print_stats(&compute_stats(&file_parts), out);
+        print_stats(&compute_stats(&file_parts, opts.compressed), out);
     }
 }
