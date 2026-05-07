@@ -109,3 +109,144 @@ pub fn write_yy_has_trans_rust(
     writeln!(out)?;
     writeln!(out, "];")
 }
+
+pub struct YyNxtPackedData {
+    pub base: Vec<usize>,
+    pub nxt: Vec<usize>,
+    pub chk: Vec<usize>,
+    pub has_trans: Vec<u8>,
+}
+
+pub fn pack_yy_nxt(data: &YyNxtData) -> YyNxtPackedData {
+    let num_states = data.transition_table.len();
+    let num_cols = data.num_cols;
+    let sentinel = num_states;
+
+    let has_trans: Vec<u8> = data
+        .transition_table
+        .iter()
+        .map(|row| if row.iter().any(|&v| v != 0) { 1u8 } else { 0u8 })
+        .collect();
+
+    // Sort densest states first for better packing
+    let mut order: Vec<usize> = (0..num_states).collect();
+    order.sort_by_key(|&s| {
+        std::cmp::Reverse(
+            data.transition_table[s]
+                .iter()
+                .filter(|&&v| v != 0)
+                .count(),
+        )
+    });
+
+    let mut packed_nxt: Vec<usize> = vec![0; num_cols.max(1)];
+    let mut packed_chk: Vec<usize> = vec![sentinel; num_cols.max(1)];
+    let mut base = vec![0usize; num_states];
+
+    for &state in &order {
+        let row = &data.transition_table[state];
+        let non_zero: Vec<usize> = (0..num_cols).filter(|&ec| row[ec] != 0).collect();
+
+        if non_zero.is_empty() {
+            continue;
+        }
+
+        let mut offset = 0usize;
+        'find: loop {
+            let needed = offset + num_cols;
+            if needed > packed_chk.len() {
+                packed_nxt.resize(needed, 0);
+                packed_chk.resize(needed, sentinel);
+            }
+            for &ec in &non_zero {
+                if packed_chk[offset + ec] != sentinel {
+                    offset += 1;
+                    continue 'find;
+                }
+            }
+            break;
+        }
+
+        base[state] = offset;
+
+        let needed = offset + num_cols;
+        if needed > packed_chk.len() {
+            packed_nxt.resize(needed, 0);
+            packed_chk.resize(needed, sentinel);
+        }
+        for &ec in &non_zero {
+            packed_nxt[offset + ec] = row[ec];
+            packed_chk[offset + ec] = state;
+        }
+    }
+
+    YyNxtPackedData {
+        base,
+        nxt: packed_nxt,
+        chk: packed_chk,
+        has_trans,
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn make_data(rows: Vec<Vec<usize>>) -> YyNxtData {
+        let num_cols = rows.first().map(|r| r.len()).unwrap_or(0);
+        YyNxtData {
+            transition_table: rows,
+            num_cols,
+        }
+    }
+
+    #[test]
+    fn pack_small_table() {
+        // 3 states, 3 cols
+        // state 0: [1, 0, 2]
+        // state 1: [0, 3, 0]
+        // state 2: [0, 0, 0]
+        let data = make_data(vec![
+            vec![1, 0, 2],
+            vec![0, 3, 0],
+            vec![0, 0, 0],
+        ]);
+        let packed = pack_yy_nxt(&data);
+
+        assert_eq!(packed.base.len(), 3);
+        assert_eq!(packed.has_trans, vec![1, 1, 0]);
+
+        // Verify round-trip: lookup should match original table
+        for state in 0..3 {
+            for ec in 0..3 {
+                let expected = data.transition_table[state][ec];
+                let pos = packed.base[state] + ec;
+                let got = if pos < packed.chk.len() && packed.chk[pos] == state {
+                    packed.nxt[pos]
+                } else {
+                    0
+                };
+                assert_eq!(got, expected, "state={state} ec={ec}");
+            }
+        }
+    }
+
+    #[test]
+    fn pack_all_zero_table() {
+        let data = make_data(vec![vec![0, 0], vec![0, 0]]);
+        let packed = pack_yy_nxt(&data);
+        assert_eq!(packed.has_trans, vec![0, 0]);
+        // All lookups return 0
+        for state in 0..2 {
+            for ec in 0..2 {
+                let pos = packed.base[state] + ec;
+                let got = if pos < packed.chk.len() && packed.chk[pos] == state {
+                    packed.nxt[pos]
+                } else {
+                    0
+                };
+                assert_eq!(got, 0);
+            }
+        }
+    }
+}
