@@ -72,6 +72,8 @@ pub fn write_tables_rust(
         writeln!(out)?;
         write_usize_slice_pub("YY_CHK", &packed.chk, out)?;
         writeln!(out)?;
+        write_usize_slice_pub("YY_DEF", &packed.def, out)?;
+        writeln!(out)?;
     } else {
         let flat: Vec<usize> = nxt.transition_table.iter().flatten().copied().collect();
         writeln!(out, "const YY_NXT_COLS: usize = {};", nxt.num_cols)?;

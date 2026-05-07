@@ -63,7 +63,7 @@ pub fn write_is_exclusive_state_rust(
     if compressed {
         writeln!(
             out,
-            "            nxt: NxtTable::Packed {{ base: YY_BASE, nxt: YY_NXT_PACKED, chk: YY_CHK }},"
+            "            nxt: NxtTable::Packed {{ base: YY_BASE, nxt: YY_NXT_PACKED, chk: YY_CHK, def: YY_DEF }},"
         )?;
     } else {
         writeln!(
