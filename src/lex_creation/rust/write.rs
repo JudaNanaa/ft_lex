@@ -15,7 +15,7 @@ pub fn write_header_rust(
     writeln!(out, "#![allow(dead_code, unused_assignments)]")?;
     writeln!(
         out,
-        "use ft_lex_runtime::{{ActionResult, LexerCore, LexerInterface, Tables, run_yylex}};"
+        "use ft_lex_runtime::{{ActionResult, LexerCore, LexerInterface, NxtTable, Tables, run_yylex}};"
     )?;
     writeln!(out)?;
     writeln!(out, "const INITIAL: usize = 0;")?;
@@ -59,8 +59,11 @@ pub fn write_is_exclusive_state_rust(
     writeln!(out)?;
     writeln!(out, "    fn tables(&self) -> Tables {{")?;
     writeln!(out, "        Tables {{")?;
-    writeln!(out, "            yy_nxt_cols: YY_NXT_COLS,")?;
-    writeln!(out, "            yy_nxt_flat: YY_NXT_FLAT,")?;
+    writeln!(
+        out,
+        "            nxt: NxtTable::Flat {{ cols: YY_NXT_COLS, flat: YY_NXT_FLAT }},"
+    )?;
+    writeln!(out, "            yy_has_trans: YY_HAS_TRANS,")?;
     writeln!(out, "            yy_ec: YY_EC,")?;
     writeln!(out, "            yy_accept: YY_ACCEPT,")?;
     writeln!(out, "            yy_trailing: YY_TRAILING,")?;

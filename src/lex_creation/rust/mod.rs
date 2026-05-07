@@ -40,7 +40,7 @@ impl CodegenBackend for RustBackend {
         file_parts: &FilePart,
         out: &mut dyn std::io::Write,
     ) -> std::io::Result<()> {
-        write_tables_rust(file_parts, out)
+        write_tables_rust(file_parts, false, out)
     }
     fn write_is_exclusive_state(
         &self,

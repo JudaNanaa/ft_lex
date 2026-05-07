@@ -124,6 +124,16 @@ fn rust_backend_generated_rust_contains_lexer_struct() {
 }
 
 #[test]
+fn rust_backend_contains_yy_has_trans() {
+    let lex_src = include_str!("fixtures/simple.lex");
+    let generated = run_ft_lex_rust(lex_src);
+    assert!(
+        generated.contains("YY_HAS_TRANS"),
+        "Missing YY_HAS_TRANS in Rust output"
+    );
+}
+
+#[test]
 fn c_backend_contains_yy_has_trans() {
     let lex_src = include_str!("fixtures/simple.lex");
     let generated = run_ft_lex_c(lex_src);
