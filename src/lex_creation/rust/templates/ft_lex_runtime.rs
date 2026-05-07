@@ -15,6 +15,7 @@ pub enum NxtTable {
         base: &'static [usize],
         nxt: &'static [usize],
         chk: &'static [usize],
+        def: &'static [usize],
     },
 }
 
@@ -227,9 +228,19 @@ pub fn run_yylex<L: LexerInterface>(lexer: &mut L) -> i32 {
                 let yy_c = tables.yy_ec[c as usize] as usize;
                 let next_state = match tables.nxt {
                     NxtTable::Flat { cols, flat } => flat[current_state * cols + yy_c],
-                    NxtTable::Packed { base, nxt, chk } => {
-                        let pos = base[current_state] + yy_c;
-                        if chk[pos] == current_state { nxt[pos] } else { 0 }
+                    NxtTable::Packed { base, nxt, chk, def } => {
+                        let jam = base.len();
+                        let mut s = current_state;
+                        loop {
+                            if s == jam {
+                                break 0;
+                            }
+                            let pos = base[s] + yy_c;
+                            if pos < chk.len() && chk[pos] == s {
+                                break nxt[pos];
+                            }
+                            s = def[s];
+                        }
                     }
                 };
 
