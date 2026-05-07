@@ -26,6 +26,7 @@ struct Opts {
     backend: Backend,
     verbose: bool,
     no_stats: bool,
+    compressed: bool,
     sources: Vec<Option<String>>,
 }
 
@@ -34,6 +35,7 @@ fn parse_args(args: &[String]) -> Opts {
     let mut backend = Backend::C;
     let mut verbose = false;
     let mut no_stats = false;
+    let mut compressed = false;
     let mut sources: Vec<Option<String>> = vec![];
     let mut stdin_seen = false;
     if args.is_empty() {
@@ -43,6 +45,7 @@ fn parse_args(args: &[String]) -> Opts {
             backend,
             verbose,
             no_stats,
+            compressed,
             sources,
         };
     }
@@ -51,6 +54,7 @@ fn parse_args(args: &[String]) -> Opts {
             "-t" => output = OutputDest::Stdout,
             "-v" => verbose = true,
             "-n" => no_stats = true,
+            "-C" => compressed = true,
             "--rust" => backend = Backend::Rust,
             "-" if !stdin_seen => {
                 stdin_seen = true;
@@ -66,6 +70,7 @@ fn parse_args(args: &[String]) -> Opts {
         backend,
         verbose,
         no_stats,
+        compressed,
         sources,
     }
 }
@@ -120,8 +125,8 @@ fn main() {
     };
 
     let backend: Box<dyn CodegenBackend> = match opts.backend {
-        Backend::Rust => Box::new(lex_creation::rust::RustBackend::new()),
-        Backend::C => Box::new(CBackend::new()),
+        Backend::Rust => Box::new(lex_creation::rust::RustBackend::new(opts.compressed)),
+        Backend::C => Box::new(CBackend::new(opts.compressed)),
     };
 
     let result = match opts.output {
