@@ -184,6 +184,74 @@ pub fn pack_yy_nxt(data: &YyNxtData) -> YyNxtPackedData {
     }
 }
 
+pub fn write_yy_nxt_packed_c(
+    data: &YyNxtPackedData,
+    file: &mut dyn std::io::Write,
+) -> std::io::Result<()> {
+    use crate::lex_creation::SPACE;
+
+    let n = data.base.len();
+    writeln!(file, "\nconst unsigned int yy_base[{n}] =")?;
+    writeln!(file, "{SPACE}{{")?;
+    write!(file, "{}", SPACE.repeat(2))?;
+    for (i, &v) in data.base.iter().enumerate() {
+        write!(file, "{v}")?;
+        if i + 1 < n {
+            write!(file, ",")?;
+            if (i + 1) % 10 == 0 {
+                writeln!(file)?;
+                write!(file, "{}", SPACE.repeat(2))?;
+            } else {
+                write!(file, " ")?;
+            }
+        }
+    }
+    writeln!(file)?;
+    writeln!(file, "{SPACE}}} ;\n")?;
+
+    let m = data.nxt.len();
+    writeln!(file, "const unsigned int yy_nxt_packed[{m}] =")?;
+    writeln!(file, "{SPACE}{{")?;
+    write!(file, "{}", SPACE.repeat(2))?;
+    for (i, &v) in data.nxt.iter().enumerate() {
+        write!(file, "{v}")?;
+        if i + 1 < m {
+            write!(file, ",")?;
+            if (i + 1) % 10 == 0 {
+                writeln!(file)?;
+                write!(file, "{}", SPACE.repeat(2))?;
+            } else {
+                write!(file, " ")?;
+            }
+        }
+    }
+    writeln!(file)?;
+    writeln!(file, "{SPACE}}} ;\n")?;
+
+    writeln!(file, "const unsigned int yy_chk[{m}] =")?;
+    writeln!(file, "{SPACE}{{")?;
+    write!(file, "{}", SPACE.repeat(2))?;
+    for (i, &v) in data.chk.iter().enumerate() {
+        write!(file, "{v}")?;
+        if i + 1 < m {
+            write!(file, ",")?;
+            if (i + 1) % 10 == 0 {
+                writeln!(file)?;
+                write!(file, "{}", SPACE.repeat(2))?;
+            } else {
+                write!(file, " ")?;
+            }
+        }
+    }
+    writeln!(file)?;
+    writeln!(file, "{SPACE}}} ;\n")?;
+
+    writeln!(
+        file,
+        "#define YY_NXT(s, c) \\\n    (yy_chk[yy_base[(s)] + (c)] == (unsigned int)(s) \\\n        ? yy_nxt_packed[yy_base[(s)] + (c)] : 0)\n"
+    )
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

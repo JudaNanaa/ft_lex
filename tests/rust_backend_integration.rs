@@ -142,3 +142,35 @@ fn c_backend_contains_yy_has_trans() {
         "Missing yy_has_trans in C output"
     );
 }
+
+fn run_ft_lex_c_compressed(lex_src: &str) -> String {
+    let mut child = std::process::Command::new(env!("CARGO_BIN_EXE_ft_lex"))
+        .args(["-t", "-C", "-"])
+        .stdin(std::process::Stdio::piped())
+        .stdout(std::process::Stdio::piped())
+        .stderr(std::process::Stdio::piped())
+        .spawn()
+        .expect("failed to spawn ft_lex");
+    child
+        .stdin
+        .take()
+        .unwrap()
+        .write_all(lex_src.as_bytes())
+        .unwrap();
+    let output = child.wait_with_output().unwrap();
+    assert!(output.status.success());
+    String::from_utf8(output.stdout).unwrap()
+}
+
+#[test]
+fn c_backend_compressed_contains_yy_base() {
+    let lex_src = include_str!("fixtures/simple.lex");
+    let generated = run_ft_lex_c_compressed(lex_src);
+    assert!(generated.contains("yy_base"), "Missing yy_base");
+    assert!(generated.contains("yy_nxt_packed"), "Missing yy_nxt_packed");
+    assert!(generated.contains("yy_chk"), "Missing yy_chk");
+    assert!(
+        !generated.contains("yy_nxt_flat"),
+        "yy_nxt_flat should not appear in compressed mode"
+    );
+}
