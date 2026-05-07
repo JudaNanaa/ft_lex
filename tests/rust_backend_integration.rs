@@ -45,10 +45,10 @@ fn run_ft_lex_c(lex_src: &str) -> String {
     String::from_utf8(output.stdout).unwrap()
 }
 
-fn build_runtime_rlib(dir: &std::path::Path) -> PathBuf {
+fn build_runtime_rlib(dir: &std::path::Path, name: &str) -> PathBuf {
     let runtime_src = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
         .join("src/lex_creation/rust/templates/ft_lex_runtime.rs");
-    let rlib_path = dir.join("libft_lex_runtime.rlib");
+    let rlib_path = dir.join(name);
     let status = Command::new("rustc")
         .args([
             "--edition",
@@ -77,7 +77,7 @@ fn rust_backend_generated_rust_compiles() {
     let generated = run_ft_lex_rust(lex_src);
 
     let dir = std::env::temp_dir();
-    let rlib_path = build_runtime_rlib(&dir);
+    let rlib_path = build_runtime_rlib(&dir, "libft_lex_runtime.rlib");
     let rs_path = dir.join("ft_lex_test_output.rs");
     std::fs::write(&rs_path, &generated).unwrap();
 
@@ -210,7 +210,7 @@ fn rust_backend_compressed_compiles() {
     );
 
     let dir = std::env::temp_dir();
-    let rlib_path = build_runtime_rlib(&dir);
+    let rlib_path = build_runtime_rlib(&dir, "libft_lex_runtime_compressed.rlib");
     let rs_path = dir.join("ft_lex_test_compressed.rs");
     std::fs::write(&rs_path, &generated).unwrap();
 
