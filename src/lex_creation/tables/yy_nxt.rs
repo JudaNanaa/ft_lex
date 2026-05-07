@@ -136,13 +136,34 @@ pub fn pack_yy_nxt(data: &YyNxtData) -> YyNxtPackedData {
     let mut packed_nxt: Vec<usize> = vec![0; num_cols.max(1)];
     let mut packed_chk: Vec<usize> = vec![jam; num_cols.max(1)];
     let mut base = vec![0usize; num_states];
-    let def = vec![jam; num_states]; // placeholder: real chaining in Task 2
+    let mut def = vec![jam; num_states];
+    let mut processed = vec![false; num_states];
 
     for &state in &order {
         let row = &data.transition_table[state];
-        let non_zero: Vec<usize> = (0..num_cols).filter(|&ec| row[ec] != 0).collect();
 
-        if non_zero.is_empty() {
+        // Find the already-processed state with maximum column agreement
+        let proto = (0..num_states)
+            .filter(|&s| processed[s])
+            .max_by_key(|&s| {
+                let pr = &data.transition_table[s];
+                row.iter().zip(pr.iter()).filter(|(&a, &b)| a == b).count()
+            });
+
+        def[state] = proto.unwrap_or(jam);
+
+        let proto_row = proto
+            .map(|p| data.transition_table[p].as_slice())
+            .unwrap_or(&[]);
+
+        // Store only entries where this state differs from its prototype
+        let to_store: Vec<usize> = (0..num_cols)
+            .filter(|&ec| row[ec] != proto_row.get(ec).copied().unwrap_or(0))
+            .collect();
+
+        processed[state] = true;
+
+        if to_store.is_empty() {
             continue;
         }
 
@@ -153,7 +174,7 @@ pub fn pack_yy_nxt(data: &YyNxtData) -> YyNxtPackedData {
                 packed_nxt.resize(needed, 0);
                 packed_chk.resize(needed, jam);
             }
-            for &ec in &non_zero {
+            for &ec in &to_store {
                 if packed_chk[offset + ec] != jam {
                     offset += 1;
                     continue 'find;
@@ -169,7 +190,7 @@ pub fn pack_yy_nxt(data: &YyNxtData) -> YyNxtPackedData {
             packed_nxt.resize(needed, 0);
             packed_chk.resize(needed, jam);
         }
-        for &ec in &non_zero {
+        for &ec in &to_store {
             packed_nxt[offset + ec] = row[ec];
             packed_chk[offset + ec] = state;
         }
