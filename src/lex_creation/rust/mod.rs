@@ -49,7 +49,7 @@ impl CodegenBackend for RustBackend {
         file_parts: &FilePart,
         out: &mut dyn std::io::Write,
     ) -> std::io::Result<()> {
-        write_is_exclusive_state_rust(file_parts, out)
+        write_is_exclusive_state_rust(file_parts, self.compressed, out)
     }
     fn write_action(
         &self,

@@ -43,6 +43,7 @@ pub fn write_yytext_section_rust(
 
 pub fn write_is_exclusive_state_rust(
     file_parts: &FilePart,
+    compressed: bool,
     out: &mut dyn std::io::Write,
 ) -> std::io::Result<()> {
     writeln!(out, "impl<R: std::io::Read> LexerInterface for Lexer<R> {{")?;
@@ -59,10 +60,17 @@ pub fn write_is_exclusive_state_rust(
     writeln!(out)?;
     writeln!(out, "    fn tables(&self) -> Tables {{")?;
     writeln!(out, "        Tables {{")?;
-    writeln!(
-        out,
-        "            nxt: NxtTable::Flat {{ cols: YY_NXT_COLS, flat: YY_NXT_FLAT }},"
-    )?;
+    if compressed {
+        writeln!(
+            out,
+            "            nxt: NxtTable::Packed {{ base: YY_BASE, nxt: YY_NXT_PACKED, chk: YY_CHK }},"
+        )?;
+    } else {
+        writeln!(
+            out,
+            "            nxt: NxtTable::Flat {{ cols: YY_NXT_COLS, flat: YY_NXT_FLAT }},"
+        )?;
+    }
     writeln!(out, "            yy_has_trans: YY_HAS_TRANS,")?;
     writeln!(out, "            yy_ec: YY_EC,")?;
     writeln!(out, "            yy_accept: YY_ACCEPT,")?;

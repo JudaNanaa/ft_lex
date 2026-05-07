@@ -57,15 +57,27 @@ pub fn write_tables_rust(
     out: &mut dyn std::io::Write,
 ) -> std::io::Result<()> {
     use crate::lex_creation::tables::yy_nxt::{
-        compute_yy_has_trans, compute_yy_nxt, write_yy_has_trans_rust,
+        compute_yy_has_trans, compute_yy_nxt, pack_yy_nxt, write_yy_has_trans_rust,
     };
-    let _ = compressed; // will be used in Task 7
 
     let nxt = compute_yy_nxt(file_parts.dfa());
-    let flat: Vec<usize> = nxt.transition_table.iter().flatten().copied().collect();
-    writeln!(out, "const YY_NXT_COLS: usize = {};", nxt.num_cols)?;
-    write_usize_slice_pub("YY_NXT_FLAT", &flat, out)?;
+    write_yy_has_trans_rust(&compute_yy_has_trans(&nxt), out)?;
     writeln!(out)?;
+
+    if compressed {
+        let packed = pack_yy_nxt(&nxt);
+        write_usize_slice_pub("YY_BASE", &packed.base, out)?;
+        writeln!(out)?;
+        write_usize_slice_pub("YY_NXT_PACKED", &packed.nxt, out)?;
+        writeln!(out)?;
+        write_usize_slice_pub("YY_CHK", &packed.chk, out)?;
+        writeln!(out)?;
+    } else {
+        let flat: Vec<usize> = nxt.transition_table.iter().flatten().copied().collect();
+        writeln!(out, "const YY_NXT_COLS: usize = {};", nxt.num_cols)?;
+        write_usize_slice_pub("YY_NXT_FLAT", &flat, out)?;
+        writeln!(out)?;
+    }
 
     let ec = compute_yy_ec(&file_parts.dfa().eq_classes);
     let ec_slice: Vec<u8> = ec
@@ -73,9 +85,6 @@ pub fn write_tables_rust(
         .map(|&v| u8::try_from(v).expect("EC value exceeds u8"))
         .collect();
     write_u8_slice("YY_EC", &ec_slice, out)?;
-    writeln!(out)?;
-
-    write_yy_has_trans_rust(&compute_yy_has_trans(&nxt), out)?;
     writeln!(out)?;
 
     write_u8_slice("YY_ACCEPT", &compute_yy_accept(file_parts.dfa()), out)?;

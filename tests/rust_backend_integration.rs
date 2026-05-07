@@ -174,3 +174,66 @@ fn c_backend_compressed_contains_yy_base() {
         "yy_nxt_flat should not appear in compressed mode"
     );
 }
+
+fn run_ft_lex_rust_compressed(lex_src: &str) -> String {
+    let mut child = std::process::Command::new(env!("CARGO_BIN_EXE_ft_lex"))
+        .args(["--rust", "-t", "-C", "-"])
+        .stdin(std::process::Stdio::piped())
+        .stdout(std::process::Stdio::piped())
+        .stderr(std::process::Stdio::piped())
+        .spawn()
+        .expect("failed to spawn ft_lex");
+    child
+        .stdin
+        .take()
+        .unwrap()
+        .write_all(lex_src.as_bytes())
+        .unwrap();
+    let output = child.wait_with_output().unwrap();
+    assert!(output.status.success());
+    String::from_utf8(output.stdout).unwrap()
+}
+
+#[test]
+fn rust_backend_compressed_compiles() {
+    let lex_src = include_str!("fixtures/simple.lex");
+    let generated = run_ft_lex_rust_compressed(lex_src);
+
+    assert!(generated.contains("YY_BASE"), "Missing YY_BASE");
+    assert!(
+        generated.contains("NxtTable::Packed"),
+        "Missing NxtTable::Packed"
+    );
+    assert!(
+        !generated.contains("YY_NXT_FLAT"),
+        "YY_NXT_FLAT should not appear in compressed mode"
+    );
+
+    let dir = std::env::temp_dir();
+    let rlib_path = build_runtime_rlib(&dir);
+    let rs_path = dir.join("ft_lex_test_compressed.rs");
+    std::fs::write(&rs_path, &generated).unwrap();
+
+    let extern_arg = format!("ft_lex_runtime={}", rlib_path.to_str().unwrap());
+    let status = std::process::Command::new("rustc")
+        .args([
+            "--edition",
+            "2021",
+            "--crate-type",
+            "lib",
+            "--extern",
+            &extern_arg,
+            rs_path.to_str().unwrap(),
+        ])
+        .output()
+        .expect("rustc not found");
+
+    if !status.status.success() {
+        eprintln!("--- Generated Rust (compressed) ---\n{generated}");
+        eprintln!(
+            "--- rustc stderr ---\n{}",
+            String::from_utf8_lossy(&status.stderr)
+        );
+        panic!("Compressed Rust output did not compile");
+    }
+}
