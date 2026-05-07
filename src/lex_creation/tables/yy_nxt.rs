@@ -206,10 +206,50 @@ pub fn write_yy_nxt_packed_c(
     use crate::lex_creation::SPACE;
 
     let n = data.base.len();
+    let jam = n;
+
+    writeln!(file, "#define YY_JAM {jam}u\n")?;
+    writeln!(
+        file,
+        "static inline unsigned int yy_nxt_lookup(unsigned int state, unsigned int ec) {{"
+    )?;
+    writeln!(file, "{SPACE}while (state != YY_JAM) {{")?;
+    writeln!(
+        file,
+        "{SPACE}{SPACE}unsigned int pos = yy_base[state] + ec;"
+    )?;
+    writeln!(
+        file,
+        "{SPACE}{SPACE}if (yy_chk[pos] == state) return yy_nxt_packed[pos];"
+    )?;
+    writeln!(file, "{SPACE}{SPACE}state = yy_def[state];")?;
+    writeln!(file, "{SPACE}}}")?;
+    writeln!(file, "{SPACE}return 0;")?;
+    writeln!(file, "}}")?;
+    writeln!(file, "#define YY_NXT(s, c) yy_nxt_lookup((s), (c))\n")?;
+
     writeln!(file, "\nconst unsigned int yy_base[{n}] =")?;
     writeln!(file, "{SPACE}{{")?;
     write!(file, "{}", SPACE.repeat(2))?;
     for (i, &v) in data.base.iter().enumerate() {
+        write!(file, "{v}")?;
+        if i + 1 < n {
+            write!(file, ",")?;
+            if (i + 1) % 10 == 0 {
+                writeln!(file)?;
+                write!(file, "{}", SPACE.repeat(2))?;
+            } else {
+                write!(file, " ")?;
+            }
+        }
+    }
+    writeln!(file)?;
+    writeln!(file, "{SPACE}}} ;\n")?;
+
+    writeln!(file, "const unsigned int yy_def[{n}] =")?;
+    writeln!(file, "{SPACE}{{")?;
+    write!(file, "{}", SPACE.repeat(2))?;
+    for (i, &v) in data.def.iter().enumerate() {
         write!(file, "{v}")?;
         if i + 1 < n {
             write!(file, ",")?;
@@ -259,12 +299,7 @@ pub fn write_yy_nxt_packed_c(
         }
     }
     writeln!(file)?;
-    writeln!(file, "{SPACE}}} ;\n")?;
-
-    writeln!(
-        file,
-        "#define YY_NXT(s, c) \\\n    (yy_chk[yy_base[(s)] + (c)] == (unsigned int)(s) \\\n        ? yy_nxt_packed[yy_base[(s)] + (c)] : 0)\n"
-    )
+    writeln!(file, "{SPACE}}} ;\n")
 }
 
 #[cfg(test)]
