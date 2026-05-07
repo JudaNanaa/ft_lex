@@ -2,8 +2,8 @@ use crate::{
     file_parsing::FilePart,
     lex_creation::{
         tables::{
-            yy_accept::compute_yy_accept, yy_ec::compute_yy_ec,
-            yy_trailing::compute_yy_trailing, yy_trailing_accept::compute_yy_trailing_accept,
+            yy_accept::compute_yy_accept, yy_ec::compute_yy_ec, yy_trailing::compute_yy_trailing,
+            yy_trailing_accept::compute_yy_trailing_accept,
         },
         SPACE,
     },

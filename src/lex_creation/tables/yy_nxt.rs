@@ -58,7 +58,13 @@ pub fn write_yy_nxt_c(data: &YyNxtData, file: &mut dyn std::io::Write) -> std::i
 pub fn compute_yy_has_trans(data: &YyNxtData) -> Vec<u8> {
     data.transition_table
         .iter()
-        .map(|row| if row.iter().any(|&v| v != 0) { 1u8 } else { 0u8 })
+        .map(|row| {
+            if row.iter().any(|&v| v != 0) {
+                1u8
+            } else {
+                0u8
+            }
+        })
         .collect()
 }
 
@@ -127,12 +133,7 @@ pub fn pack_yy_nxt(data: &YyNxtData) -> YyNxtPackedData {
     // Sort densest states first for better packing
     let mut order: Vec<usize> = (0..num_states).collect();
     order.sort_by_key(|&s| {
-        std::cmp::Reverse(
-            data.transition_table[s]
-                .iter()
-                .filter(|&&v| v != 0)
-                .count(),
-        )
+        std::cmp::Reverse(data.transition_table[s].iter().filter(|&&v| v != 0).count())
     });
 
     let mut packed_nxt: Vec<usize> = vec![0; num_cols.max(1)];
@@ -270,11 +271,7 @@ mod tests {
         // state 0: [1, 0, 2]
         // state 1: [0, 3, 0]
         // state 2: [0, 0, 0]
-        let data = make_data(vec![
-            vec![1, 0, 2],
-            vec![0, 3, 0],
-            vec![0, 0, 0],
-        ]);
+        let data = make_data(vec![vec![1, 0, 2], vec![0, 3, 0], vec![0, 0, 0]]);
         let packed = pack_yy_nxt(&data);
 
         assert_eq!(packed.base.len(), 3);
