@@ -122,11 +122,7 @@ pub fn pack_yy_nxt(data: &YyNxtData) -> YyNxtPackedData {
     let num_cols = data.num_cols;
     let sentinel = num_states;
 
-    let has_trans: Vec<u8> = data
-        .transition_table
-        .iter()
-        .map(|row| if row.iter().any(|&v| v != 0) { 1u8 } else { 0u8 })
-        .collect();
+    let has_trans = compute_yy_has_trans(data);
 
     // Sort densest states first for better packing
     let mut order: Vec<usize> = (0..num_states).collect();
