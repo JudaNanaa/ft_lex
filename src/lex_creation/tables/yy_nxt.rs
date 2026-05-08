@@ -208,26 +208,6 @@ pub fn write_yy_nxt_packed_c(
     let n = data.base.len();
     let jam = n;
 
-    writeln!(file, "#define YY_JAM {jam}u\n")?;
-    writeln!(
-        file,
-        "static inline unsigned int yy_nxt_lookup(unsigned int state, unsigned int ec) {{"
-    )?;
-    writeln!(file, "{SPACE}while (state != YY_JAM) {{")?;
-    writeln!(
-        file,
-        "{SPACE}{SPACE}unsigned int pos = yy_base[state] + ec;"
-    )?;
-    writeln!(
-        file,
-        "{SPACE}{SPACE}if (yy_chk[pos] == state) return yy_nxt_packed[pos];"
-    )?;
-    writeln!(file, "{SPACE}{SPACE}state = yy_def[state];")?;
-    writeln!(file, "{SPACE}}}")?;
-    writeln!(file, "{SPACE}return 0;")?;
-    writeln!(file, "}}")?;
-    writeln!(file, "#define YY_NXT(s, c) yy_nxt_lookup((s), (c))\n")?;
-
     writeln!(file, "\nconst unsigned int yy_base[{n}] =")?;
     writeln!(file, "{SPACE}{{")?;
     write!(file, "{}", SPACE.repeat(2))?;
@@ -299,7 +279,27 @@ pub fn write_yy_nxt_packed_c(
         }
     }
     writeln!(file)?;
-    writeln!(file, "{SPACE}}} ;\n")
+    writeln!(file, "{SPACE}}} ;\n")?;
+
+    writeln!(file, "#define YY_JAM {jam}u\n")?;
+    writeln!(
+        file,
+        "static inline unsigned int yy_nxt_lookup(unsigned int state, unsigned int ec) {{"
+    )?;
+    writeln!(file, "{SPACE}while (state != YY_JAM) {{")?;
+    writeln!(
+        file,
+        "{SPACE}{SPACE}unsigned int pos = yy_base[state] + ec;"
+    )?;
+    writeln!(
+        file,
+        "{SPACE}{SPACE}if (yy_chk[pos] == state) return yy_nxt_packed[pos];"
+    )?;
+    writeln!(file, "{SPACE}{SPACE}state = yy_def[state];")?;
+    writeln!(file, "{SPACE}}}")?;
+    writeln!(file, "{SPACE}return 0;")?;
+    writeln!(file, "}}")?;
+    writeln!(file, "#define YY_NXT(s, c) yy_nxt_lookup((s), (c))\n")
 }
 
 #[cfg(test)]
