@@ -28,7 +28,7 @@ clean:
 	cargo clean
 
 fclean: clean
-	rm -rf ft_lex.yy.c ft_lex_yy.rs lex.yy.c libl_functions.o libl.a libft_lex_runtime.rlib a.out ft_lex_yy
+	rm -rf ft_lex.yy.c ft_lex_yy.rs lex.yy.c libl_functions.o libl.a libft_lex_runtime.rlib a.out ft_lex_yy ft_lex
 	rm -rf target
 
 push: fmt test fclean

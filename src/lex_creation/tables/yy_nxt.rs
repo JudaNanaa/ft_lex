@@ -143,12 +143,10 @@ pub fn pack_yy_nxt(data: &YyNxtData) -> YyNxtPackedData {
         let row = &data.transition_table[state];
 
         // Find the already-processed state with maximum column agreement
-        let proto = (0..num_states)
-            .filter(|&s| processed[s])
-            .max_by_key(|&s| {
-                let pr = &data.transition_table[s];
-                row.iter().zip(pr.iter()).filter(|(&a, &b)| a == b).count()
-            });
+        let proto = (0..num_states).filter(|&s| processed[s]).max_by_key(|&s| {
+            let pr = &data.transition_table[s];
+            row.iter().zip(pr.iter()).filter(|(&a, &b)| a == b).count()
+        });
 
         def[state] = proto.unwrap_or(jam);
 
@@ -196,7 +194,12 @@ pub fn pack_yy_nxt(data: &YyNxtData) -> YyNxtPackedData {
         }
     }
 
-    YyNxtPackedData { base, nxt: packed_nxt, chk: packed_chk, def }
+    YyNxtPackedData {
+        base,
+        nxt: packed_nxt,
+        chk: packed_chk,
+        def,
+    }
 }
 
 pub fn write_yy_nxt_packed_c(
@@ -364,10 +367,7 @@ mod tests {
         // state 1: differs only at ec=3 → [1, 2, 3, 0]
         // With prototype chaining, state 1 uses state 0 as its prototype and
         // stores only 1 entry (ec=3, nxt=0) instead of 3 entries (old algo).
-        let data = make_data(vec![
-            vec![1, 2, 3, 4],
-            vec![1, 2, 3, 0],
-        ]);
+        let data = make_data(vec![vec![1, 2, 3, 4], vec![1, 2, 3, 0]]);
         let packed = pack_yy_nxt(&data);
 
         for state in 0..2 {
