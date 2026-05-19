@@ -58,13 +58,7 @@ pub fn write_yy_nxt_c(data: &YyNxtData, file: &mut dyn std::io::Write) -> std::i
 pub fn compute_yy_has_trans(data: &YyNxtData) -> Vec<u8> {
     data.transition_table
         .iter()
-        .map(|row| {
-            if row.iter().any(|&v| v != 0) {
-                1u8
-            } else {
-                0u8
-            }
-        })
+        .map(|row| u8::from(row.iter().any(|&v| v != 0)))
         .collect()
 }
 

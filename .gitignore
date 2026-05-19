@@ -12,3 +12,4 @@ libl.a
 ft_lex.yy.rs
 test
 /docs
+.bacon-locations
