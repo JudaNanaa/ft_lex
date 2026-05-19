@@ -2,8 +2,8 @@ use crate::{
     file_parsing::FilePart,
     lex_creation::{
         tables::{
-            yy_accept::compute_yy_accept, yy_ec::compute_yy_ec, yy_nxt::compute_yy_nxt,
-            yy_trailing::compute_yy_trailing, yy_trailing_accept::compute_yy_trailing_accept,
+            yy_accept::compute_yy_accept, yy_ec::compute_yy_ec, yy_trailing::compute_yy_trailing,
+            yy_trailing_accept::compute_yy_trailing_accept,
         },
         SPACE,
     },
@@ -53,13 +53,33 @@ fn write_u8_slice(name: &str, data: &[u8], out: &mut dyn std::io::Write) -> std:
 
 pub fn write_tables_rust(
     file_parts: &FilePart,
+    compressed: bool,
     out: &mut dyn std::io::Write,
 ) -> std::io::Result<()> {
+    use crate::lex_creation::tables::yy_nxt::{
+        compute_yy_has_trans, compute_yy_nxt, pack_yy_nxt, write_yy_has_trans_rust,
+    };
+
     let nxt = compute_yy_nxt(file_parts.dfa());
-    let flat: Vec<usize> = nxt.transition_table.iter().flatten().copied().collect();
-    writeln!(out, "const YY_NXT_COLS: usize = {};", nxt.num_cols)?;
-    write_usize_slice_pub("YY_NXT_FLAT", &flat, out)?;
+    write_yy_has_trans_rust(&compute_yy_has_trans(&nxt), out)?;
     writeln!(out)?;
+
+    if compressed {
+        let packed = pack_yy_nxt(&nxt);
+        write_usize_slice_pub("YY_BASE", &packed.base, out)?;
+        writeln!(out)?;
+        write_usize_slice_pub("YY_NXT_PACKED", &packed.nxt, out)?;
+        writeln!(out)?;
+        write_usize_slice_pub("YY_CHK", &packed.chk, out)?;
+        writeln!(out)?;
+        write_usize_slice_pub("YY_DEF", &packed.def, out)?;
+        writeln!(out)?;
+    } else {
+        let flat: Vec<usize> = nxt.transition_table.iter().flatten().copied().collect();
+        writeln!(out, "const YY_NXT_COLS: usize = {};", nxt.num_cols)?;
+        write_usize_slice_pub("YY_NXT_FLAT", &flat, out)?;
+        writeln!(out)?;
+    }
 
     let ec = compute_yy_ec(&file_parts.dfa().eq_classes);
     let ec_slice: Vec<u8> = ec

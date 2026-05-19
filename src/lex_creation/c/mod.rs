@@ -10,11 +10,13 @@ use functions::{yy_action::yy_action, yy_is_exclusive_state::write_yy_is_exclusi
 use std::io;
 use tables::{write_accept_actions_c, write_tables_c};
 
-pub struct CBackend;
+pub struct CBackend {
+    compressed: bool,
+}
 
 impl CBackend {
-    pub fn new() -> Self {
-        CBackend
+    pub fn new(compressed: bool) -> Self {
+        CBackend { compressed }
     }
 }
 
@@ -35,7 +37,7 @@ impl CodegenBackend for CBackend {
     }
 
     fn write_tables(&self, file_parts: &FilePart, out: &mut dyn io::Write) -> io::Result<()> {
-        write_tables_c(file_parts, out)
+        write_tables_c(file_parts, self.compressed, out)
     }
 
     fn write_is_exclusive_state(

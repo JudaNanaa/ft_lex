@@ -11,11 +11,13 @@ use crate::{
     lex_creation::backend::CodegenBackend,
 };
 
-pub struct RustBackend;
+pub struct RustBackend {
+    compressed: bool,
+}
 
 impl RustBackend {
-    pub fn new() -> Self {
-        RustBackend
+    pub fn new(compressed: bool) -> Self {
+        RustBackend { compressed }
     }
 }
 
@@ -40,14 +42,14 @@ impl CodegenBackend for RustBackend {
         file_parts: &FilePart,
         out: &mut dyn std::io::Write,
     ) -> std::io::Result<()> {
-        write_tables_rust(file_parts, out)
+        write_tables_rust(file_parts, self.compressed, out)
     }
     fn write_is_exclusive_state(
         &self,
         file_parts: &FilePart,
         out: &mut dyn std::io::Write,
     ) -> std::io::Result<()> {
-        write_is_exclusive_state_rust(file_parts, out)
+        write_is_exclusive_state_rust(file_parts, self.compressed, out)
     }
     fn write_action(
         &self,

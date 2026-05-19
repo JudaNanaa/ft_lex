@@ -6,9 +6,23 @@ pub struct AcceptElem {
 }
 
 #[derive(Clone, Copy)]
+pub enum NxtTable {
+    Flat {
+        cols: usize,
+        flat: &'static [usize],
+    },
+    Packed {
+        base: &'static [usize],
+        nxt: &'static [usize],
+        chk: &'static [usize],
+        def: &'static [usize],
+    },
+}
+
+#[derive(Clone, Copy)]
 pub struct Tables {
-    pub yy_nxt_cols: usize,
-    pub yy_nxt_flat: &'static [usize],
+    pub nxt: NxtTable,
+    pub yy_has_trans: &'static [u8],
     pub yy_ec: &'static [u8],
     pub yy_accept: &'static [u8],
     pub yy_trailing: &'static [u8],
@@ -19,7 +33,7 @@ pub struct Tables {
 
 impl Tables {
     pub fn yy_finish_state(&self, state: usize) -> bool {
-        (0..self.yy_nxt_cols).any(|c| self.yy_nxt_flat[state * self.yy_nxt_cols + c] != 0)
+        self.yy_has_trans[state] != 0
     }
 }
 
@@ -212,8 +226,23 @@ pub fn run_yylex<L: LexerInterface>(lexer: &mut L) -> i32 {
             Some(c) => {
                 len_match += 1;
                 let yy_c = tables.yy_ec[c as usize] as usize;
-                let next_state =
-                    tables.yy_nxt_flat[current_state * tables.yy_nxt_cols + yy_c] as usize;
+                let next_state = match tables.nxt {
+                    NxtTable::Flat { cols, flat } => flat[current_state * cols + yy_c],
+                    NxtTable::Packed { base, nxt, chk, def } => {
+                        let jam = base.len();
+                        let mut s = current_state;
+                        loop {
+                            if s == jam {
+                                break 0;
+                            }
+                            let pos = base[s] + yy_c;
+                            if pos < chk.len() && chk[pos] == s {
+                                break nxt[pos];
+                            }
+                            s = def[s];
+                        }
+                    }
+                };
 
                 {
                     let core = lexer.get_core_mut();

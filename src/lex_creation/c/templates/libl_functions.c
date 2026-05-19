@@ -10,13 +10,11 @@
 
 
 extern const unsigned char yy_ec[256];
-extern const unsigned int yy_nxt_flat[];
-extern const int yy_nxt_cols;
+extern const int yy_has_trans[];
 extern const int yy_accept[];
 extern const int yy_trailing_accept[];
 extern const int yy_accept_cols;
 extern const int yy_accept_actions_flat[];
-#define YY_NXT(s, c) (yy_nxt_flat[(s) * yy_nxt_cols + (c)])
 #define YY_ACCEPT(s, i) (yy_accept_actions_flat[(s) * yy_accept_cols + (i)])
 void yy_if_match(void);
 void yy_if_no_match(char *cpos);
@@ -244,15 +242,7 @@ void yy_reject(void)
 }
 
 int yy_finish_state(int next_state) {
-	int i = 0;
-
-	while (i < yy_nxt_cols) {
-		if (YY_NXT(next_state, i) != 0) {
-			return 1;
-		}
-		i++;
-	}
-	return 0;
+	return yy_has_trans[next_state];
 }
 
 // default_main.c

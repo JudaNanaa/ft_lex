@@ -4,7 +4,10 @@ use crate::{
         tables::{
             yy_accept::{compute_yy_accept, write_yy_accept_c},
             yy_ec::{compute_yy_ec, write_yy_ec_c},
-            yy_nxt::{compute_yy_nxt, write_yy_nxt_c},
+            yy_nxt::{
+                compute_yy_has_trans, compute_yy_nxt, pack_yy_nxt, write_yy_has_trans_c,
+                write_yy_nxt_c, write_yy_nxt_packed_c,
+            },
             yy_trailing::{compute_yy_trailing, write_yy_trailing_c},
             yy_trailing_accept::{compute_yy_trailing_accept, write_yy_trailing_accept_c},
         },
@@ -12,10 +15,20 @@ use crate::{
     },
 };
 
-pub fn write_tables_c(file_parts: &FilePart, out: &mut dyn std::io::Write) -> std::io::Result<()> {
+pub fn write_tables_c(
+    file_parts: &FilePart,
+    compressed: bool,
+    out: &mut dyn std::io::Write,
+) -> std::io::Result<()> {
     write_yy_ec_c(&compute_yy_ec(&file_parts.dfa().eq_classes), out)?;
     let nxt = compute_yy_nxt(file_parts.dfa());
-    write_yy_nxt_c(&nxt, out)?;
+    write_yy_has_trans_c(&compute_yy_has_trans(&nxt), out)?;
+    if compressed {
+        let packed = pack_yy_nxt(&nxt);
+        write_yy_nxt_packed_c(&packed, out)?;
+    } else {
+        write_yy_nxt_c(&nxt, out)?;
+    }
     write_yy_accept_c(&compute_yy_accept(file_parts.dfa()), out)?;
     write_yy_trailing_c(&compute_yy_trailing(file_parts.dfa()), out)?;
     write_yy_trailing_accept_c(&compute_yy_trailing_accept(file_parts.dfa()), out)
